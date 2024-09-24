@@ -1,4 +1,4 @@
-# SAE501Mobile
+# SAE501
 
 ## Rules
 Don't push into main \
