@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'docker'
+      - 'dev-api'
 jobs:
   deploy:
     name: run docker compose
