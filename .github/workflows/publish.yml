@@ -25,7 +25,7 @@ jobs:
         id: build-push-api
         uses: docker/build-push-action@v3
         with:
-          context: .
-          file: Dockerfile
+          context: ./server/
+          file: docker-compose
           push: true
           tags: lamarquenoe/api-sae:latest
