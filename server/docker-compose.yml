@@ -28,7 +28,7 @@ services:
       ME_CONFIG_BASICAUTH: "false"
   app:
     build:
-      context: ./server
+      context: ./
     environment:
       DB_SCHEMA: postgres
       DB_USER: postgres
