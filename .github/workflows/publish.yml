@@ -26,6 +26,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ./server/
-          file: docker-compose
+          file: docker-compose.yml
           push: true
           tags: lamarquenoe/api-sae:latest
