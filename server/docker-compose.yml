@@ -39,6 +39,7 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017/
     depends_on:
       - postgres
+      - mongo
     ports:
       - '80:80'        
 volumes:

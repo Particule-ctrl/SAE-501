@@ -29,5 +29,5 @@ jobs:
       - name: Test Database
         working-directory: ./server
         run: |
-          docker-compose run app ls
+          docker-compose run app ls -la
           docker-compose run app npm test
