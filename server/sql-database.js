@@ -103,6 +103,12 @@ const Site = sequelize.define('Site',{
     }
 });
 
+Site.hasMany(Agent, {
+    foreignKey: 'site_id'
+});
+Agent.belongsTo(Site, { foreignKey: 'site_id', as: 'Site' });
+
+
 module.exports = {
     sequelize: sequelize,
     PMR: PMR,
