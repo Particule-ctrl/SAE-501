@@ -1,4 +1,4 @@
-const {sequelize, PMR, Accompagnateur, Agent, Site} = require('./sql-database');
+const {sequelize, PMR, Accompagnateur, Agent, Site} = require('../sql-database');
 
 beforeAll(async () =>{
     await sequelize.sync({ force: true});
