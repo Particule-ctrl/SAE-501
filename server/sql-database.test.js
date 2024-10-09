@@ -27,7 +27,7 @@ describe('Database Models', () => {
             name: 'Jane Doe',
             birthdate: '1985-05-10',
             email: 'jane.doe@example.com',
-            tel: 9876543210,
+            tel: 1123456789,
             password: 'anotherpassword'
         });
 

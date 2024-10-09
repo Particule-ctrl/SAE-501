@@ -24,7 +24,7 @@ jobs:
       - name: Run Docker Compose
         working-directory: ./server
         run: |
-          docker-compose up -d
+          docker-compose up -d --build
       
       - name: Test Database
         working-directory: ./server
