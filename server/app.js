@@ -1,13 +1,13 @@
 var express = require('express');
-var path = require('path')
+var path = require('path');
 
-var apiRouter = require('./routes/api');
+var pmrRouter = require('./routes/pmr');
 
 var app = express();
 
 app.set('views', path.join(__dirname, 'public'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', apiRouter);
+app.use('/api/pmr/', pmr);
 
 module.exports = app;
