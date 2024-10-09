@@ -16,8 +16,6 @@ jobs:
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: List Project Files
-        run: ls server -la
       - name: Install Docker Compose
         run: |
           sudo apt-get update
@@ -31,5 +29,4 @@ jobs:
       - name: Test Database
         working-directory: ./server
         run: |
-          docker-compose run app ls -la
           docker-compose run app npm test
