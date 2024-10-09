@@ -25,3 +25,8 @@ jobs:
         working-directory: ./server
         run: |
           docker-compose up -d
+      
+      - name: Test Database
+        working-directory: ./server
+        run: |
+          docker-compose run app npm test
