@@ -5,9 +5,9 @@ const path = require('path');
 const { stringify } = require('querystring');
 
 
-/* GET PMM by ID. */
+/* GET Accompagnateur by ID. */
 router.get('/:id', function(req, res) {
-  db.PMR.findByPk(req.params.id)
+  db.Accompagnateur.findByPk(req.params.id)
     .then( pmr => {
       res.status(200).send(JSON.stringify(pmr));
     })
@@ -16,9 +16,9 @@ router.get('/:id', function(req, res) {
     });
 });
 
-/* POST new PMR*/
+/* POST new Accompagnateur*/
 router.post('/', function(req, res){
-  db.PMR.create({
+  db.Accompagnateur.create({
     name: req.body.name,
     birthdate: req.body.birthdate,
     email: req.body.email,
@@ -30,9 +30,9 @@ router.post('/', function(req, res){
   });
 });
 
-/* DELETE PMR*/
+/* DELETE Accompagnateur*/
 router.get("/delete/:id", function(req, res){
-  db.PMR.destroy({
+  db.Accompagnateur.destroy({
     where: {
       id: req.params.id
     }
