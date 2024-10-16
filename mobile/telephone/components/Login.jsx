@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Text, Alert } from 'react-native';
+import { SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Text, Alert, View } from 'react-native';
 import { Link } from 'expo-router'
 
 export default function Login() {
@@ -7,15 +7,16 @@ export default function Login() {
     const [password, setPassword] = useState('');
 
     const handleLogin = () => {
-        Alert.alert('Login Info', `Email: ${email}, Password: ${password}`);
+        Alert.alert("Test");
     };
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Se conecter</Text>
+
+            <Text style={styles.title}>Login</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Adresse Mail"
+                placeholder="Email"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -23,18 +24,18 @@ export default function Login() {
             />
             <TextInput
                 style={styles.input}
-                placeholder="Mot de passe"
+                placeholder="Password"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
             />
             <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                <Text style={styles.loginText}>Se conecter</Text>
+                <Text style={styles.loginText}>Login</Text>
             </TouchableOpacity>
             <Link href="./Register" style={styles.pasCompte}>
-                <Text>Vous ne possedez pas de compte ?</Text>
+                <Text>You don't have an account ?</Text>
             </Link>
-            <Text style={ styles.mdpOublie }>Mot de passe oublié ?</Text>
+            <Text style={ styles.mdpOublie }>Forgotten password ?</Text>
             
         </SafeAreaView>
     );
@@ -42,36 +43,43 @@ export default function Login() {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        backgroundColor: '#E9E9E9',
+        borderTopEndRadius: 10,
+        borderTopStartRadius: 10,
         justifyContent: 'center',
+        padding: 5,
+        position: 'absolute', 
+        bottom: 0, 
+        width: '100%',
+        height: '80%',
     },
     title: {
         fontSize: 46,
-        marginTop: 0,
-        marginBottom: 80,
+        marginBottom: "15%",
         textAlign: 'center',
     },
     input: {
-        height: 40,
-        borderColor: '988F8F',
-        borderWidth: 1,
-        marginBottom: 25,
-        borderRadius: 10,
-        paddingHorizontal: 8,
-        width: '80%',
-        alignSelf: 'center',
-        height: 50,
-        
-    },
+        height: 40,                
+        borderColor: '#988F8F',    
+        borderWidth: 1,            
+        borderBottomWidth: 1,       
+        borderRightWidth: 0,        
+        borderLeftWidth: 0,
+        borderTopWidth: 0,
+        marginBottom: '5%',         
+        paddingHorizontal: 8,       
+        width: '80%',               
+        alignSelf: 'center',       
+      },
     loginButton: {
         width: '80%',
         alignSelf: 'center',
-        height: 50,
-        backgroundColor: 'gray',
-        borderRadius: 10,
+        backgroundColor: '#a83c54',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: "5%",
+        padding: 10,
+
     },
     loginText: {
         color: 'white',
@@ -80,12 +88,12 @@ const styles = StyleSheet.create({
     pasCompte: {
         textAlign: 'center',
         fontSize: 13,
-        color: 'blue',
-        marginBottom: 20,
+        color: '#010292',
+        marginBottom: "1%",
     },
     mdpOublie: {
         textAlign: 'center',
         fontSize: 13,
-        color: 'blue',
+        color: '#010292',
     },
 });

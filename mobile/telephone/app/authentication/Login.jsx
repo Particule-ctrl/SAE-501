@@ -1,5 +1,5 @@
 import React from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { SafeAreaView, StyleSheet, KeyboardAvoidingView } from "react-native";
 import Login from "../../components/Login";
 
 export default function Authentication(){
@@ -13,6 +13,8 @@ export default function Authentication(){
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: "relative",    
+    position: "relative",
+    backgroundColor: "white",
+    marginBottom: 0,
   },
 });
