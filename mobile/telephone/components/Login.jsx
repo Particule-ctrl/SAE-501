@@ -5,7 +5,7 @@ import { Link } from 'expo-router';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [focusedInput, setFocusedInput] = useState(null);  // Pour détecter l'input actif
+    const [focusedInput, setFocusedInput] = useState(null);  
 
     const handleLogin = () => {
         Alert.alert("Test");
@@ -16,7 +16,7 @@ export default function Login() {
             <Text style={styles.title}>Login</Text>
             <Text style={styles.inputEmail}>Email</Text>
             <TextInput
-                style={[styles.input, focusedInput === 'email' && styles.inputFocused]} // Appliquer le style quand actif
+                style={[styles.input, focusedInput === 'email' && styles.inputFocused]} 
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -26,7 +26,7 @@ export default function Login() {
             />
             <Text style={styles.inputPassword}>Password</Text>
             <TextInput
-                style={[styles.input, focusedInput === 'password' && styles.inputFocused]} // Appliquer le style quand actif
+                style={[styles.input, focusedInput === 'password' && styles.inputFocused]} 
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
