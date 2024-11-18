@@ -19,22 +19,19 @@ export default RegisterItem;
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        backgroundColor: '#6a5acd',
-        backgroundColor: '#E9E9E9',
-        backgroundColor: 'blue',
     
     },
     text: {
         fontSize: 16,
         marginLeft: '10%',
         marginBottom: '1%',
+        color: 'white',
 
     },
     input: {
         height: 40,
         borderColor: '#988F8F',
         borderWidth: 1,
-        borderRadius: 10,
         marginBottom: '5%',
         paddingHorizontal: 8,
         width: '80%',

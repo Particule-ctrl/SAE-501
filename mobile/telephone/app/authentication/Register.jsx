@@ -16,7 +16,7 @@ export default function SignIn() {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#282828',
     
       },
       text: {

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { SafeAreaView, StyleSheet, Text, FlatList, Animated, View, Button, useWindowDimensions, } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, FlatList, Animated, View, useWindowDimensions } from 'react-native';
 import slides from '../assets/data/register.js';
 import RegisterItem from './registerItem.jsx';
 import CustomButton from './registerButtons.jsx';
@@ -7,9 +7,9 @@ import CustomButton from './registerButtons.jsx';
 export default function Register() {
     const { width } = useWindowDimensions();
     const scrollX = useRef(new Animated.Value(0)).current;
-    const flatListRef = useRef(null); 
+    const flatListRef = useRef(null);
     const numCol = 3;
-    const [currentIndex, setCurrentIndex] = useState(0); 
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     const organizeInColumns = (data, columns) => {
         const columnsData = [];
@@ -40,9 +40,9 @@ export default function Register() {
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Register</Text>
-            
+
             <FlatList
-                ref={flatListRef} 
+                ref={flatListRef}
                 data={columns}
                 style={styles.flatlist}
                 renderItem={({ item: column }) => (
@@ -62,20 +62,38 @@ export default function Register() {
                     { useNativeDriver: false }
                 )}
             />
-            <FlatList horizontal>
-                <View style={styles.buttonContainer}>
-                    <CustomButton title="Previous" onPress={handlePrevious} style={styles.button} disabled={currentIndex === 0} />
-                    <CustomButton title="Next" onPress={handleNext} style={styles.button} disabled={currentIndex === columns.length - 1} />
-                </View>
-            </FlatList>
 
+            <View style={styles.buttonTable}>
+                <View style={styles.buttonCell}>
+                    <CustomButton
+                        title="Previous"
+                        onPress={handlePrevious}
+                        style={[
+                            styles.button,
+                            currentIndex === 0 && styles.disabledButton
+                        ]}
+                        disabled={currentIndex === 0}
+                    />
+                </View>
+                <View style={styles.buttonCell}>
+                    <CustomButton
+                        title="Next"
+                        onPress={handleNext}
+                        style={[
+                            styles.button,
+                            currentIndex === columns.length - 1 && styles.disabledButton
+                        ]}
+                        disabled={currentIndex === columns.length - 1}
+                    />
+                </View>
+            </View>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#E9E9E9',
+        backgroundColor: '#192032',
         borderTopEndRadius: 60,
         borderTopStartRadius: 60,
         alignContent: 'center',
@@ -89,35 +107,34 @@ const styles = StyleSheet.create({
         fontSize: 46,
         textAlign: 'center',
         marginVertical: "10%",
-
+        color: 'white',
+        fontWeight: 'bold',
     },
     column: {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         height: '70%',
-        
     },
-    buttonContainer: {
+    flatlist: {
+        height: '70%',
+    },
+    buttonTable: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginHorizontal: 40,
-        marginBottom: '20%',
-        backgroundColor: 'purple',
+        marginBottom: 20,
     },
-    flatlist:{
-        backgroundColor: 'green',
-        height: '0%',
-        
+    buttonCell: {
+        flex: 1, 
+        alignItems: 'center',
+       
     },
     button: {
-        width: '30%',
         alignItems: 'center',
-        backgroundColor: '#69B7F6',
-        padding: 10, 
+        backgroundColor: '#12B4A9',
+        padding: 10,
         borderRadius: 10,
-        width: '40%',    
-    }
-
-
+    },
+    
 });
