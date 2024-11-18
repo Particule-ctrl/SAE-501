@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
     inputEmail: {
         marginLeft: '10%',
         marginBottom: '1%',
+        fontSize: 16,
     },
     inputPassword: {
         marginLeft: '10%',

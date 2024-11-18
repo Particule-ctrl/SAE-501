@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { SafeAreaView, StyleSheet, Text, Alert, FlatList, Animated, View, Button, useWindowDimensions } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, FlatList, Animated, View, Button, useWindowDimensions,  } from 'react-native';
 import slides from '../assets/data/register.js';
 import RegisterItem from './registerItem.jsx';
+import CustomButton from './registerButtons.jsx';
 
 export default function Register() {
     const { width } = useWindowDimensions();
@@ -43,6 +44,7 @@ export default function Register() {
             <FlatList
                 ref={flatListRef} 
                 data={columns}
+                style={styles.flatlist}
                 renderItem={({ item: column }) => (
                     <View style={[styles.column, { width }]}>
                         {column.map((element) => (
@@ -60,11 +62,11 @@ export default function Register() {
                     { useNativeDriver: false }
                 )}
             />
-
             <View style={styles.buttonContainer}>
-                <Button title="Précédent" onPress={handlePrevious} disabled={currentIndex === 0} />
-                <Button title="Suivant" onPress={handleNext} disabled={currentIndex === columns.length - 1} />
+                <CustomButton title="Previous" onPress={handlePrevious} style={styles.button} disabled={currentIndex === 0} />
+                <CustomButton title="Next" onPress={handleNext} style={styles.button} disabled={currentIndex === columns.length - 1} />
             </View>
+
         </SafeAreaView>
     );
 }
@@ -84,17 +86,36 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 46,
         textAlign: 'center',
+        marginVertical: "10%",
+
     },
     column: {
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center', 
-        paddingHorizontal: 20,
+        justifyContent: 'center',
+        height: '70%',
+        
     },
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginHorizontal: 40,
-        marginTop: 20,
+        marginBottom: '20%',
+        backgroundColor: 'purple',
     },
+    flatlist:{
+        backgroundColor: 'green',
+        height: '0%',
+        
+    },
+    button: {
+        width: '30%',
+        alignItems: 'center',
+        backgroundColor: '#69B7F6',
+        padding: 10, 
+        borderRadius: 10,
+        width: '40%',    
+    }
+
+
 });

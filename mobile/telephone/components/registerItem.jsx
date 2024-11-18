@@ -1,5 +1,5 @@
 import React from "react";
-import { SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Text, Alert, View } from 'react-native';
+import { StyleSheet, TextInput, Text, View } from 'react-native';
 
 const RegisterItem = ({item}) => {
     return (
@@ -7,7 +7,7 @@ const RegisterItem = ({item}) => {
             <Text style={styles.text}>{item.title}</Text>
             <TextInput
                 style={styles.input}
-                placeholder={item.placeholder}
+            
             />  
 
         </View>
@@ -18,15 +18,17 @@ export default RegisterItem;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        width: '100%',
         backgroundColor: '#6a5acd',
         backgroundColor: '#E9E9E9',
-
+        backgroundColor: 'blue',
+    
     },
     text: {
         fontSize: 16,
+        marginLeft: '10%',
+        marginBottom: '1%',
+
     },
     input: {
         height: 40,
@@ -39,4 +41,5 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         backgroundColor: '#E9E9E9',
     },
+    
 });
