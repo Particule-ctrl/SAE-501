@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { SafeAreaView, StyleSheet, Text, FlatList, Animated, View, Button, useWindowDimensions,  } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, FlatList, Animated, View, Button, useWindowDimensions, } from 'react-native';
 import slides from '../assets/data/register.js';
 import RegisterItem from './registerItem.jsx';
 import CustomButton from './registerButtons.jsx';
@@ -62,10 +62,12 @@ export default function Register() {
                     { useNativeDriver: false }
                 )}
             />
-            <View style={styles.buttonContainer}>
-                <CustomButton title="Previous" onPress={handlePrevious} style={styles.button} disabled={currentIndex === 0} />
-                <CustomButton title="Next" onPress={handleNext} style={styles.button} disabled={currentIndex === columns.length - 1} />
-            </View>
+            <FlatList horizontal>
+                <View style={styles.buttonContainer}>
+                    <CustomButton title="Previous" onPress={handlePrevious} style={styles.button} disabled={currentIndex === 0} />
+                    <CustomButton title="Next" onPress={handleNext} style={styles.button} disabled={currentIndex === columns.length - 1} />
+                </View>
+            </FlatList>
 
         </SafeAreaView>
     );
