@@ -32,6 +32,6 @@ describe('Database Models', () => {
         });
 
         const foundAgent = await Agent.findOne({ where: { id: agent.id }});
-        expect(foundAgent.Agent.name).toBe('Agent Smith');
+        expect(foundAgent.name).toBe('Agent Smith');
     });
 });
