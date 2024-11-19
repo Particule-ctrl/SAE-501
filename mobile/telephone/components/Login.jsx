@@ -46,7 +46,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#E9E9E9',
+        backgroundColor: '#192032',
         borderTopEndRadius: 60,
         borderTopStartRadius: 60,
         alignContent: 'center',
@@ -61,12 +61,14 @@ const styles = StyleSheet.create({
         marginBottom: "10%",
         textAlign: 'center',
         marginTop: "10%",
+        color: 'white',
+        fontWeight: 'bold',
+
     },
     input: {
         height: 40,
         borderColor: '#988F8F',
         borderWidth: 1,
-        borderRadius: 10,
         marginBottom: '5%',
         paddingHorizontal: 8,
         width: '80%',
@@ -79,9 +81,9 @@ const styles = StyleSheet.create({
         borderWidth: 2,  
     },
     loginButton: {
-        width: '60%',
+        width: '70%',
         alignSelf: 'center',
-        backgroundColor: '#a83c54',
+        backgroundColor: '#12B4A9',
         justifyContent: 'center',
         borderRadius: 10,
         alignItems: 'center',
@@ -96,21 +98,23 @@ const styles = StyleSheet.create({
     pasCompte: {
         textAlign: 'center',
         fontSize: 13,
-        color: '#010292',
-        marginBottom: "1%",
+        color: 'white',
+        marginBottom: "2%",
     },
     mdpOublie: {
         textAlign: 'center',
         fontSize: 13,
-        color: '#010292',
+        color: 'white',
     },
     inputEmail: {
         marginLeft: '10%',
         marginBottom: '1%',
         fontSize: 16,
+        color: 'white',
     },
     inputPassword: {
         marginLeft: '10%',
         marginBottom: '1%',
+        color: 'white',
     },
 });

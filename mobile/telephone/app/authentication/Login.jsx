@@ -13,8 +13,8 @@ export default function Authentication(){
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: "relative",
-    backgroundColor: "white",
-    marginBottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#282828',
   },
 });

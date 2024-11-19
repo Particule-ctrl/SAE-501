@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginHorizontal: 40,
-        marginBottom: 20,
+        marginBottom: 30,
     },
     buttonCell: {
         flex: 1, 
