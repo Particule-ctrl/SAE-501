@@ -1,4 +1,4 @@
-const {sequelize, PMR, Accompagnateur, Agent, Site} = require('../sql-database');
+const {sequelize, User, Agent, Handicap} = require('../sql-database');
 
 beforeAll(async () =>{
     await sequelize.sync({ force: true});
@@ -9,8 +9,8 @@ afterAll(async () => {
 });
 
 describe('Database Models', () => {
-    test('PMR model should create a new PMR record', async () => {
-        const pmr = await PMR.create({
+    test('User model should create a new User record', async () => {
+        const user = await User.create({
             name: 'John Doe',
             birthdate: '1980-01-01',
             email: 'john.doe@example.com',
@@ -18,39 +18,20 @@ describe('Database Models', () => {
             password: 'securepassword'
         });
 
-        expect(pmr.name).toBe('John Doe');
-        expect(pmr.email).toBe('john.doe@example.com');
+        expect(user.name).toBe('John Doe');
+        expect(user.email).toBe('john.doe@example.com');
     });
 
-    test('Accompagnateur model should create a new Accompagnateur record', async () => {
-        const accompagnateur = await Accompagnateur.create({
-            name: 'Jane Doe',
-            birthdate: '1985-05-10',
-            email: 'jane.doe@example.com',
-            tel: 1123456789,
-            password: 'anotherpassword'
-        });
-
-        expect(accompagnateur.name).toBe('Jane Doe');
-        expect(accompagnateur.email).toBe('jane.doe@example.com');
-    });
-
-    test('Site and Agent relationship should work as expected', async () => {
-        const site = await Site.create({
-            name: 'Main Office',
-            country: 'CountryX',
-            city: 'CityY'
-        });
+    test('Agent should work as expected', async () => {
 
         const agent = await Agent.create({
             name: 'Agent Smith',
             email: 'smith@example.com',
             tel: 1122334455,
-            password: 'agentpassword',
-            site_id: site.id
+            password: 'agentpassword'
         });
 
-        const foundAgent = await Agent.findOne({ where: { id: agent.id }, include: 'Site' });
-        expect(foundAgent.Site.name).toBe('Main Office');
+        const foundAgent = await Agent.findOne({ where: { id: agent.id }});
+        expect(foundAgent.Agent.name).toBe('Agent Smith');
     });
 });

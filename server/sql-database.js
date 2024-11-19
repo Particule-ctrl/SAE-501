@@ -13,7 +13,7 @@ const sequelize = new Sequelize(process.env.DB_SCHEMA || 'postgres',
                                 }
 );
 
-const PMR = sequelize.define('PMR',{
+const User = sequelize.define('User',{
     name: {
         type: Sequelize.STRING,
         allowNull: false
@@ -34,29 +34,18 @@ const PMR = sequelize.define('PMR',{
         type: Sequelize.STRING,
         allowNull: false
     },
-});
-
-const Accompagnateur = sequelize.define('Accompagnateur',{
-    name: {
-        type: Sequelize.STRING,
-        allowNull: false
+    civility: {
+        type: Sequelize.STRING
     },
-    birthdate: {
-        type: Sequelize.DATEONLY,
-        allowNull: false
+    note: {
+        type: Sequelize.STRING
     },
-    email: {
-        type: Sequelize.STRING,
-        allowNull: false
+    handicap: {
+        type: Sequelize.INTEGER
     },
-    tel: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    },
-    password: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
+    googleUUID: {
+        type: Sequelize.STRING
+    }
 });
 
 const Agent = sequelize.define('Agent',{
@@ -75,45 +64,24 @@ const Agent = sequelize.define('Agent',{
     password: {
         type: Sequelize.STRING,
         allowNull: false
-    },
-    site_id: {
-        type: Sequelize.INTEGER
     }
 });
 
-const Site = sequelize.define('Site',{
-    name: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    geoCoord: {
-        type: Sequelize.STRING,
-        allowNull: true
-    },
-    country: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    geoSubDiv: {
-        type: Sequelize.STRING,
-        allowNull: true
-    },
-    city: {
-        type: Sequelize.STRING,
-        allowNull: true
+const Handicap = sequelize.define('Handicap',{
+    code: {
+        type: Sequelize.STRING
     }
 });
 
-Site.hasMany(Agent, {
-    foreignKey: 'site_id'
+Handicap.hasMany(User, {
+    foreignKey: 'handicap'
 });
-Agent.belongsTo(Site, { foreignKey: 'site_id', as: 'Site' });
+User.belongsTo(Handicap, { foreignKey: 'handicap', as: 'Handicap'});
 
 
 module.exports = {
     sequelize: sequelize,
-    PMR: PMR,
-    Accompagnateur: Accompagnateur,
+    User: User,
     Agent: Agent,
-    Site: Site
+    Handicap: Handicap
 }
