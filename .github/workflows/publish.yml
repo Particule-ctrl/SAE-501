@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: docker
+          fetch-depth: 0
     
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v2
@@ -24,4 +24,9 @@ jobs:
       - name: Run Docker Compose
         working-directory: ./server
         run: |
-          docker-compose up -d
+          docker-compose up -d --build
+      
+      - name: Test Database
+        working-directory: ./server
+        run: |
+          docker-compose run app npm test
