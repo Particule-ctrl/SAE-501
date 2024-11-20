@@ -1,9 +1,18 @@
 var express = require('express');
 var router = express.Router();
-const {db, sequelize} = require('../sql-database');
+const db = require('../sql-database');
 const path = require('path');
 const { stringify } = require('querystring');
 
+router.get("/all",function(req,res){
+  db.User.findAll()
+    .then( users => {
+      res.status(200).send(JSON.stringify(users));
+    })
+    .catch( err => {
+      res.status(500).send(JSON.stringify(err));
+    });
+});
 
 /* GET PMM by ID. */
 router.get('/:id', function(req, res) {
@@ -28,6 +37,7 @@ router.post('/', function(req, res){
     note: req.body.note,
     googleUUID: req.body.googleUUID
   })
+  .then(user => res.status(201).send(user))
   .catch( err => {
     res.status(500).send(JSON.stringify(err));
   });
@@ -40,19 +50,10 @@ router.get("/delete/:id", function(req, res){
       id: req.params.id
     }
   })
+  .then(() => res.status(200).send({ message: 'User deleted successfully' }))
   .catch( err => {
     res.status(500).send(JSON.stringify(err));
   });
-});
-
-router.get("/all",function(req,res){
-  db.User.findAll()
-    .then( users => {
-      res.status(200).send(JSON.stringify(users));
-    })
-    .catch( err => {
-      res.status(500).send(JSON.stringify(err));
-    });
 });
 
 module.exports = router;

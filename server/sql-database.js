@@ -79,9 +79,11 @@ Handicap.hasMany(User, {
 User.belongsTo(Handicap, { foreignKey: 'handicap', as: 'Handicap'});
 
 
-module.exports = {
+const db = {
     sequelize: sequelize,
     User: User,
     Agent: Agent,
     Handicap: Handicap
 }
+
+module.exports = db
