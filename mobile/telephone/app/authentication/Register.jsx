@@ -12,6 +12,10 @@ export default function Register() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [age, setAge] = useState('');
+  const [birthdate , setBirthdate] = useState('')
+  const [civility, setCivility] = useState('')
+  const [tel, setTel] = useState('')
+  const [note , setNote] = useState('')
 
   const navigation = useNavigation();
 
@@ -23,8 +27,27 @@ export default function Register() {
 
   // Fonction pour gérer l'inscription
   const handleRegister = async () => {
-    if (!firstName || !lastName || !age || !email || !password) {
+    if (!firstName || !lastName || !age || !email || !password || !birthdate || !civility || !tel) {
       alert("Tous les champs sont obligatoires !");
+      return;
+    }
+  
+    if (isNaN(age) || age <= 0) {
+      alert("Veuillez entrer un âge valide.");
+      return;
+    }
+
+    if (isNaN(age) || age <= 18){
+      alert("Vous devez etre majeur pour avoir un compte ")
+    }
+  
+    if (!/\d{2}-\d{2}-\d{4}/.test(birthdate)) {
+      alert("Veuillez entrer une date de naissance valide au format JJ-MM-AAAA.");
+      return;
+    }
+  
+    if (!/^\d{10}$/.test(tel)) {
+      alert("Veuillez entrer un numéro de téléphone valide à 10 chiffres.");
       return;
     }
 
@@ -33,14 +56,40 @@ export default function Register() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Combiner `firstName` et `lastName`
+      const fullName = `${firstName} ${lastName}`;
+
       // Étape 2 : Ajouter les informations dans Firestore
       const userDocRef = doc(db, "users", user.uid); // Document avec UID de l'utilisateur
       await setDoc(userDocRef, {
-        FirstName: firstName,
-        LastName: lastName,
+        Name: fullName,
         Age: parseInt(age), // Convertir l'âge en nombre
         Email: email,
+        Birthdate: birthdate,
+        Civility: civility,
+        Tel: tel,
+        Note: note,
       });
+
+      fetch('http://localhost/api/user', {
+        method: "POST",
+        mode: "no-cors", // Désactive les restrictions CORS
+        headers: {
+          Accept: "application/json",
+          'Content-Type': "application/json",
+        },
+        body: JSON.stringify({
+          name: fullName, 
+          birthdate,
+          email,
+          tel,
+          password,
+          civility,
+          note,
+          googleUUID: user.uid,
+        })
+      })
+      
 
       console.log('Utilisateur enregistré avec succès et ajouté à Firestore !');
       alert('Inscription réussie !');
@@ -83,6 +132,34 @@ export default function Register() {
         keyboardType="numeric"
       />
 
+      {/* Champ Date de naissance */}
+      <TextInput
+        style={styles.input}
+        placeholder="Date de naissance (JJ-MM-AAAA)"
+        placeholderTextColor="#888"
+        value={birthdate}
+        onChangeText={setBirthdate}
+      />
+
+      {/* Champ Civilité */}
+      <TextInput
+        style={styles.input}
+        placeholder="Civilité (Mr, Mme)"
+        placeholderTextColor="#888"
+        value={civility}
+        onChangeText={setCivility}
+      />
+
+      {/* Champ Téléphone */}
+      <TextInput
+        style={styles.input}
+        placeholder="Téléphone"
+        placeholderTextColor="#888"
+        value={tel}
+        onChangeText={setTel}
+        keyboardType="phone-pad"
+      />
+
       {/* Champ Email */}
       <TextInput
         style={styles.input}
@@ -102,6 +179,15 @@ export default function Register() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+      />
+
+      {/* Champ Note */}
+      <TextInput
+        style={styles.input}
+        placeholder="Note (optionnel)"
+        placeholderTextColor="#888"
+        value={note}
+        onChangeText={setNote}
       />
 
       {/* Bouton S'inscrire */}
