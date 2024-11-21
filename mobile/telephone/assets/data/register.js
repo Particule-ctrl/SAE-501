@@ -68,30 +68,47 @@ export default  [
         },
         {
             id: '11',
-            type: 'list',
-            title: 'types of disability',
+            type: 'dropdown',
+            title: 'Types of disability',
             placeholder: 'Select your disability',
             options: [
                 {
                     id: '0',
                     title: 'Blindness',
+                    value: 'BLND',
                 },
                 {
                     id: '1',
                     title: 'Deafness',
+                    value: 'DEAF',
                 },
                 {
                     id: '2',
-                    title: 'Mute',
+                    title: 'Developmental or intellectual disability',
+                    value: 'DPNA',
+
                 },
                 {
                     id: '3',
-                    title: 'Paralysis',
+                    title: 'Wheel chair ramp',
+                    value: 'WCHR',
                 },
                 {
                     id: '4',
-                    title: 'Other',
+                    title: 'Wheel chair stair',
+                    value: 'WCHS',
                 },
+                {
+                id: '5',
+                title: 'Wheel chair completely',
+                value: 'WCHC',
+                },
+                {
+                    id: '6',
+                    title: 'Other',
+                    value: 'MAAS',
+                }
+                
             ]
         },
         

@@ -1,6 +1,6 @@
 import React from "react";
 import { SafeAreaView, StyleSheet, KeyboardAvoidingView } from "react-native";
-import Login from "../../components/Login";
+import Login from "../../components/Authentication/Login/Login";
 
 export default function Authentication(){
   return (

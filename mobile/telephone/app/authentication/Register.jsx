@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Link } from 'expo-router'
-import Register from '../../components/Register';
+import Register from '../../components/Authentication/Register/Register';
 
 export default function SignIn() {
     return (

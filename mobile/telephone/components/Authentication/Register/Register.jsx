@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { SafeAreaView, StyleSheet, Text, FlatList, Animated, View, useWindowDimensions } from 'react-native';
-import slides from '../assets/data/register.js';
+import slides from '../../../assets/data/register.js';
 import RegisterItem from './registerItem.jsx';
 import CustomButton from './registerButtons.jsx';
 
@@ -18,6 +18,10 @@ export default function Register() {
         }
         return columnsData;
     };
+
+    const Create_user = () => {
+        console.log("User created");
+    }
 
     const columns = organizeInColumns(slides, numCol);
 
@@ -123,7 +127,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginHorizontal: 40,
-        marginBottom: 30,
+        marginBottom: 20,
     },
     buttonCell: {
         flex: 1, 
