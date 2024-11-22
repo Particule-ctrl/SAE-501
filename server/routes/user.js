@@ -4,6 +4,8 @@ const db = require('../sql-database');
 const path = require('path');
 const { stringify } = require('querystring');
 
+router.use(express.json())
+
 router.get("/all",function(req,res){
   db.User.findAll()
     .then( users => {

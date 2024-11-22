@@ -1,6 +1,6 @@
 var express = require('express');
 var path = require('path');
-
+const cors = require('cors');
 var userRouter = require('./routes/user');
 
 var app = express();
@@ -14,8 +14,20 @@ db.sequelize.sync({ alter: true }) // Adjust 'force: true' or 'alter: true' depe
     console.error('Error synchronizing the database:', err);
   });
 
-app.set('views', path.join(__dirname, 'public'));
-app.use(express.static(path.join(__dirname, 'public')));
+const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000'];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true); // Allow requests from allowed origins
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.options('*', cors());
 
 app.use('/api/user/', userRouter);
 

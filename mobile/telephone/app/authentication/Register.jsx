@@ -41,7 +41,7 @@ export default function Register() {
       alert("Vous devez etre majeur pour avoir un compte ")
     }
   
-    if (!/\d{2}-\d{2}-\d{4}/.test(birthdate)) {
+    if (!/\d{4}-\d{2}-\d{2}/.test(birthdate)) {
       alert("Veuillez entrer une date de naissance valide au format JJ-MM-AAAA.");
       return;
     }
@@ -73,7 +73,6 @@ export default function Register() {
 
       fetch('http://localhost/api/user', {
         method: "POST",
-        mode: "no-cors", // Désactive les restrictions CORS
         headers: {
           Accept: "application/json",
           'Content-Type': "application/json",
