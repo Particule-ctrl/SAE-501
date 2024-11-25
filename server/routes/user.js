@@ -37,6 +37,7 @@ router.post('/', function(req, res){
     password: req.body.password,
     civility: req.body.civility,
     note: req.body.note,
+    handicap: req.body.handicap,
     googleUUID: req.body.googleUUID
   })
   .then(user => res.status(201).send(user))
