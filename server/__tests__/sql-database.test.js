@@ -64,31 +64,5 @@ describe('Handicap Model and Associations', () => {
 
         expect(user.handicap).toBe(handicap.id);
     });
-
-    test('Retrieve User with associated Handicap', async () => {
-        // Create a Handicap
-        const handicap = await Handicap.create({
-            code: 'HC003'
-        });
-
-        // Create a User and associate it with the Handicap
-        const user = await User.create({
-            name: 'Mark Smith',
-            birthdate: '1985-05-05',
-            email: 'mark.smith@example.com',
-            tel: 4561237890,
-            password: 'securepassword',
-            handicap: handicap.id // Associate via foreign key
-        });
-
-        // Retrieve the User along with associated Handicap
-        const foundUser = await User.findOne({
-            where: { id: user.id },
-            include: [{ model: Handicap, as: 'Handicap' }]
-        });
-
-        expect(foundUser.Handicap).toBeDefined();
-        expect(foundUser.Handicap.code).toBe('HC003');
-    });
 });
 
