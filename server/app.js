@@ -1,7 +1,10 @@
 var express = require('express');
 var path = require('path');
 const cors = require('cors');
+
 var userRouter = require('./routes/user');
+var agentRouter = require('./routes/agent');
+var handicapRouter = require('./routes/handicap');
 
 var app = express();
 const db = require('./sql-database'); // Adjust path as necessary
@@ -30,5 +33,6 @@ app.use(cors({
 app.options('*', cors());
 
 app.use('/api/user/', userRouter);
+app.use('/api/agent/', agentRouter);
 
 module.exports = app;

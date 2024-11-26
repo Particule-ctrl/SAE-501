@@ -6,6 +6,7 @@ const { stringify } = require('querystring');
 
 router.use(express.json());
 
+/* GET all User*/
 router.get("/all",function(req,res){
   db.User.findAll()
     .then( users => {
@@ -16,7 +17,7 @@ router.get("/all",function(req,res){
     });
 });
 
-/* GET PMM by ID. */
+/* GET User by ID. */
 router.get('/:id', function(req, res) {
   db.User.findByPk(req.params.id)
     .then( user => {
@@ -27,7 +28,7 @@ router.get('/:id', function(req, res) {
     });
 });
 
-/* POST new PMR*/
+/* POST new User*/
 router.post('/', function(req, res){
   db.User.create({
     name: req.body.name,
@@ -37,6 +38,7 @@ router.post('/', function(req, res){
     password: req.body.password,
     civility: req.body.civility,
     note: req.body.note,
+    handicap: req.body.handicap,
     googleUUID: req.body.googleUUID
   })
   .then(user => res.status(201).send(user))
@@ -45,7 +47,7 @@ router.post('/', function(req, res){
   });
 });
 
-/* DELETE PMR*/
+/* DELETE User*/
 router.get("/delete/:id", function(req, res){
   db.User.destroy({
     where: {

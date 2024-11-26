@@ -4,6 +4,18 @@ const {db, sequelize} = require('../sql-database');
 const path = require('path');
 const { stringify } = require('querystring');
 
+router.use(express.json());
+
+/* GET all Agent*/
+router.get("/all",function(req,res){
+  db.Agent.findAll()
+    .then( agents => {
+      res.status(200).send(JSON.stringify(agents));
+    })
+    .catch( err => {
+      res.status(500).send(JSON.stringify(err));
+    });
+});
 
 /* GET Agent by ID. */
 router.get('/:id', function(req, res) {

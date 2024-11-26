@@ -5,4 +5,4 @@ COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
 EXPOSE 80
-CMD [ "npm", "start"]
+CMD ["/bin/sh", "-c", "node path/to/migrate.js && npm start"]

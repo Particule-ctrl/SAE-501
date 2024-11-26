@@ -5,6 +5,7 @@ beforeAll(async () =>{
 });
 
 afterAll(async () => {
+    await sequelize.drop();
     await sequelize.close();
 });
 
@@ -35,3 +36,39 @@ describe('Database Models', () => {
         expect(foundAgent.name).toBe('Agent Smith');
     });
 });
+
+describe('Handicap Model and Associations', () => {
+    test('Handicap model should create a new Handicap record', async () => {
+        const handicap = await Handicap.create({
+            code: 'HC001'
+        });
+
+        expect(handicap.code).toBe('HC001');
+    });
+
+    /*test('User should associate with Handicap', async () => {
+        // Create a Handicap
+        const handicap = await Handicap.create({
+            code: 'HC002'
+        });
+
+        // Create a User and associate it with the Handicap
+        const user = await User.create({
+            name: 'Jane Doe',
+            birthdate: '1990-02-02',
+            email: 'jane.doe@example.com',
+            tel: 2211221122,
+            password: 'securepassword',
+            handicap: handicap.id // Associate via foreign key
+        });
+
+        const foundUser = await User.findOne({
+            where: { id: user.id },
+            include: [{ model: Handicap, as: 'Handicap' }]
+        });
+
+        expect(foundUser.handicap).toBe(handicap.id);
+        expect(foundUser.Handicap.code).toBe('HC002');
+    });*/
+});
+
