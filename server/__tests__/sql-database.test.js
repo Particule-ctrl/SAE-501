@@ -5,6 +5,7 @@ beforeAll(async () =>{
 });
 
 afterAll(async () => {
+    await sequelize.drop();
     await sequelize.close();
 });
 
@@ -35,3 +36,59 @@ describe('Database Models', () => {
         expect(foundAgent.name).toBe('Agent Smith');
     });
 });
+
+describe('Handicap Model and Associations', () => {
+    test('Handicap model should create a new Handicap record', async () => {
+        const handicap = await Handicap.create({
+            code: 'HC001'
+        });
+
+        expect(handicap.code).toBe('HC001');
+    });
+
+    test('User should associate with Handicap', async () => {
+        // Create a Handicap
+        const handicap = await Handicap.create({
+            code: 'HC002'
+        });
+
+        // Create a User and associate it with the Handicap
+        const user = await User.create({
+            name: 'Jane Doe',
+            birthdate: '1990-02-02',
+            email: 'jane.doe@example.com',
+            tel: 9876543210,
+            password: 'securepassword',
+            handicap: handicap.id // Associate via foreign key
+        });
+
+        expect(user.handicap).toBe(handicap.id);
+    });
+
+    test('Retrieve User with associated Handicap', async () => {
+        // Create a Handicap
+        const handicap = await Handicap.create({
+            code: 'HC003'
+        });
+
+        // Create a User and associate it with the Handicap
+        const user = await User.create({
+            name: 'Mark Smith',
+            birthdate: '1985-05-05',
+            email: 'mark.smith@example.com',
+            tel: 4561237890,
+            password: 'securepassword',
+            handicap: handicap.id // Associate via foreign key
+        });
+
+        // Retrieve the User along with associated Handicap
+        const foundUser = await User.findOne({
+            where: { id: user.id },
+            include: [{ model: Handicap, as: 'Handicap' }]
+        });
+
+        expect(foundUser.Handicap).toBeDefined();
+        expect(foundUser.Handicap.code).toBe('HC003');
+    });
+});
+
