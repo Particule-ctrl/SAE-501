@@ -57,12 +57,18 @@ describe('Handicap Model and Associations', () => {
             name: 'Jane Doe',
             birthdate: '1990-02-02',
             email: 'jane.doe@example.com',
-            tel: 9876543210,
+            tel: 2211221122,
             password: 'securepassword',
             handicap: handicap.id // Associate via foreign key
         });
 
-        expect(user.handicap).toBe(handicap.id);
+        const foundUser = await User.findOne({
+            where: { id: user.id },
+            include: [{ model: Handicap, as: 'Handicap' }]
+        });
+
+        expect(foundUser.handicap).toBe(handicap.id);
+        expect(foundUser.Handicap.code).toBe('HC002');
     });
 });
 
