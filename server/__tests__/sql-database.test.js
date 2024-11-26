@@ -46,7 +46,7 @@ describe('Handicap Model and Associations', () => {
         expect(handicap.code).toBe('HC001');
     });
 
-    /*test('User should associate with Handicap', async () => {
+    test('User should associate with Handicap', async () => {
         // Create a Handicap
         const handicap = await Handicap.create({
             code: 'HC002'
@@ -54,12 +54,12 @@ describe('Handicap Model and Associations', () => {
 
         // Create a User and associate it with the Handicap
         const user = await User.create({
-            name: 'Jane Doe',
-            birthdate: '1990-02-02',
-            email: 'jane.doe@example.com',
-            tel: 2211221122,
+            name: 'John Doe',
+            birthdate: '1980-01-01',
+            email: 'john.doe@example.com',
+            tel: 1234567890,
             password: 'securepassword',
-            handicap: handicap.id // Associate via foreign key
+            handicap: handicap.id
         });
 
         const foundUser = await User.findOne({
@@ -69,6 +69,6 @@ describe('Handicap Model and Associations', () => {
 
         expect(foundUser.handicap).toBe(handicap.id);
         expect(foundUser.Handicap.code).toBe('HC002');
-    });*/
+    });
 });
 
