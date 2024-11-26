@@ -34,5 +34,6 @@ app.options('*', cors());
 
 app.use('/api/user/', userRouter);
 app.use('/api/agent/', agentRouter);
+app.use('/api/handicap/', handicapRouter);
 
 module.exports = app;
