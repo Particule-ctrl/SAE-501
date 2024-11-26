@@ -33,6 +33,58 @@ When you're ready, run:
 npm run reset-project
 ```
 
+
+# Revert to the Last Push State
+
+Here are the steps to reset your local repository to the state of the last commit pushed to GitHub.
+
+## Step 1: Save Current Changes (Optional)
+If you want to keep your current changes before resetting, you can save them with the following command:
+```bash
+git stash
+```
+This saves your changes in a "stack" that you can restore later.
+
+## Step 2: Reset to the Last Push State
+To revert to the state of your last push (the last commit pushed to GitHub), use the following command:
+```bash
+git reset --hard origin/<branch_name>
+```
+**Replace `<branch_name>` with the name of your current branch, e.g., `dev-mobile`.**
+
+- `--hard`: Removes all local uncommitted changes.
+- If you want to keep the modified files without deleting them, use `--soft` instead.
+
+## Step 3: Check the Status
+After resetting, check if your repository is back to the expected state by running:
+```bash
+git status
+```
+
+## Step 4: Restore Saved Changes (Optional)
+If you saved your changes in Step 1, you can restore them with:
+```bash
+git stash pop
+```
+
+## Delete Untracked Files
+Untracked files are not affected by the `git reset` command. To delete them as well, use:
+```bash
+git clean -fd
+```
+- `-f`: Forces the deletion of files.
+- `-d`: Deletes untracked directories as well.
+
+### Tip: Preview Before Deleting
+To see which files will be deleted without performing the action, use:
+```bash
+git clean -fdn
+```
+
+## Warning
+These commands are destructive; make sure you're ready to lose your changes before running them.
+## 
+
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
 ## Learn more
