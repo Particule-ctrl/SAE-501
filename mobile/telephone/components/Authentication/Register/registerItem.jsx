@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-const MyComponent = ({ item }) => {
+const profileComp = ({ item, onValueChange }) => {
     return (
         <>
             {item.type === 'input' && (
@@ -10,6 +10,8 @@ const MyComponent = ({ item }) => {
                     <Text style={styles.text}>{item.title}</Text>
                     <TextInput
                         style={styles.input}
+                        secureTextEntry={item.secureTextEntry}
+                        onChangeText={(text) => onValueChange(item.id, text)}
                     />
                 </View>
             )}
@@ -18,7 +20,7 @@ const MyComponent = ({ item }) => {
                     <Text style={styles.text}>{item.title}</Text>
                     <Picker
                         selectedValue={item.selectedValue}
-                        onValueChange={item.onValueChange}
+                        onValueChange={(value) => onValueChange(item.id, value)}
                         style={styles.dropdown}
                     >
                         {item.options.map((option, index) => (
@@ -31,10 +33,12 @@ const MyComponent = ({ item }) => {
     );
 };
 
+
+
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-    
+        position: 'static'
     },
     text: {
         fontSize: 16,
@@ -62,4 +66,4 @@ const styles = StyleSheet.create({
     
 });
 
-export default MyComponent;
+export default profileComp;

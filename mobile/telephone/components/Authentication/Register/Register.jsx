@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { SafeAreaView, StyleSheet, Text, FlatList, Animated, View, useWindowDimensions } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, FlatList, Animated, View, useWindowDimensions, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import slides from '../../../assets/data/register.js';
 import RegisterItem from './registerItem.jsx';
 import CustomButton from './registerButtons.jsx';
@@ -9,7 +9,28 @@ export default function Register() {
     const scrollX = useRef(new Animated.Value(0)).current;
     const flatListRef = useRef(null);
     const numCol = 3;
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [formValues, setFormValues] = useState({}); 
+
+    const isFormValid = () => {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        return slides.every((item) =>
+            emailRegex.test(formValues[0]) && formValues[1] === formValues[2] &&formValues[item.id] !== ""    
+        );
+    };
+
+    const handleValueChange = (id, value) => {
+        setFormValues((prev) => ({ ...prev, [id]: value }));
+    };
+
+    const createUser = () => {
+        if (isFormValid()) {
+            Alert.alert("Ok");
+            console.log(formValues);
+        } else {
+            Alert.alert("Non");
+        }
+    };
+
 
     const organizeInColumns = (data, columns) => {
         const columnsData = [];
@@ -19,40 +40,28 @@ export default function Register() {
         return columnsData;
     };
 
-    const Create_user = () => {
-        console.log("User created");
-    }
+    
 
     const columns = organizeInColumns(slides, numCol);
 
-    const handleNext = () => {
-        if (currentIndex < columns.length - 1) {
-            const newIndex = currentIndex + 1;
-            flatListRef.current.scrollToOffset({ offset: newIndex * width, animated: true });
-            setCurrentIndex(newIndex);
-        }
-    };
-
-    const handlePrevious = () => {
-        if (currentIndex > 0) {
-            const newIndex = currentIndex - 1;
-            flatListRef.current.scrollToOffset({ offset: newIndex * width, animated: true });
-            setCurrentIndex(newIndex);
-        }
-    };
-
     return (
+        <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "padding" : "height"        }
+        style={{ flex: 1 }}
+    >
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Register</Text>
-
             <FlatList
                 ref={flatListRef}
                 data={columns}
-                style={styles.flatlist}
                 renderItem={({ item: column }) => (
                     <View style={[styles.column, { width }]}>
                         {column.map((element) => (
-                            <RegisterItem key={element.id} item={element} />
+                            <RegisterItem
+                                key={element.id}
+                                item={element}
+                                onValueChange={handleValueChange}
+                            />
                         ))}
                     </View>
                 )}
@@ -66,46 +75,20 @@ export default function Register() {
                     { useNativeDriver: false }
                 )}
             />
-
-            <View style={styles.buttonTable}>
-                <View style={styles.buttonCell}>
-                    <CustomButton
-                        title="Previous"
-                        onPress={handlePrevious}
-                        style={[
-                            styles.button,
-                            currentIndex === 0 && styles.disabledButton
-                        ]}
-                        disabled={currentIndex === 0}
-                    />
-                </View>
-                <View style={styles.buttonCell}>
-                    <CustomButton
-                        title="Next"
-                        onPress={handleNext}
-                        style={[
-                            styles.button,
-                            currentIndex === columns.length - 1 && styles.disabledButton
-                        ]}
-                        disabled={currentIndex === columns.length - 1}
-                    />
-                </View>
+            
+            <View style={styles.buttonContainer}>
+                <CustomButton title="Sign Up" onPress={createUser} style={[styles.button,{ opacity: isFormValid() ? 1 : 0.5 },  ]} />
             </View>
         </SafeAreaView>
+    </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#192032',
-        borderTopEndRadius: 60,
-        borderTopStartRadius: 60,
-        alignContent: 'center',
-        padding: 5,
-        position: 'absolute',
-        bottom: 0,
-        width: '100%',
-        height: '80%',
+            flex: 1,
+            
+
     },
     title: {
         fontSize: 46,
@@ -118,27 +101,18 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '70%',
+        height: '70%',  
     },
-    flatlist: {
-        height: '70%',
-    },
-    buttonTable: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginHorizontal: 40,
-        marginBottom: 20,
-    },
-    buttonCell: {
-        flex: 1, 
+    buttonContainer: {
         alignItems: 'center',
-       
+        marginBottom: 50,
+        
     },
     button: {
-        alignItems: 'center',
         backgroundColor: '#12B4A9',
-        padding: 10,
-        borderRadius: 10,
+        padding: 15,
+        borderRadius: 5,
+        width: '60%',
+        alignItems: 'center',
     },
-    
 });

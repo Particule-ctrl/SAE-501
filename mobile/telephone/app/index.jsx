@@ -15,7 +15,7 @@ export default function Index() {
         <Text> Connect </Text>
       </Link>
       <Link href="/authentication/Login">
-        <Text> login </Text>
+        <Text> Login </Text>
       </Link>
     </View>
   );
