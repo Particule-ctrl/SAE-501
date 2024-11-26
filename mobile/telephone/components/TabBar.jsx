@@ -15,7 +15,7 @@ export default function TabBar({ state, descriptors, navigation }) {
         Setting : (props) => <AntDesign name="setting" size={26} color= {secondColor} {...props} />,
         Trafic : (props) => <Entypo name="traffic-cone" size={26} color= {secondColor} {...props} />
     }
-    const primaryColor = "#0891b2";
+    const primaryColor = "#12B3A8";
     const secondColor = "#737373";
   return (
     <View style={styles.tabbar}>
