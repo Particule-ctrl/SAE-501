@@ -47,6 +47,30 @@ router.post('/', function(req, res){
   });
 });
 
+/* POST Edit User*/
+router.post('/:id', function(req, res){
+  db.User.update({
+    name: req.body.name,
+    email: req.body.email,
+    tel: req.body.tel,
+    password: req.body.password,
+    civility: req.body.civility,
+    note: req.body.note,
+    handicap: req.body.handicap
+  },
+    {
+      where: {
+        id: req.params.id,
+      },
+    },
+  )
+  .then(user => res.status(201).send(user))
+  .catch( err => {
+    res.status(500).send(JSON.stringify(err));
+  });
+});
+
+
 /* DELETE User*/
 router.get("/delete/:id", function(req, res){
   db.User.destroy({
