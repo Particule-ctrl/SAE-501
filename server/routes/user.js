@@ -47,7 +47,7 @@ router.post('/', function(req, res){
   });
 });
 
-router.post('/byGoogleID/:uuid', function(req, res){
+router.get('/byGoogleID/:uuid', function(req, res){
   db.User.findOne({
     where: { googleUUID: req.params.uuid }
   }).then(user => res.status(201).send(user))
