@@ -1,51 +1,50 @@
 import { router } from 'expo-router';
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
-import Animated ,{ FadeInDown,  }from 'react-native-reanimated';
+import { View, Text, StyleSheet, Pressable, Image, ScrollView } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Index() {
-
   const CMF = require('../assets/images/CMF_1.webp');
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.viewContainer}>
-        <Animated.View entering={FadeInDown.duration(200).springify()} style={styles.viewTextContainer}>
-          {/* <Text style={styles.textTitle}>Come and follow me</Text> */}
-          <Image  source={CMF} style={styles.image} />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.viewContainer}>
+          {/* Image Container */}
+          <Animated.View entering={FadeInDown.duration(200).springify()} style={styles.viewTextContainer}>
+            <Image source={CMF} style={styles.image} />
+          </Animated.View>
 
-        </Animated.View>
-        <Animated.View entering={FadeInDown.duration(200).delay(200).springify()} style={styles.viewTextContainer2}>
-          <Text style={styles.textSubtitle}>
+          {/* First Subtitle */}
+          <Animated.View entering={FadeInDown.duration(200).delay(200).springify()} style={styles.viewTextContainer2}>
+            <Text style={styles.textSubtitle}>
               Voyagez serein, voyagez avec C&FM.
-          </Text>
-        </Animated.View>
+            </Text>
+          </Animated.View>
 
-        <Animated.View entering={FadeInDown.duration(200).delay(400).springify()} style={styles.viewTextContainer2}>
-          <Text style={styles.textSubtitle2}>
-            Choisir C&FM, c'est garantir à sa famille un voyage serein, sécurisé et dans les meilleures conditions.
-          </Text>
-        </Animated.View>
+          {/* Second Subtitle */}
+          <Animated.View entering={FadeInDown.duration(200).delay(400).springify()} style={styles.viewTextContainer2}>
+            <Text style={styles.textSubtitle2}>
+              Choisir C&FM, c'est garantir à sa famille un voyage serein, sécurisé et dans les meilleures conditions.
+            </Text>
+          </Animated.View>
 
-        <Animated.View entering={FadeInDown.duration(200).delay(600).springify()} style={styles.ViewButton}>
-          <Pressable style={styles.Button} onPress={()=> router.push("/authentication/Login")}>
-            <Text style={styles.buttonText}>Connexion</Text>
-          </Pressable>
+          {/* Buttons Container */}
+          <Animated.View entering={FadeInDown.duration(200).delay(600).springify()} style={styles.ViewButton}>
+            {/* Login Button */}
+            <Pressable style={styles.Button} onPress={() => router.push("/authentication/Login")}>
+              <Text style={styles.buttonText}>Connexion</Text>
+            </Pressable>
 
-          {/* <Link href="/authentication/Register"> */}
-            <Text style={styles.title}>Vous etes pas encore inscrit ? </Text>
-          {/* </Link> */}
-          <Pressable onPress={()=> router.push("/authentication/Register")}>
-            <Text style={styles.inscription}>Inscription</Text>
-          </Pressable>
-          
-          
-        </Animated.View>
-
-
-
-      </View>
+            {/* Register Text and Button */}
+            <Text style={styles.title}>Vous n'êtes pas encore inscrit ?</Text>
+            <Pressable onPress={() => router.push("/authentication/Register")}>
+              <Text style={styles.inscription}>Inscription</Text>
+            </Pressable>
+          </Animated.View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -55,80 +54,76 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#192031',
   },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
   viewContainer: {
-    height: '100%',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
   },
   viewTextContainer: {
-    height: "10%",
-    display : "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    alignItems: 'center',
-    margin: 32,
-    marginTop: 45, 
-  },
-  viewTextContainer2: {
-    height: "auto",
-    paddingLeft: 8,
-    paddingRight: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    margin: 32,
+    marginBottom: -60,
   },
-  textTitle: {
-    color: 'white',
-    fontSize: 20,
+  viewTextContainer2: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 16,
   },
   textSubtitle: {
     color: 'white',
-    fontSize: 45,
+    fontSize: 24,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
-
   textSubtitle2: {
     color: 'white',
-    fontSize: 19,
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
   },
-
   ViewButton: {
-    width: "auto",
-    height: "30%",
-    alignItems: "center",
-    justifyContent: "center",
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
   },
   Button: {
     height: 55,
-    width: "90%",
-    display : "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 12,
-    backgroundColor: "#12B3A8"
-
+    backgroundColor: '#12B3A8',
+    marginBottom: 16,
   },
   buttonText: {
-    color: 'white', 
+    color: 'white',
     fontWeight: 'bold',
-    fontSize: 18, 
+    fontSize: 18,
   },
-
-  
-
   title: {
-    color: "white",
-    fontSize:13,
-    paddingTop:20
+    color: 'white',
+    fontSize: 13,
+    marginTop: 16,
   },
   inscription: {
-    color: "#12B3A8",
-    fontWeight: "bold",
-    paddingTop:10
-  }, 
-  
+    color: '#12B3A8',
+    fontWeight: 'bold',
+    marginTop: 8,
+    fontSize: 16,
+  },
   image: {
-    width: 200, // Ajustez selon vos besoins
-    height: 220,
+    width: 300,
+    height: 320,
     resizeMode: 'contain',
+    marginBottom: 24,
   },
 });
-
-
