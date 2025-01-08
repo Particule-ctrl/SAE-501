@@ -1,50 +1,152 @@
 import { router } from 'expo-router';
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image, ScrollView } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable, Image, ScrollView, Animated, Dimensions } from 'react-native';
+import AnimatedComponent, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const { width, height } = Dimensions.get('window');
+
+// Composant pour l'arrière-plan animé (dégradé)
+const AnimatedBackground = () => {
+  const colorAnimation = new Animated.Value(0);
+
+  useEffect(() => {
+    // Démarrer l'animation en boucle
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(colorAnimation, {
+          toValue: 1,
+          duration: 5000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(colorAnimation, {
+          toValue: 0,
+          duration: 5000,
+          useNativeDriver: false,
+        }),
+      ])
+    );
+
+    animation.start();
+
+    // Nettoyer l'animation lors du démontage du composant
+    return () => {
+      animation.stop();
+      colorAnimation.setValue(0); // Réinitialiser la valeur de l'animation
+    };
+  }, []);
+
+  const backgroundColor = colorAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#192031', '#0E1A2B'],
+  });
+
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor }]} />
+  );
+};
+
+// Composant pour les particules animées
+const Particle = ({ delay }) => {
+  const position = new Animated.ValueXY({ x: Math.random() * width, y: Math.random() * height });
+
+  useEffect(() => {
+    // Animation en boucle infinie pour les particules
+    const animateParticle = () => {
+      Animated.sequence([
+        Animated.timing(position, {
+          toValue: { x: Math.random() * width, y: Math.random() * height },
+          duration: 5000 + Math.random() * 5000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(position, {
+          toValue: { x: Math.random() * width, y: Math.random() * height },
+          duration: 5000 + Math.random() * 5000,
+          useNativeDriver: true,
+        }),
+      ]).start(() => animateParticle()); // Relance l'animation en boucle
+    };
+
+    animateParticle(); // Démarre l'animation
+
+    // Nettoyer l'animation lors du démontage du composant
+    return () => {
+      position.stopAnimation(); // Arrêter l'animation
+    };
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        styles.particle,
+        {
+          transform: [{ translateY: position.y }, { translateX: position.x }],
+        },
+      ]}
+    />
+  );
+};
+
+// Composant principal
 export default function Index() {
   const CMF = require('../assets/images/CMF_1.webp');
 
   return (
     <SafeAreaView style={styles.safe}>
+      <AnimatedBackground />
+      {/* Ajout des particules animées */}
+      {[...Array(20)].map((_, index) => (
+        <Particle key={index} delay={index * 500} />
+      ))}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.viewContainer}>
           {/* Image Container */}
-          <Animated.View entering={FadeInDown.duration(200).springify()} style={styles.viewTextContainer}>
+          <AnimatedComponent.View entering={FadeInDown.duration(200).springify()} style={styles.viewTextContainer}>
             <Image source={CMF} style={styles.image} />
-          </Animated.View>
+          </AnimatedComponent.View>
 
           {/* First Subtitle */}
-          <Animated.View entering={FadeInDown.duration(200).delay(200).springify()} style={styles.viewTextContainer2}>
+          <AnimatedComponent.View entering={FadeInDown.duration(200).delay(200).springify()} style={styles.viewTextContainer2}>
             <Text style={styles.textSubtitle}>
-              Voyagez serein, voyagez avec C&FM.
+              🌍 Voyagez serein, voyagez avec C&FM. ✈️
             </Text>
-          </Animated.View>
+          </AnimatedComponent.View>
 
           {/* Second Subtitle */}
-          <Animated.View entering={FadeInDown.duration(200).delay(400).springify()} style={styles.viewTextContainer2}>
+          <AnimatedComponent.View entering={FadeInDown.duration(200).delay(400).springify()} style={styles.viewTextContainer2}>
             <Text style={styles.textSubtitle2}>
-              Choisir C&FM, c'est garantir à sa famille un voyage serein, sécurisé et dans les meilleures conditions.
+              🛡️ Choisir C&FM, c'est garantir à sa famille un voyage serein, sécurisé et dans les meilleures conditions. 🌟
             </Text>
-          </Animated.View>
+          </AnimatedComponent.View>
 
           {/* Buttons Container */}
-          <Animated.View entering={FadeInDown.duration(200).delay(600).springify()} style={styles.ViewButton}>
+          <AnimatedComponent.View entering={FadeInDown.duration(200).delay(600).springify()} style={styles.ViewButton}>
             {/* Login Button */}
-            <Pressable style={styles.Button} onPress={() => router.push("/authentication/Login")}>
-              <Text style={styles.buttonText}>Connexion</Text>
+            <Pressable
+              style={[styles.Button, styles.shadow]}
+              onPress={() => router.push("/authentication/Login")}
+            >
+              <Text style={styles.buttonText}>🔑 Connexion</Text>
             </Pressable>
 
             {/* Register Text and Button */}
             <Text style={styles.title}>Vous n'êtes pas encore inscrit ?</Text>
-            <Pressable onPress={() => router.push("/authentication/Register")}>
-              <Text style={styles.inscription}>Inscription</Text>
+            <Pressable
+              style={[styles.inscription, styles.shadow]}
+              onPress={() => router.push("/authentication/Register")}
+            >
+              <Text style={styles.inscriptionText}>📄 Inscription</Text>
             </Pressable>
-          </Animated.View>
+          </AnimatedComponent.View>
         </View>
       </ScrollView>
+
+      {/* Copyright centré */}
+      <View style={styles.footer}>
+        <Text style={styles.copyright}>
+          © 2025 C&FM. Tous droits réservés.
+        </Text>
+      </View>
     </SafeAreaView>
   );
 }
@@ -56,13 +158,14 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   viewContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 16,
+    marginTop: -40,
   },
   viewTextContainer: {
     alignItems: 'center',
@@ -72,7 +175,7 @@ const styles = StyleSheet.create({
   viewTextContainer2: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     paddingHorizontal: 16,
   },
   textSubtitle: {
@@ -87,7 +190,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: 24,
+    marginBottom: 16,
   },
   ViewButton: {
     width: '100%',
@@ -115,9 +218,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   inscription: {
-    color: '#12B3A8',
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: '#1E2A3A',
+    marginTop: 24, // Déplace le bouton Inscription plus bas
+  },
+  inscriptionText: {
+    color: 'white', // Texte toujours en blanc
     fontWeight: 'bold',
-    marginTop: 8,
     fontSize: 16,
   },
   image: {
@@ -125,5 +233,30 @@ const styles = StyleSheet.create({
     height: 320,
     resizeMode: 'contain',
     marginBottom: 24,
+  },
+  particle: {
+    position: 'absolute',
+    width: 5,
+    height: 5,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5, // Pour Android
+  },
+  footer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  copyright: {
+    color: 'white',
+    fontSize: 12,
   },
 });

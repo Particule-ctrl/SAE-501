@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useRef } from 'react';
 import {
   Text,
   TextInput,
@@ -13,15 +13,15 @@ import {
   TouchableWithoutFeedback,
   Alert,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; // Assurez-vous d'avoir installé ce package
-import { Checkbox } from 'react-native-paper'; // Assurez-vous d'avoir installé ce package
+import { Picker } from '@react-native-picker/picker';
+import { Checkbox } from 'react-native-paper';
 import { router, useNavigation } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from './firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
-import { Camera } from 'expo-camera'; // Assurez-vous d'avoir installé ce package
-import * as ImagePicker from 'expo-image-picker'; // Assurez-vous d'avoir installé ce package
-import TextRecognition from '@react-native-ml-kit/text-recognition'; // Assurez-vous d'avoir installé ce package
+import { Camera } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import TesseractOcr from 'react-native-tesseract-ocr'; // Import de Tesseract OCR
 
 export default function Register() {
   // États pour les champs du formulaire
@@ -54,7 +54,7 @@ export default function Register() {
   // États pour le scan de la carte d'identité
   const [cameraPermission, setCameraPermission] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  let camera;
+  const cameraRef = useRef(null);
 
   const navigation = useNavigation();
 
@@ -63,6 +63,14 @@ export default function Register() {
       headerShown: false,
     });
   }, [navigation]);
+
+  // Demander la permission pour la caméra
+  useLayoutEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setCameraPermission(status === 'granted');
+    })();
+  }, []);
 
   // Fonction pour formater la date de naissance
   const formatBirthdate = (text) => {
@@ -81,7 +89,7 @@ export default function Register() {
     if (validateStep(currentStep)) {
       setCurrentStep(currentStep + 1);
     } else {
-      alert('Veuillez remplir tous les champs obligatoires.');
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires.');
     }
   };
 
@@ -113,27 +121,27 @@ export default function Register() {
   // Fonction pour gérer l'inscription
   const handleRegister = async () => {
     if (!firstName || !lastName || !age || !email || !password || !birthdate || !civility || !tel) {
-      alert('Tous les champs sont obligatoires !');
+      Alert.alert('Erreur', 'Tous les champs sont obligatoires !');
       return;
     }
 
     if (isNaN(age) || age <= 0) {
-      alert('Veuillez entrer un âge valide.');
+      Alert.alert('Erreur', 'Veuillez entrer un âge valide.');
       return;
     }
 
     if (isNaN(age) || age <= 18) {
-      alert('Vous devez être majeur pour avoir un compte.');
+      Alert.alert('Erreur', 'Vous devez être majeur pour avoir un compte.');
       return;
     }
 
     if (!/\d{2}\/\d{2}\/\d{4}/.test(birthdate)) {
-      alert('Veuillez entrer une date de naissance valide au format JJ/MM/AAAA.');
+      Alert.alert('Erreur', 'Veuillez entrer une date de naissance valide au format JJ/MM/AAAA.');
       return;
     }
 
     if (!/^\d{10}$/.test(tel)) {
-      alert('Veuillez entrer un numéro de téléphone valide à 10 chiffres.');
+      Alert.alert('Erreur', 'Veuillez entrer un numéro de téléphone valide à 10 chiffres.');
       return;
     }
 
@@ -166,63 +174,51 @@ export default function Register() {
       });
 
       console.log('Utilisateur enregistré avec succès et ajouté à Firestore !');
-      alert('Inscription réussie !');
+      Alert.alert('Succès', 'Inscription réussie !');
       router.push('./Login'); // Redirige vers la page Login après inscription
     } catch (error) {
       console.error("Erreur lors de l'inscription :", error.message);
-      alert('Erreur : ' + error.message);
+      Alert.alert('Erreur', error.message);
     }
   };
 
   // Fonction pour scanner la carte d'identité
-  const requestCameraPermission = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    setCameraPermission(status === 'granted');
-  };
-
   const takePicture = async () => {
-    if (cameraPermission) {
-      const photo = await camera.takePictureAsync({ base64: true });
-      processImage(photo.uri);
-    } else {
-      Alert.alert('Permission refusée', 'Vous devez autoriser l\'accès à la caméra.');
-    }
-  };
-
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission refusée', 'Vous devez autoriser l\'accès à la galerie.');
+    if (!cameraRef.current || !cameraPermission) {
+      Alert.alert('Erreur', 'La caméra n\'est pas disponible');
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-      base64: true,
-    });
-
-    if (!result.cancelled) {
-      processImage(result.uri);
+    try {
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.5,
+        base64: true,
+      });
+      await processImage(photo.uri);
+      setIsCameraActive(false);
+    } catch (error) {
+      Alert.alert('Erreur', 'Impossible de prendre la photo');
+      console.error('Error taking picture:', error);
     }
   };
 
+  // Fonction pour traiter l'image et extraire le texte avec Tesseract OCR
   const processImage = async (imageUri) => {
     try {
-      const text = await TextRecognition.recognize(imageUri);
-      const extractedData = extractDataFromText(text);
+      const result = await TesseractOcr.recognize(imageUri, 'LANG_FRENCH'); // Utilisez 'LANG_FRENCH' pour le français
+      console.log('Texte extrait :', result);
+      const extractedData = extractDataFromText(result);
       setFirstName(extractedData.firstName);
       setLastName(extractedData.lastName);
       setBirthdate(extractedData.birthdate);
       setCivility(extractedData.gender);
-      setIsCameraActive(false); // Fermer la caméra après le scan
     } catch (error) {
-      console.error('Erreur lors de la reconnaissance du texte :', error);
-      Alert.alert('Erreur', 'Impossible de lire la carte d\'identité.');
+      Alert.alert('Erreur', 'Impossible de lire la carte d\'identité');
+      console.error('Error processing image:', error);
     }
   };
 
+  // Fonction pour extraire les données du texte
   const extractDataFromText = (text) => {
     const lines = text.split('\n');
     const data = {
@@ -255,15 +251,32 @@ export default function Register() {
         return (
           <View style={styles.stepContainer}>
             <Text style={styles.stepTitle}>Étape 1 : Informations personnelles</Text>
-            {isCameraActive ? (
-              <Camera style={styles.camera} ref={(ref) => (camera = ref)}>
-                <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-                  <Text style={styles.captureButtonText}>Prendre une photo</Text>
-                </TouchableOpacity>
-              </Camera>
+            {isCameraActive && cameraPermission ? (
+              <View style={styles.cameraContainer}>
+                <Camera
+                  ref={cameraRef}
+                  style={styles.camera}
+                  type="back"
+                >
+                  <View style={styles.cameraButtonContainer}>
+                    <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+                      <Text style={styles.captureButtonText}>Prendre une photo</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={() => setIsCameraActive(false)}
+                    >
+                      <Text style={styles.cancelButtonText}>Annuler</Text>
+                    </TouchableOpacity>
+                  </View>
+                </Camera>
+              </View>
             ) : (
               <>
-                <TouchableOpacity style={styles.button} onPress={() => setIsCameraActive(true)}>
+                <TouchableOpacity
+                  style={styles.scanButton}
+                  onPress={() => setIsCameraActive(true)}
+                >
                   <Text style={styles.buttonText}>Scanner la carte d'identité</Text>
                 </TouchableOpacity>
                 <TextInput
@@ -545,14 +558,23 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
+  cameraContainer: {
+    width: '100%',
+    height: 300,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
   camera: {
     flex: 1,
-    width: '100%',
+  },
+  cameraButtonContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   captureButton: {
-    position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
     backgroundColor: '#fff',
     padding: 15,
     borderRadius: 10,
@@ -561,11 +583,24 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 16,
   },
-  button: {
-    backgroundColor: '#12B3A8',
+  cancelButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     padding: 15,
     borderRadius: 10,
-    marginBottom: 20,
+    marginTop: 10,
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  scanButton: {
+    width: '100%',
+    height: 50,
+    backgroundColor: '#12B3A8',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   buttonText: {
     color: '#fff',
