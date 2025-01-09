@@ -79,6 +79,28 @@ router.post('/:id', function(req, res){
   });
 });
 
+router.post('/byGoogleID/:uuid', function(req, res){
+  db.User.update({
+    name: req.body.name,
+    email: req.body.email,
+    tel: req.body.tel,
+    password: req.body.password,
+    civility: req.body.civility,
+    note: req.body.note,
+    handicap: req.body.handicap
+  },
+    {
+      where: {
+        id: req.params.uuid,
+      },
+    },
+  )
+  .then(user => res.status(201).send(user))
+  .catch( err => {
+    res.status(500).send(JSON.stringify(err));
+  });
+});
+
 
 /* DELETE User*/
 router.get("/delete/:id", function(req, res){
