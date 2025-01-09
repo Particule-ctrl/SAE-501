@@ -12,7 +12,7 @@ export default function Register() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [age, setAge] = useState('');
-  const [birthdate , setBirthdate] = useState('')
+  const [birthdate , setBirthdate] = useState('') 
   const [civility, setCivility] = useState('')
   const [tel, setTel] = useState('')
   const [note , setNote] = useState('')
@@ -41,7 +41,7 @@ export default function Register() {
       alert("Vous devez etre majeur pour avoir un compte ")
     }
   
-    if (!/\d{4}-\d{2}-\d{2}/.test(birthdate)) {
+    if (!/\d{2}-\d{2}-\d{4}/.test(birthdate)) {
       alert("Veuillez entrer une date de naissance valide au format JJ-MM-AAAA.");
       return;
     }
@@ -56,8 +56,12 @@ export default function Register() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+
       // Combiner `firstName` et `lastName`
       const fullName = `${firstName} ${lastName}`;
+
+      const parts = birthdate.split('-')
+      const reverseDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
 
       // Étape 2 : Ajouter les informations dans Firestore
       const userDocRef = doc(db, "users", user.uid); // Document avec UID de l'utilisateur
@@ -65,13 +69,13 @@ export default function Register() {
         Name: fullName,
         Age: parseInt(age), // Convertir l'âge en nombre
         Email: email,
-        Birthdate: birthdate,
+        Birthdate: reverseDate,
         Civility: civility,
         Tel: tel,
         Note: note,
       });
 
-      fetch('http://localhost/api/user', {
+      fetch('http://172.20.10.11/api/user', {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -79,7 +83,7 @@ export default function Register() {
         },
         body: JSON.stringify({
           name: fullName, 
-          birthdate,
+          birthdate: reverseDate,
           email,
           tel,
           password,

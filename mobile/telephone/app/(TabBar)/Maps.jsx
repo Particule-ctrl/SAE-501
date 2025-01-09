@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, SafeAreaView } from 'react-native';
 import { db } from '../authentication/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore'; // Importez `getDoc` pour obtenir un seul document
 import { getAuth } from 'firebase/auth'; // Importez `getAuth` pour gérer l'utilisateur connecté
+
 
 export default function Maps() {
   const [user, setUser] = useState(null); // Stocke les données de l'utilisateur
@@ -10,7 +11,7 @@ export default function Maps() {
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
-      try {
+      try { 
         const currentUser = auth.currentUser; // Récupère l'utilisateur connecté
         if (currentUser) {
           const userDocRef = doc(db, "users", currentUser.uid); // Référence au document Firestore de l'utilisateur
@@ -35,17 +36,30 @@ export default function Maps() {
     <View style={styles.container}>
       {user ? (
         // Affiche les informations de l'utilisateur connecté
-        <View>
-          <Text style={styles.title}>Bienvenue, {user.FirstName} {user.LastName} !</Text>
-          <Text>Âge : {user.Age}</Text>
-          <Text>PMR : {user.PMR ? "Oui" : "Non"}</Text>
-        </View>
+        <SafeAreaView>
+          <View>
+            <Text style={styles.title}>Bienvenue, {user.Name} !</Text>
+            <Text>Âge : {user.Age}</Text>
+            <Text>Email : {user.Email}</Text>
+            <Text>Téléphone : {user.Tel}</Text>
+            <Text>Date de naissance : {user.Birthdate}</Text>
+            <Text>Civilité : {user.Civility}</Text>
+          </View>
+        </SafeAreaView>
       ) : (
         // Affiche un message de chargement
         <Text>Chargement des informations utilisateur...</Text>
       )}
     </View>
   );
+  
+  // return (
+  //   <SafeAreaView>
+  //     {/* <Map/> */}
+  //   </SafeAreaView>
+  // );
+
+
 }
 
 const styles = StyleSheet.create({
