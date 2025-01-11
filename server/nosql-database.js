@@ -28,24 +28,11 @@ const setupModels = () => {
     return { DataModel };
 };
 
-const transformData = (incomingData) => {
-    return {
-        idDossier: incomingData["id-dossier"],
-        idPMR: incomingData.idPMR,
-        enregistre: incomingData.enregistre,
-        Assistance: incomingData.Assistance,
-        sousTrajets: incomingData.sousTrajets.map(st => ({
-            BD: st.BD,
-            numDossier: st.numDossier
-        })),
-        bagage: incomingData.bagage
-    };
-};
+
 
 
 no_sql_db = {
     mongoose: mongoose,
     DataModel: setupModels().DataModel,
-    transformData: transformData
 }
 module.exports = no_sql_db

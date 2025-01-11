@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const db = require('../sql-database');
 const no_sql_db = require('../nosql-database');
+const data_manip = require('../service/data-manipulation');
 const path = require('path');
 const { stringify } = require('querystring');
 
@@ -35,7 +36,8 @@ router.post('/',function(req,res){
   }
 
   console.log('Received data:', data);
-  transformedData = no_sql_db.transformData(data);
+  data_manip.sendDataToAPIs(data);
+  transformedData = data_manip.transformData(data);
 
   new no_sql_db.DataModel(data).save()
   .then( reservations => {
