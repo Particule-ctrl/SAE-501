@@ -37,12 +37,178 @@ const DATA = [
             }
         ],
         "bagage": [1234, 4321]
-    }
+    },
+        {
+        "id-dossier": 127834,
+        "idPMR": 1234,
+        "enregistre": 0,
+        "Assistance": 1,
+        "sousTrajets": [
+            {
+                "BD": "SNCF",
+                "numDossier": 1234,
+                "departure": "Paris Est",
+                "arrival": "CDG",
+                "departureTime": "2025-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "AF",
+                "numDossier": 5555,
+                "departure": "LAX",
+                "arrival": "CDG",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "RATP",
+                "numDossier": 8901,
+                "departure": "Chatelet",
+                "arrival": "Saint Lazare",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            }
+        ],
+        "bagage": [1234, 4321]
+    },
+        {
+        "id-dossier": 143434,
+        "idPMR": 1234,
+        "enregistre": 0,
+        "Assistance": 1,
+        "sousTrajets": [
+            {
+                "BD": "SNCF",
+                "numDossier": 1234,
+                "departure": "Paris Est",
+                "arrival": "CDG",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "AF",
+                "numDossier": 5555,
+                "departure": "LAX",
+                "arrival": "CDG",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "RATP",
+                "numDossier": 8901,
+                "departure": "Chatelet",
+                "arrival": "Saint Lazare",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            }
+        ],
+        "bagage": [1234, 4321]
+    },    {
+        "id-dossier": 1222234,
+        "idPMR": 1234,
+        "enregistre": 0,
+        "Assistance": 1,
+        "sousTrajets": [
+            {
+                "BD": "SNCF",
+                "numDossier": 1234,
+                "departure": "Paris Est",
+                "arrival": "CDG",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "AF",
+                "numDossier": 5555,
+                "departure": "LAX",
+                "arrival": "CDG",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "RATP",
+                "numDossier": 8901,
+                "departure": "Chatelet",
+                "arrival": "Saint Lazare",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            }
+        ],
+        "bagage": [1234, 4321]
+    },
+    {
+        "id-dossier": 12212322234,
+        "idPMR": 1234,
+        "enregistre": 0,
+        "Assistance": 1,
+        "sousTrajets": [
+            {
+                "BD": "SNCF",
+                "numDossier": 1234,
+                "departure": "Paris Est",
+                "arrival": "CDG",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "AF",
+                "numDossier": 5555,
+                "departure": "LAX",
+                "arrival": "CDG",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "RATP",
+                "numDossier": 8901,
+                "departure": "Chatelet",
+                "arrival": "Saint Lazare",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            }
+        ],
+        "bagage": [1234, 4321]
+    },
+    {
+        "id-dossier": 12234342234,
+        "idPMR": 1234,
+        "enregistre": 0,
+        "Assistance": 1,
+        "sousTrajets": [
+            {
+                "BD": "SNCF",
+                "numDossier": 1234,
+                "departure": "Paris Est",
+                "arrival": "CDG",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "AF",
+                "numDossier": 5555,
+                "departure": "LAX",
+                "arrival": "CDG",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            },
+            {
+                "BD": "RATP",
+                "numDossier": 8901,
+                "departure": "Chatelet",
+                "arrival": "Saint Lazare",
+                "departureTime": "2024-12-23 03:25:44",
+                "arrivalTime": "2024-12-24 04:25:44"
+            }
+        ],
+        "bagage": [1234, 4321]
+    },
+    
 ];
 
 export default function Tickets() {
     const [idTrajet, setID] = useState(null);
     const [isSousTrajet, setQRCode] = useState(null);
+
 
     const bouton = (id) => {
         setID(idTrajet === id ? null : id);
@@ -63,15 +229,25 @@ export default function Tickets() {
         setQRCode(isSousTrajet === id ? null : id);
     };
 
+    const qrData = (id, idTrajet) => {
+        const dataQR = JSON.stringify({
+            trajet: DATA.find(item => item["id-dossier"] === id).sousTrajets.find(item => item.numDossier === idTrajet).numDossier,
+            bagage: DATA.find(item => item["id-dossier"] === id).bagage
+        });
+        return dataQR;
+    }
+
 
     return (
         <SafeAreaView style={styles.container}>
             <FlatList
+                style={{marginTop: 10}}
                 data={DATA}
                 keyExtractor={(item) => item["id-dossier"].toString()}
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                     <TouchableOpacity activeOpacity={0.9} onPress={() => bouton(item["id-dossier"])}>
-                        <View style={styles.item}>
+                        
+                        <View style={[styles.item]}>
                             <View style={styles.top}>
                                 <Text style={styles.idTrajet}>Id Trajet: {item["id-dossier"]}</Text>
                                 <Text style={styles.idTrajet}>{exctratDate(item.sousTrajets[0].departureTime)}</Text>
@@ -102,20 +278,21 @@ export default function Tickets() {
                                                 <View style={styles.sousTrajetBarre}>
                                                 <BarreTrajet style={styles.sousTrajetBarre} />
                                                 </View>
-                                            </View>
+                                           
                                             {isSousTrajet === sousTrajet.numDossier && (
                                                 <View style={styles.qrCode}>
-                                                    <QRCodeTrajet id={sousTrajet.numDossier} />
+                                                    <QRCodeTrajet id={qrData(idTrajet,isSousTrajet)} />
                                                 </View>
                                             )}
+                                             </View>
                                         </TouchableOpacity>
-
                                     ))}
                                 </View>
                             )}
                         </View>
                     </TouchableOpacity>
                 )}
+                ListFooterComponent={<View style={{ height: 120 }} />}
             />
         </SafeAreaView>
     );
@@ -123,9 +300,12 @@ export default function Tickets() {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        marginTop: 20,
+        position: 'absolute',
         width: '100%',
+        height: '75%',
+        backgroundColor: '#FAF9F6',
+        bottom: 0,
+        borderRadius: 20,
     },
     item: {
         backgroundColor: '#f4f5f9',
@@ -170,13 +350,16 @@ const styles = StyleSheet.create({
     details: {
         marginTop: 10,
         padding: 10,
-        borderRadius: 5,
         
     },
+    
     sousTrajet: {
         marginBottom: 20,
-        borderRadius: 1,
-        borderBottomColor: 'gray',
+        borderRadius: 10,
+        padding: 5,
+        borderRadius: 5,
+        borderColor: 'gray',
+        borderWidth: 1.5,
     },
     place: {
         flexDirection: 'row',
@@ -198,6 +381,8 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
     qrCode: {
-        
+        alignContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
     },
 });
