@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "L'application nécessite l'accès à la caméra pour scanner votre carte d'identité.",
-        "NSPhotoLibraryUsageDescription": "L'application nécessite l'accès à vos photos pour sauvegarder les photos prises."
+        "NSPhotoLibraryUsageDescription": "L'application nécessite l'accès à vos photos pour sauvegarder les photos prises.",
+        "NSMicrophoneUsageDescription": "L'application n'utilise pas le microphone"
       }
     },
     "android": {
@@ -27,14 +28,7 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "package": "com.anonymous.telephone"
     },
@@ -50,7 +44,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "L'application nécessite l'accès à la caméra pour scanner votre carte d'identité."
+          "cameraPermission": "L'application nécessite l'accès à la caméra pour scanner votre carte d'identité.",
+          "microphonePermission": false
         }
       ],
       [

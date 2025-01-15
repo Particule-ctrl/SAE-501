@@ -1,7 +1,7 @@
 import React from 'react';
 import { Clock, RotateCcw, ChevronRight } from 'lucide-react';
 import { TRANSPORT_MODES } from '../../constants/TRANSPORT_MODES';
-import { formatDuration, formatDistance, formatPrice, formatTime } from '../utils/formatters';
+import { formatDuration, formatDistance, formatPrice, formatTime } from '../../app/utils/formatters';
 
 const JourneySummary = ({ journey, isSelected, onClick }) => {
     const isMultimodal = journey.mode === 'multimodal' || journey.segments.length > 1;

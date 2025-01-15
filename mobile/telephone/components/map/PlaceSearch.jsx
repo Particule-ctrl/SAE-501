@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { MapPin, Home, Train, Bus, Building, Plane } from 'lucide-react';
 import { PLACE_TYPES } from '../../constants/PLACE_TYPES';
-import TransportService from '../services/TransportService';
+import TransportService from '../../app/services/TransportService';
 
 const PlaceSearch = ({ value, onChange, onPlaceSelect, placeholder }) => {
     // États pour gérer les suggestions et leur affichage

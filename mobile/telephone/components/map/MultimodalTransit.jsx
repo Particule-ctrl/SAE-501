@@ -3,8 +3,8 @@ import { Search, RotateCcw, Calendar, Clock } from 'lucide-react';
 import PlaceSearch from './PlaceSearch';
 import TransportModeSelector from './TransportModeSelector';
 import JourneySummary from './JourneySummary';
-import MapComponent from './map/Maps';
-import TransportService from '../services/TransportService';
+import MapComponent from '../../app/(TabBar)/map/Maps';
+import TransportService from '../../app/services/TransportService';
 
 const MultimodalTransit = () => {
     const [departure, setDeparture] = useState('');
