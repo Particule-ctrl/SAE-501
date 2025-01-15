@@ -27,6 +27,7 @@ describe('Database Models', () => {
 
         const agent = await Agent.create({
             email: 'smith@example.com',
+            entreprise: 'SNCF',
             password: 'agentpassword'
         });
 
