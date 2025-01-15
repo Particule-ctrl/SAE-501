@@ -1,19 +1,50 @@
-
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState, useEffect } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from "expo-status-bar";
+import { db } from '../authentication/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 export default function Home() {
   const navigation = useNavigation();
   const [pending, setPending] = useState(false);
+  const [user, setUser] = useState(null);
+  const auth = getAuth();
 
-  // Masquer l'en-tête (header)
+  // Hide header
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
+
+  // Fetch current user data
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      setPending(true); // Start loading
+      try {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            setUser(userDoc.data());
+          } else {
+            console.log("Aucun utilisateur trouvé avec cet UID !");
+          }
+        } else {
+          console.log("Aucun utilisateur connecté !");
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération de l'utilisateur :", error);
+      } finally {
+        setPending(false); // Stop loading
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -28,13 +59,15 @@ export default function Home() {
           <View style={styles.leftContainer}>
             <View style={styles.logoWrapper}>
               <Image
-                source={require("./../../assets/Profile/profil.jpeg")} // Utilisation directe de l'import
+                source={require("./../../assets/Profile/profil.jpeg")}
                 style={styles.logo}
               />
             </View>
             <View style={styles.ConText}>
               <Text style={styles.Text1}>Bienvenue,</Text>
-              <Text style={styles.Text2}>Marius 👋</Text>
+              {user && user.Name && (
+                <Text style={styles.Text2}> {user.Name.split(' ')[0]} 👋</Text>
+              )}
             </View>
             <View style={styles.ConText2}>
               <Text style={styles.Text3}>
@@ -42,7 +75,9 @@ export default function Home() {
               </Text>
             </View>
           </View>
-          <View style={styles.rightContainer}></View>
+          <View style={styles.rightContainer}>
+            {user && <Text> {user.Name} </Text>}
+          </View>
         </View>
       </View>
     </View>
