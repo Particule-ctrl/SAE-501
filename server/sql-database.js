@@ -49,19 +49,15 @@ const User = sequelize.define('User',{
 });
 
 const Agent = sequelize.define('Agent',{
-    name: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
     email: {
         type: Sequelize.STRING,
         allowNull: false
     },
-    tel: {
-        type: Sequelize.INTEGER,
+    password: {
+        type: Sequelize.STRING,
         allowNull: false
     },
-    password: {
+    entreprise: {
         type: Sequelize.STRING,
         allowNull: false
     }
