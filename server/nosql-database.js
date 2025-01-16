@@ -19,6 +19,7 @@ const setupModels = () => {
             {
                 BD: String,
                 numDossier: Number,
+                statusValue: Number,
             }
         ],
         bagage: [Number]

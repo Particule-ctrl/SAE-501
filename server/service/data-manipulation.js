@@ -14,7 +14,8 @@ const transformData = (incomingData) => {
         Assistance: incomingData.Assistance,
         sousTrajets: incomingData.sousTrajets.map(st => ({
             BD: st.BD,
-            numDossier: st.numDossier
+            numDossier: st.numDossier,
+            statusValue: 0
         })),
         bagage: incomingData.bagage
     };

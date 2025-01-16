@@ -58,4 +58,24 @@ router.get('/byuserid/:id',function(req,res){
   });
 });
 
+router.get('/setDone/:dossier/:trajet', function(req,res){
+  no_sql_db.DataModel.updateOne({idDossier:req.params.dossier, "sousTrajets.numDossier":req.params.trajet}, { $set: {"sousTrajets.$.statusValue":2}})
+  .then( reservation => {
+    res.status(200).send(JSON.stringify(reservation));
+  })
+  .catch( err => {
+    res.status(500).send(JSON.stringify(err));
+  });
+});
+
+router.get('/setOngoing/:dossier/:trajet', function(req,res){
+  no_sql_db.DataModel.updateOne({idDossier:req.params.dossier, "sousTrajets.numDossier":req.params.trajet}, { $set: {"sousTrajets.$.statusValue":1}})
+  .then( reservation => {
+    res.status(200).send(JSON.stringify(reservation));
+  })
+  .catch( err => {
+    res.status(500).send(JSON.stringify(err));
+  });
+});
+
 module.exports = router;
