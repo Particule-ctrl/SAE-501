@@ -36,6 +36,29 @@ const Reservations = sequelize.define('Reservation', {
         allowNull: false
     }
 });
+
+const Agent = sequelize.define('Agent',{
+    name: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    email: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    tel: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+    },
+    password: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    lieu: {
+        type: Sequelize.STRING,
+        allowNull: false
+    }
+})
 // Synchroniser le modèle avec la base de données
 (async () => {
     try {

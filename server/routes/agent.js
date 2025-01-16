@@ -31,11 +31,9 @@ router.get('/:id', function(req, res) {
 /* POST new Agent*/
 router.post('/', function(req, res){
   db.Agent.create({
-    name: req.body.name,
     email: req.body.email,
-    tel: req.body.tel,
-    site: req.body.site,
-    password: req.body.password
+    password: req.body.password,
+    entreprise: req.body.entreprise
   })
   .catch( err => {
     res.status(500).send(JSON.stringify(err));
