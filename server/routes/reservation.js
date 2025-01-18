@@ -58,6 +58,16 @@ router.get('/byuserid/:id',function(req,res){
   });
 });
 
+router.get('/bygoogleid/:id',function(req,res){
+  no_sql_db.DataModel.find({googleId: req.params.id})
+  .then( reservations => {
+    res.status(200).send(JSON.stringify(reservations));
+  })
+  .catch( err => {
+    res.status(500).send(JSON.stringify(err));
+  });
+});
+
 router.get('/setDone/:dossier/:trajet', function(req,res){
   no_sql_db.DataModel.updateOne({idDossier:req.params.dossier, "sousTrajets.numDossier":req.params.trajet}, { $set: {"sousTrajets.$.statusValue":2}})
   .then( reservation => {

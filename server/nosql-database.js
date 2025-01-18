@@ -13,6 +13,7 @@ const setupModels = () => {
     const DataSchema = new mongoose.Schema({
         idDossier: Number,
         idPMR: Number,
+        googleId: String,
         enregistre: Number,
         Assistance: Number,
         sousTrajets: [
