@@ -10,6 +10,7 @@ const transformData = (incomingData) => {
     return {
         idDossier: incomingData["id-dossier"],
         idPMR: incomingData.idPMR,
+        googleId: incomingData.googleId,
         enregistre: incomingData.enregistre,
         Assistance: incomingData.Assistance,
         sousTrajets: incomingData.sousTrajets.map(st => ({
