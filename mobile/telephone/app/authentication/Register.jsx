@@ -329,8 +329,27 @@ export default function Register() {
         Accompagnateur: accompagnateurData
       });
 
-      Alert.alert('Succès', 'Inscription réussie !');
-      router.push('./Login');
+      fetch('http://172.20.10.11/api/user', {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          'Content-Type': "application/json",
+        },
+        body: JSON.stringify({
+          name: `${firstName} ${lastName}`, 
+          birthdate: birthdate,
+          email,
+          tel,
+          password,
+          civility,
+          note,
+          googleUUID: user.uid,
+        })
+      });
+
+      console.log('Utilisateur enregistré avec succès et ajouté à Firestore !');
+      alert('Inscription réussie !');
+      router.push('./Login'); // Redirige vers la page Login après inscription
     } catch (error) {
       console.error("Erreur lors de l'inscription :", error.message);
       Alert.alert('Erreur', error.message);
