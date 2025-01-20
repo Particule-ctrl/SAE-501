@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import {
   Text,
   TextInput,
@@ -74,12 +74,22 @@ export default function Register() {
 
   const navigation = useNavigation();
 
+
+  // Masquer l'en-tête de la navigation
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
   useEffect(() => {
     (async () => {
       const { status } = await useCameraPermissions();
       setHasPermission(status === 'granted');
     })();
   }, []);
+
+ 
 
   // Fonction pour formater la date de naissance
   const formatBirthdate = (text) => {
@@ -769,7 +779,7 @@ const styles = StyleSheet.create({
   },
   stepContainer: {
     width: '90%',
-    marginBottom: 24,
+    marginBottom: 30,
   },
   stepTitle: {
     fontSize: 20,
@@ -833,6 +843,7 @@ const styles = StyleSheet.create({
   },
   navButtonFullWidth: {
     width: '100%',
+    marginBottom: 10,
   },
   navButtonText: {
     color: 'white',
