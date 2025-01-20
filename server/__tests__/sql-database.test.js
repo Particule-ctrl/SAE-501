@@ -26,14 +26,13 @@ describe('Database Models', () => {
     test('Agent should work as expected', async () => {
 
         const agent = await Agent.create({
-            name: 'Agent Smith',
             email: 'smith@example.com',
-            tel: 1122334455,
+            entreprise: 'SNCF',
             password: 'agentpassword'
         });
 
         const foundAgent = await Agent.findOne({ where: { id: agent.id }});
-        expect(foundAgent.name).toBe('Agent Smith');
+        expect(foundAgent.email).toBe('smith@example.com');
     });
 });
 
