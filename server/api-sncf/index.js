@@ -15,27 +15,51 @@ const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_
 // Définition du modèle Item
 const Reservations = sequelize.define('Reservation', {
     numDossier: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true
     },
     departure: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
     },
     arrival: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
     },
     departureTime: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
         allowNull: false
     },
     arrivalTime: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
         allowNull: false
     }
 });
+
+const Agent = sequelize.define('Agent',{
+    name: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    email: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    tel: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+    },
+    password: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    lieu: {
+        type: Sequelize.STRING,
+        allowNull: false
+    }
+});
+
 // Synchroniser le modèle avec la base de données
 (async () => {
     try {

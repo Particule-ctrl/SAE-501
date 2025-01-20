@@ -1,5 +1,5 @@
 const express = require('express');
-const { Sequelize, DataTypes, DATE } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const app = express();
 const port = 3000;
 
@@ -15,24 +15,47 @@ const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_
 // Définition du modèle Item
 const Reservations = sequelize.define('Reservation', {
     numDossier: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true
     },
     departure: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
     },
     arrival: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
     },
     departureTime: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
         allowNull: false
     },
     arrivalTime: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
+        allowNull: false
+    }
+});
+
+const Agent = sequelize.define('Agent',{
+    name: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    email: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    tel: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+    },
+    password: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    lieu: {
+        type: Sequelize.STRING,
         allowNull: false
     }
 });
@@ -55,16 +78,6 @@ app.get('/reservations', async (req, res) => {
     const reservations = await Reservations.findAll();
     res.json(reservations);
 });
-
-app.get('/reservations/byDossier/:id',(req, res) => {
-    find({numDossier: req.params.id})
-  .then( reservations => {
-    res.status(200).send(JSON.stringify(reservations));
-  })
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
-})
 
 // GET - Récupérer un élément par son ID
 app.get('/reservations/:id', async (req, res) => {
