@@ -1,10 +1,12 @@
 var express = require('express');
 var path = require('path');
 const cors = require('cors');
+const listEndpoints = require('express-list-endpoints');
 
 var userRouter = require('./routes/user');
 var agentRouter = require('./routes/agent');
 var handicapRouter = require('./routes/handicap');
+var reservationRouter = require('./routes/reservation')
 
 var app = express();
 const db = require('./sql-database'); // Adjust path as necessary
@@ -35,5 +37,10 @@ app.options('*', cors());
 app.use('/api/user/', userRouter);
 app.use('/api/agent/', agentRouter);
 app.use('/api/handicap/', handicapRouter);
+app.use('/api/reservation/', reservationRouter);
+app.get('/list-routes', (req, res) => {
+  res.json(listEndpoints(app));
+});
+
 
 module.exports = app;

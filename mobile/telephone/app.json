@@ -13,13 +13,24 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "L'application nécessite l'accès à la caméra pour scanner votre carte d'identité.",
+        "NSPhotoLibraryUsageDescription": "L'application nécessite l'accès à vos photos pour sauvegarder les photos prises.",
+        "NSMicrophoneUsageDescription": "L'application n'utilise pas le microphone"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "package": "com.anonymous.telephone"
     },
     "web": {
       "bundler": "metro",
@@ -29,7 +40,20 @@
     "plugins": [
       "expo-router",
       "expo-build-properties",
-      "expo-secure-store"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "L'application nécessite l'accès à la caméra pour scanner votre carte d'identité.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "L'application nécessite l'accès à vos photos."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

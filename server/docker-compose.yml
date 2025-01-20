@@ -41,7 +41,101 @@ services:
       - postgres
       - mongo
     ports:
-      - '80:80'        
+      - '80:80'
+
+  # # Base de données sncf
+  db-sncf:
+    image: mysql:latest
+    container_name: db-sncf
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: sncf
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: password1
+    ports:
+      - "3307:3306"
+    volumes:
+      - sncf_data:/var/lib/mysql
+
+  # # API 1
+  api-sncf:
+    build: ./api-sncf
+    container_name: api-sncf
+    environment:
+      DATABASE_HOST: db-sncf
+      DATABASE_PORT: 3306
+      DATABASE_USER: user1
+      DATABASE_PASSWORD: password1
+      DATABASE_NAME: sncf
+    depends_on:
+      - db-sncf
+    ports:
+      - "8001:3000"
+
+  # Base de données 2
+  db-af:
+    image: mysql:latest
+    container_name: db-af
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: af
+      MYSQL_USER: user2
+      MYSQL_PASSWORD: password2
+    ports:
+      - "3308:3306"
+    volumes:
+      - af_data:/var/lib/mysql
+
+  # API 2
+  api-af:
+    build: ./api-af
+    container_name: api-af
+    environment:
+      DATABASE_HOST: db-af
+      DATABASE_PORT: 3306
+      DATABASE_USER: user2
+      DATABASE_PASSWORD: password2
+      DATABASE_NAME: af
+    depends_on:
+      - db-af
+    ports:
+      - "8003:3000"
+
+  # # Base de données 3
+  db-ratp:
+    image: mysql:latest
+    container_name: db-ratp
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ratp
+      MYSQL_USER: user3
+      MYSQL_PASSWORD: password3
+    ports:
+      - "3309:3306"
+    volumes:
+      - ratp_data:/var/lib/mysql
+
+#  API 3
+  api-ratp:
+    build: ./api-ratp
+    container_name: api-ratp
+    environment:
+      DATABASE_HOST: db-ratp
+      DATABASE_PORT: 3306
+      DATABASE_USER: user3
+      DATABASE_PASSWORD: password3
+      DATABASE_NAME: ratp
+    depends_on:
+      - db-ratp
+    ports:
+      - "8004:3000"
+
+
+
+    
 volumes:
   app-db:
   mongo-data:
+  af_data:
+  sncf_data:
+  ratp_data:
