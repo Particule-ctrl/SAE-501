@@ -18,15 +18,27 @@ router.get('/all',function(req,res){
   });
 });
 
-router.get('/:id',function(req,res){
-  no_sql_db.DataModel.find({idDossier: req.params.id})
-  .then( reservations => {
-    res.status(200).send(JSON.stringify(reservations));
-  })
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
+router.get('/:id', async function (req, res) {
+  try {
+      // Trouver les réservations correspondant à l'idDossier
+      const reservation = await no_sql_db.DataModel.findOne({ idDossier: req.params.id });
+
+      // Vérifier si des réservations ont été trouvées
+      if (reservation.length === 0) {
+          return res.status(404).json({ error: "No reservations found for the given idDossier." });
+      }
+      console.log(reservation);
+      const updatedReservations = await data_manip.getDataFromAPIs(reservation._doc);
+
+      // Envoyer la réponse avec les réservations mises à jour
+      res.status(200).json(updatedReservations);
+  } catch (err) {
+      // Gérer les erreurs globales
+      console.error('Error in GET /:id:', err.message);
+      res.status(500).json({ error: err.message });
+  }
 });
+
 
 router.post('/',function(req,res){
   const data = req.body;
@@ -48,24 +60,38 @@ router.post('/',function(req,res){
   });
 });
 
-router.get('/byuserid/:id',function(req,res){
-  no_sql_db.DataModel.find({idPMR: req.params.id})
-  .then( reservations => {
-    res.status(200).send(JSON.stringify(reservations));
-  })
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
+router.get('/byuserid/:id', async function (req, res) {
+  try {
+      const reservations = await no_sql_db.DataModel.find({ idPMR: req.params.id });
+      const reservationsData = reservations.map(doc => doc._doc);
+      const updatedReservations = await Promise.all(
+          reservationsData.map(async (reservation) => {
+              return await data_manip.getDataFromAPIs(reservation);
+          })
+      );
+
+      res.status(200).json(updatedReservations);
+  } catch (err) {
+      console.error('Error in GET /byuserid/:id:', err.message);
+      res.status(500).json({ error: err.message });
+  }
 });
 
-router.get('/bygoogleid/:id',function(req,res){
-  no_sql_db.DataModel.find({googleId: req.params.id})
-  .then( reservations => {
-    res.status(200).send(JSON.stringify(reservations));
-  })
-  .catch( err => {
-    res.status(500).send(JSON.stringify(err));
-  });
+router.get('/bygoogleid/:id', async function (req, res) {
+  try {
+      const reservations = await no_sql_db.DataModel.find({ googleId: req.params.id });
+      const reservationsData = reservations.map(doc => doc._doc);
+      const updatedReservations = await Promise.all(
+        reservationsData.map(async (reservation) => {
+              return await data_manip.getDataFromAPIs(reservation);
+          })
+      );
+
+      res.status(200).json(updatedReservations);
+  } catch (err) {
+      console.error('Error in GET /bygoogleid/:id:', err.message);
+      res.status(500).json({ error: err.message });
+  }
 });
 
 router.get('/setDone/:dossier/:trajet', function(req,res){
