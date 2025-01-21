@@ -329,7 +329,7 @@ export default function Register() {
         Accompagnateur: accompagnateurData
       });
 
-      fetch('http://172.20.10.11/api/user', {
+      fetch('http://192.168.139.235/api/user', {
         method: "POST",
         headers: {
           Accept: "application/json",
