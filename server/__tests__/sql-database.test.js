@@ -21,7 +21,7 @@ describe('Database Models', () => {
         });
 
         expect(user.firstname).toBe('John');
-        expect(user.lastname).toBe('DOe');
+        expect(user.lastname).toBe('Doe');
         expect(user.email).toBe('john.doe@example.com');
     });
 
