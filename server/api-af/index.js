@@ -82,7 +82,11 @@ app.get('/reservations', async (req, res) => {
 // GET - Récupérer un élément par son ID
 app.get('/reservations/:id', async (req, res) => {
     const { id } = req.params;
-    const reservation = await Reservations.findByPk(id);
+    const reservation = await Reservations.findOne(
+        {
+            where: { numDossier: req.params.id }
+          }
+    );
 
     if (!reservation) {
         return res.status(404).json({ error: 'Item not found' });
@@ -93,7 +97,6 @@ app.get('/reservations/:id', async (req, res) => {
 
 // POST - Ajouter un nouvel élément
 app.post('/reservations', (req, res) => {
-    console.log('hey')
     Reservations.create({
         numDossier: req.body.numDossier,
         departure: req.body.departure,
@@ -115,7 +118,11 @@ app.post('/reservations/delete', async (req, res) => {
         return res.status(400).json({ error: 'ID is required' });
     }
 
-    const item = await Reservations.findByPk(id);
+    const item = await Reservations.findOne(
+        {
+            where: { numDossier: req.params.id }
+          }
+    );
 
     if (!item) {
         return res.status(404).json({ error: 'Item not found' });
