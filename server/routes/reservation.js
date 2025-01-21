@@ -20,20 +20,16 @@ router.get('/all',function(req,res){
 
 router.get('/:id', async function (req, res) {
   try {
-      // Trouver les réservations correspondant à l'idDossier
       const reservation = await no_sql_db.DataModel.findOne({ idDossier: req.params.id });
 
-      // Vérifier si des réservations ont été trouvées
       if (reservation.length === 0) {
           return res.status(404).json({ error: "No reservations found for the given idDossier." });
       }
       console.log(reservation);
       const updatedReservations = await data_manip.getDataFromAPIs(reservation._doc);
 
-      // Envoyer la réponse avec les réservations mises à jour
       res.status(200).json(updatedReservations);
   } catch (err) {
-      // Gérer les erreurs globales
       console.error('Error in GET /:id:', err.message);
       res.status(500).json({ error: err.message });
   }
@@ -139,6 +135,14 @@ module.exports = router;
  *         statusValue:
  *           type: integer
  *           description: Status of the sousTrajet (0 = pending, 1 = ongoing, 2 = done)
+ *         departure:
+ *           type: string
+ *         arrival:
+ *           type: string
+ *         departureTime:
+ *           type: date
+ *         arrivalTime:
+ *           type: date
  *     Reservation:
  *       type: object
  *       properties:
