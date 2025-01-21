@@ -80,9 +80,9 @@ export default function Header() {
               </Text>
             </View>
           </View>
-          <View style={styles.rightContainer}>
+          {/* <View style={styles.rightContainer}>
             {user && <Text style={styles.Text3}> {user.Name} </Text>}
-          </View>
+          </View> */}
         </View>
       </View>
 
