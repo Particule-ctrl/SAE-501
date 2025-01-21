@@ -4,11 +4,11 @@
     "slug": "telephone",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/CMF_1.gif",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/CMF_1.webp",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
