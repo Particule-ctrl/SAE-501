@@ -39,12 +39,27 @@ npm run reset-project
 Here are the steps to reset your local repository to the state of the last commit pushed to GitHub.
 
 ## Step 1: Save Current Changes (Optional)
+<<<<<<< Updated upstream
+- If you want to keep your current changes before resetting, you can save them with the following command:
+=======
 If you want to keep your current changes before resetting, you can save them with the following command:
+>>>>>>> Stashed changes
 ```bash
 git stash
 ```
 This saves your changes in a "stack" that you can restore later.
 
+<<<<<<< Updated upstream
+-if you want to come back in a "stack" 
+```bash
+git stah pop
+
+```
+
+
+
+=======
+>>>>>>> Stashed changes
 ## Step 2: Reset to the Last Push State
 To revert to the state of your last push (the last commit pushed to GitHub), use the following command:
 ```bash

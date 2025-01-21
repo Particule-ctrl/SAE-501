@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import {
   Text,
   TextInput,
@@ -96,12 +96,22 @@ export default function Register() {
 
   const navigation = useNavigation();
 
+
+  // Masquer l'en-tête de la navigation
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
   useEffect(() => {
     (async () => {
       const { status } = await useCameraPermissions();
       setHasPermission(status === 'granted');
     })();
   }, []);
+
+ 
 
   // Fonction pour formater la date de naissance
   const formatBirthdate = (text) => {
@@ -372,9 +382,28 @@ export default function Register() {
         },
         Accompagnateur: accompagnateurData
       });
-  
-      Alert.alert('Succès', 'Inscription réussie !');
-      router.push('./Login');
+
+      fetch('http://172.20.10.11/api/user', {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          'Content-Type': "application/json",
+        },
+        body: JSON.stringify({
+          name: `${firstName} ${lastName}`, 
+          birthdate: birthdate,
+          email,
+          tel,
+          password,
+          civility,
+          note,
+          googleUUID: user.uid,
+        })
+      });
+
+      console.log('Utilisateur enregistré avec succès et ajouté à Firestore !');
+      alert('Inscription réussie !');
+      router.push('./Login'); // Redirige vers la page Login après inscription
     } catch (error) {
       console.error("Erreur lors de l'inscription :", error.message);
       Alert.alert('Erreur', error.message);
@@ -804,7 +833,7 @@ const styles = StyleSheet.create({
   },
   stepContainer: {
     width: '90%',
-    marginBottom: 24,
+    marginBottom: 30,
   },
   stepTitle: {
     fontSize: 20,
@@ -868,6 +897,7 @@ const styles = StyleSheet.create({
   },
   navButtonFullWidth: {
     width: '100%',
+    marginBottom: 10,
   },
   navButtonText: {
     color: 'white',

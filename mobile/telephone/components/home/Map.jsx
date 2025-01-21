@@ -1,55 +1,116 @@
-import React, { useState, useRef } from 'react';
-import { View, StyleSheet, Animated, TouchableOpacity } from 'react-native';
-import Header from './Header';
-import Profil from './Profil';
+// import React, { useEffect, useRef, useState } from 'react';
+// import MapboxGL from '@react-native-mapbox-gl/maps';
+// import { View, StyleSheet } from 'react-native';
+// import { API_CONFIG } from '../../constants/API_CONFIG'
+// import { PLACE_TYPES } from '../../constants/PLACE_TYPES';
+// import { TRANSPORT_MODES } from '../../constants/TRANSPORT_MODES';
 
-export default function Map() {
-  // Déclaration de l'état en dehors de la fonction toggleProfil
-  const [isProfilVisible, setProfilVisible] = useState(false);
-  const slideAnim = useRef(new Animated.Value(-300)).current;  // Valeur d'animation initiale
+// MapboxGL.setAccessToken(API_CONFIG.mapbox);
 
-  const toggleProfil = () => {
-    setProfilVisible(!isProfilVisible); // Bascule l'état de visibilité du Profil
+// const Map = ({ selectedDeparture, selectedArrival, selectedJourney }) => {
+//     const mapRef = useRef(null);
+//     const [markers, setMarkers] = useState([]);
+//     const [routes, setRoutes] = useState([]);
 
-    // Animation de glissement à droite si le Profil est affiché, sinon à gauche
-    Animated.timing(slideAnim, {
-      toValue: isProfilVisible ? -300 : 0,  // Si Profil est visible, on le cache à -300
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  };
+//     const clearMap = () => {
+//         setMarkers([]);
+//         setRoutes([]);
+//     };
 
-  return (
-    <View style={styles.map}>
-      {/* Header2 avec le bouton pour afficher/masquer le Profil */}
-      <TouchableOpacity onPress={toggleProfil}>
-        <Header />
-      </TouchableOpacity>
+//     const updateMap = () => {
+//         clearMap();
 
-      {/* Vue animée qui contient le Profil */}
-      <Animated.View style={[styles.profilContainer, { transform: [{ translateX: slideAnim }] }]}>
-        <Profil />
-      </Animated.View>
-    </View>
-  );
-}
+//         const newMarkers = [];
+//         const newRoutes = [];
+//         const bounds = [];
 
-const styles = StyleSheet.create({
-    map: {
-        width: '100%',
-        height: 700, 
-        backgroundColor: 'red',
-        top: -900,
-       
-      },
-  profilContainer: {
-    position: 'absolute',
-    left: 0,  // Le composant commence à gauche
-    top: 100,  // Ajuste la position verticale
-    width: 300,
-    height: '100%',
-    backgroundColor: 'white',
-    padding: 20,
-    elevation: 5, // Ombre pour effet de profondeur
-  },
-});
+//         if (selectedDeparture) {
+//             newMarkers.push(
+//                 <MapboxGL.PointAnnotation
+//                     key="departure"
+//                     id="departure"
+//                     coordinate={selectedDeparture.coords}
+//                 />
+//             );
+//             bounds.push(selectedDeparture.coords);
+//         }
+
+//         if (selectedArrival) {
+//             newMarkers.push(
+//                 <MapboxGL.PointAnnotation
+//                     key="arrival"
+//                     id="arrival"
+//                     coordinate={selectedArrival.coords}
+//                 />
+//             );
+//             bounds.push(selectedArrival.coords);
+//         }
+
+//         if (selectedJourney) {
+//             selectedJourney.segments.forEach((segment, index) => {
+//                 const routeId = `route-${index}`;
+
+//                 newRoutes.push(
+//                     <MapboxGL.ShapeSource id={routeId} key={routeId} shape={segment.geometry}>
+//                         <MapboxGL.LineLayer
+//                             id={`line-${routeId}`}
+//                             style={{
+//                                 lineColor: TRANSPORT_MODES[segment.mode.toUpperCase()].lineColor,
+//                                 lineWidth: 4,
+//                                 lineOpacity: 0.8,
+//                                 lineDasharray: segment.mode === 'plane' ? [2, 1] : []
+//                             }}
+//                         />
+//                     </MapboxGL.ShapeSource>
+//                 );
+
+//                 if (segment.geometry.coordinates) {
+//                     bounds.push(...segment.geometry.coordinates);
+//                 }
+//             });
+//         }
+
+//         setMarkers(newMarkers);
+//         setRoutes(newRoutes);
+
+//         if (bounds.length > 0) {
+//             mapRef.current?.fitBounds(
+//                 [Math.min(...bounds.map(coord => coord[0])), Math.min(...bounds.map(coord => coord[1]))],
+//                 [Math.max(...bounds.map(coord => coord[0])), Math.max(...bounds.map(coord => coord[1]))],
+//                 50
+//             );
+//         }
+//     };
+
+//     useEffect(() => {
+//         updateMap();
+//     }, [selectedDeparture, selectedArrival, selectedJourney]);
+
+//     return (
+//         <View style={styles.container}>
+//             <MapboxGL.MapView
+//                 ref={mapRef}
+//                 style={styles.map}
+//                 styleURL={MapboxGL.StyleURL.Street}
+//             >
+//                 <MapboxGL.Camera
+//                     zoomLevel={11}
+//                     centerCoordinate={[2.3522, 48.8566]} // Paris par défaut
+//                 />
+//                 {markers}
+//                 {routes}
+//             </MapboxGL.MapView>
+//         </View>
+//     );
+// };
+
+// const styles = StyleSheet.create({
+//     container: {
+//         flex: 1,
+//     },
+//     map: {
+//         flex: 1,
+//     },
+// });
+
+// export default Map;

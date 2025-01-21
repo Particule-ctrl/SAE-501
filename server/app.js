@@ -2,6 +2,8 @@ var express = require('express');
 var path = require('path');
 const cors = require('cors');
 const listEndpoints = require('express-list-endpoints');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 
 var userRouter = require('./routes/user');
 var agentRouter = require('./routes/agent');
@@ -44,5 +46,6 @@ app.use('/api/textrecognition/', textRecognitionRouter); // Nouvelle ligne
 app.get('/list-routes', (req, res) => {
   res.json(listEndpoints(app));
 });
+app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 module.exports = app;

@@ -10,11 +10,13 @@ const transformData = (incomingData) => {
     return {
         idDossier: incomingData["id-dossier"],
         idPMR: incomingData.idPMR,
+        googleId: incomingData.googleId,
         enregistre: incomingData.enregistre,
         Assistance: incomingData.Assistance,
         sousTrajets: incomingData.sousTrajets.map(st => ({
             BD: st.BD,
-            numDossier: st.numDossier
+            numDossier: st.numDossier,
+            statusValue: 0
         })),
         bagage: incomingData.bagage
     };
@@ -60,9 +62,67 @@ const sendDataToAPIs = async (incomingData) => {
     }
 };
 
+const getDataFromAPIs = async (incomingData) => {
+    try {
+        const sousTrajets = incomingData.sousTrajets || [];
+        const newData = {
+            idDossier: incomingData.idDossier,
+            idPMR: incomingData.idPMR,
+            googleId: incomingData.googleId,
+            enregistre: incomingData.enregistre,
+            Assistance: incomingData.Assistance,
+            bagage: incomingData.bagage,
+            sousTrajets: []
+        }; // Clone l'objet pour éviter de modifier directement l'entrée
+
+        for (let i = 0; i < sousTrajets.length; i++) {
+            const trajet = sousTrajets[i];
+            const apiUrl = API_MAPPING[trajet.BD];
+
+            if (!apiUrl) {
+                console.warn(`No API defined for BD: ${trajet.BD}, skipping.`);
+                continue;
+            }
+
+            try {
+                const response = await fetch(`${apiUrl}/${trajet.numDossier}`);
+                if (!response.ok) {
+                    console.warn(`Failed to fetch data for numDossier ${trajet.numDossier}: ${response.status}`);
+                    continue;
+                }
+
+                const responseData = await response.json();
+                console.log("Received :",typeof(responseData));
+                console.log("Received content:", responseData);
+                console.log("Trajet :",typeof(trajet));
+                console.log("Trajet content:",trajet);
+
+                newData.sousTrajets[i] =  {
+                    BD: trajet.BD,
+                    numDossier: trajet.numDossier,
+                    statusValue: trajet.statusValue,
+                    departure: responseData.departure,
+                    arrival: responseData.arrival,
+                    departureTime: responseData.departureTime,
+                    arrivalTime: responseData.arrivalTime
+                };
+                console.log(newData.sousTrajets[i]);
+            } catch (fetchError) {
+                console.error(`Error fetching data for numDossier ${trajet.numDossier}:`, fetchError.message);
+                continue;
+            }
+        }
+
+        return newData;
+    } catch (error) {
+        console.error('Error in getDataFromAPIs:', error.message);
+        throw error;
+    }
+};
 
 functions = {
     transformData: transformData,
-    sendDataToAPIs: sendDataToAPIs
+    sendDataToAPIs: sendDataToAPIs,
+    getDataFromAPIs: getDataFromAPIs
 }
 module.exports = functions

@@ -14,7 +14,11 @@ const sequelize = new Sequelize(process.env.DB_SCHEMA || 'postgres',
 );
 
 const User = sequelize.define('User',{
-    name: {
+    firstname: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    lastname: {
         type: Sequelize.STRING,
         allowNull: false
     },
@@ -49,19 +53,15 @@ const User = sequelize.define('User',{
 });
 
 const Agent = sequelize.define('Agent',{
-    name: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
     email: {
         type: Sequelize.STRING,
         allowNull: false
     },
-    tel: {
-        type: Sequelize.INTEGER,
+    password: {
+        type: Sequelize.STRING,
         allowNull: false
     },
-    password: {
+    entreprise: {
         type: Sequelize.STRING,
         allowNull: false
     }
