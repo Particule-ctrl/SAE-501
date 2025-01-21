@@ -31,7 +31,8 @@ router.get('/:id', function(req, res) {
 /* POST new User*/
 router.post('/', function(req, res){
   db.User.create({
-    name: req.body.name,
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
     birthdate: req.body.birthdate,
     email: req.body.email,
     tel: req.body.tel,
@@ -59,7 +60,8 @@ router.get('/byGoogleID/:uuid', function(req, res){
 /* POST Edit User*/
 router.post('/:id', function(req, res){
   db.User.update({
-    name: req.body.name,
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
     email: req.body.email,
     tel: req.body.tel,
     password: req.body.password,
@@ -81,7 +83,8 @@ router.post('/:id', function(req, res){
 
 router.post('/byGoogleID/:uuid', function(req, res){
   db.User.update({
-    name: req.body.name,
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
     email: req.body.email,
     tel: req.body.tel,
     password: req.body.password,
@@ -130,7 +133,8 @@ module.exports = router;
  *     User:
  *       type: object
  *       required:
- *         - name
+ *         - firstname
+ *         - lastname
  *         - birthdate
  *         - email
  *         - tel
@@ -139,9 +143,12 @@ module.exports = router;
  *         id:
  *           type: integer
  *           description: The unique ID of the user
- *         name:
+ *         firstname:
  *           type: string
- *           description: The name of the user
+ *           description: The firstname of the user
+ *         lastname:
+ *           type: string
+ *           description: The lastname of the user
  *         birthdate:
  *           type: string
  *           format: date
