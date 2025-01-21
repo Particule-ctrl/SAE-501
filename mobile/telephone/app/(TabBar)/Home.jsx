@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, FlatList, Dimensions } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, FlatList, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -25,7 +25,7 @@ const Home = () => {
     const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1Ijoia2xlcGVyIiwiYSI6ImNtMjNpdTBjbjA3bmQyanF3cTB3ZDR2bTkifQ.zGnlUoaFGuyhrWSJtEsXYA';
 
     const fetchSuggestions = async (query, setSuggestions) => {
-        if (query.length < 3) {
+        if (query.length < 2) {
             setSuggestions([]);
             return;
         }
@@ -37,18 +37,27 @@ const Home = () => {
                     params: {
                         access_token: MAPBOX_ACCESS_TOKEN,
                         country: 'FR',
-                        types: 'address,poi',
-                        language: 'fr'
+                        types: 'place,address,poi',
+                        language: 'fr',
+                        limit: 8
                     },
                 }
             );
 
             if (response.data.features) {
-                const suggestions = response.data.features.map(feature => ({
-                    id: feature.id,
-                    name: feature.place_name,
-                    coords: feature.center,
-                }));
+                const suggestions = response.data.features.map(feature => {
+                    let displayName = feature.place_name;
+                    if (feature.place_type[0] === 'place') {
+                        displayName = `${feature.text}, ${feature.context?.[0]?.text || 'France'}`;
+                    }
+
+                    return {
+                        id: feature.id,
+                        name: displayName,
+                        coords: feature.center,
+                        type: feature.place_type[0]
+                    };
+                });
                 setSuggestions(suggestions);
             }
         } catch (error) {
@@ -92,7 +101,6 @@ const Home = () => {
     return (
         <View style={styles.container}>
             <View style={styles.innerContainer}>
-
                 <View style={styles.formContainer}>
                     {/* Sélecteur de type de trajet */}
                     <View style={styles.tripTypeContainer}>
@@ -136,7 +144,7 @@ const Home = () => {
                                     setDeparture(text);
                                     fetchSuggestions(text, setDepartureSuggestions);
                                 }}
-                                placeholder="Saisissez une adresse de départ"
+                                placeholder="Ville ou adresse de départ"
                                 placeholderTextColor="#8E8E93"
                             />
                         </View>
@@ -152,7 +160,22 @@ const Home = () => {
                                         style={styles.suggestionItem}
                                         onPress={() => handleSelectSuggestion(item, true)}
                                     >
-                                        <Text style={styles.suggestionText}>{item.name}</Text>
+                                        <View style={styles.suggestionContent}>
+                                            <Ionicons 
+                                                name={item.type === 'place' ? 'location-outline' : 
+                                                      item.type === 'address' ? 'home-outline' : 'business-outline'} 
+                                                size={16} 
+                                                color="#8E8E93" 
+                                                style={styles.suggestionIcon}
+                                            />
+                                            <View>
+                                                <Text style={styles.suggestionText}>{item.name}</Text>
+                                                <Text style={styles.suggestionType}>
+                                                    {item.type === 'place' ? 'Ville' : 
+                                                     item.type === 'address' ? 'Adresse' : 'Point d\'intérêt'}
+                                                </Text>
+                                            </View>
+                                        </View>
                                     </TouchableOpacity>
                                 )}
                             />
@@ -173,7 +196,7 @@ const Home = () => {
                                     setArrival(text);
                                     fetchSuggestions(text, setArrivalSuggestions);
                                 }}
-                                placeholder="Saisissez une adresse d'arrivée"
+                                placeholder="Ville ou adresse d'arrivée"
                                 placeholderTextColor="#8E8E93"
                             />
                         </View>
@@ -189,7 +212,22 @@ const Home = () => {
                                         style={styles.suggestionItem}
                                         onPress={() => handleSelectSuggestion(item, false)}
                                     >
-                                        <Text style={styles.suggestionText}>{item.name}</Text>
+                                        <View style={styles.suggestionContent}>
+                                            <Ionicons 
+                                                name={item.type === 'place' ? 'location-outline' : 
+                                                      item.type === 'address' ? 'home-outline' : 'business-outline'} 
+                                                size={16} 
+                                                color="#8E8E93" 
+                                                style={styles.suggestionIcon}
+                                            />
+                                            <View>
+                                                <Text style={styles.suggestionText}>{item.name}</Text>
+                                                <Text style={styles.suggestionType}>
+                                                    {item.type === 'place' ? 'Ville' : 
+                                                     item.type === 'address' ? 'Adresse' : 'Point d\'intérêt'}
+                                                </Text>
+                                            </View>
+                                        </View>
                                     </TouchableOpacity>
                                 )}
                             />
@@ -248,8 +286,8 @@ const Home = () => {
                                 }
                             }}
                             locale="fr-FR"
+                            minimumDate={new Date()}
                             style={styles.datePicker}
-                            textColor="white"
                         />
                         <TouchableOpacity 
                             style={styles.modalButton}
@@ -313,6 +351,23 @@ const styles = StyleSheet.create({
         padding: 12,
         marginBottom: 12,
     },
+    inputIcon: {
+        marginRight: 12,
+        justifyContent: 'center',
+    },
+    inputContent: {
+        flex: 1,
+    },
+    inputLabel: {
+        color: '#8E8E93',
+        fontSize: 12,
+        marginBottom: 4,
+    },
+    input: {
+        color: 'white',
+        fontSize: 16,
+        padding: 0,
+    },
     suggestionsContainer: {
         marginTop: -8,
         marginBottom: 12,
@@ -330,26 +385,21 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#3C3C3E',
     },
+    suggestionContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    suggestionIcon: {
+        marginRight: 8,
+    },
     suggestionText: {
         color: 'white',
         fontSize: 14,
     },
-    inputIcon: {
-        marginRight: 12,
-        justifyContent: 'center',
-    },
-    inputContent: {
-        flex: 1,
-    },
-    inputLabel: {
+    suggestionType: {
         color: '#8E8E93',
         fontSize: 12,
-        marginBottom: 4,
-    },
-    input: {
-        color: 'white',
-        fontSize: 16,
-        padding: 0,
+        marginTop: 2,
     },
     datesContainer: {
         flexDirection: 'row',
@@ -413,6 +463,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',
+        marginTop: 12,
     },
     searchButtonText: {
         color: 'white',
@@ -454,27 +505,7 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: '600',
-    },
-    bottomNav: {
-        flexDirection: 'row',
-        backgroundColor: '#2C2C2E',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        justifyContent: 'space-between',
-        borderTopWidth: 1,
-        borderTopColor: '#3C3C3E',
-    },
-    navItem: {
-        alignItems: 'center',
-    },
-    navText: {
-        color: '#8E8E93',
-        fontSize: 12,
-        marginTop: 4,
-    },
-    navTextActive: {
-        color: '#12B3A8',
-    },
+    }
 });
 
 export default Home;

@@ -1,290 +1,179 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Dimensions } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { PLACE_TYPES } from '../../constants/PLACE_TYPES';
-import { API_CONFIG } from '../../constants/API_CONFIG';
+import TransportService from '../services/TransportService';
+
+const { width } = Dimensions.get('window');
 
 const MapComponent = () => {
-    const { departure, arrival, departureCoords, arrivalCoords } = useLocalSearchParams();
     const mapRef = useRef(null);
+    const { departure, arrival, departureCoords, arrivalCoords } = useLocalSearchParams();
     const [selectedRoute, setSelectedRoute] = useState(null);
     const [routes, setRoutes] = useState([]);
-    const [selectedDeparture, setSelectedDeparture] = useState(null);
-    const [selectedArrival, setSelectedArrival] = useState(null);
-    const [trainStations, setTrainStations] = useState([]); // Pour stocker les gares
-    const [airports, setAirports] = useState([]); // Pour stocker les aéroports
+    const [loading, setLoading] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [stations, setStations] = useState([]);
+    const [airports, setAirports] = useState([]);
 
-    // Fonction pour obtenir les itinéraires multimodaux
-    const getMultimodalRoutes = async (start, end) => {
-        try {
-            // Appel à l'API pour les itinéraires en voiture
-            const carRoute = await getCarRoute(start, end);
-            
-            // Appel à l'API pour les itinéraires en train
-            const trainRoute = await getTrainRoute(start, end);
-            
-            // Appel à l'API pour les itinéraires mixtes (train + voiture)
-            const mixedRoute = await getMixedRoute(start, end);
-
-            // Simulons différents types de trajets (à remplacer par les vraies données d'API)
-            setRoutes([
-                {
-                    id: '1',
-                    type: 'car',
-                    segments: [
-                        {
-                            mode: 'car',
-                            duration: 90, // en minutes
-                            distance: 50, // en km
-                            coordinates: carRoute,
-                            color: '#2196F3'
-                        }
-                    ],
-                    totalDuration: 90,
-                    totalDistance: 50,
-                    price: 25
-                },
-                {
-                    id: '2',
-                    type: 'train',
-                    segments: [
-                        {
-                            mode: 'train',
-                            duration: 60,
-                            distance: 45,
-                            coordinates: trainRoute,
-                            color: '#4CAF50',
-                            stations: [
-                                { name: "Gare de départ", coords: [start[0], start[1]] },
-                                { name: "Gare d'arrivée", coords: [end[0], end[1]] }
-                            ]
-                        }
-                    ],
-                    totalDuration: 60,
-                    totalDistance: 45,
-                    price: 35
-                },
-                {
-                    id: '3',
-                    type: 'mixed',
-                    segments: [
-                        {
-                            mode: 'car',
-                            duration: 20,
-                            distance: 15,
-                            coordinates: mixedRoute.car1,
-                            color: '#2196F3'
-                        },
-                        {
-                            mode: 'train',
-                            duration: 45,
-                            distance: 30,
-                            coordinates: mixedRoute.train,
-                            color: '#4CAF50',
-                            stations: [
-                                { name: "Gare intermédiaire 1", coords: mixedRoute.stations[0] },
-                                { name: "Gare intermédiaire 2", coords: mixedRoute.stations[1] }
-                            ]
-                        },
-                        {
-                            mode: 'car',
-                            duration: 15,
-                            distance: 10,
-                            coordinates: mixedRoute.car2,
-                            color: '#2196F3'
-                        }
-                    ],
-                    totalDuration: 80,
-                    totalDistance: 55,
-                    price: 45
-                }
-            ]);
-        } catch (error) {
-            console.error('Erreur lors de la récupération des itinéraires:', error);
+    const getSegmentColor = (mode) => {
+        switch (mode) {
+            case 'car': return '#2196F3';
+            case 'train': return '#4CAF50';
+            case 'plane': return '#FF9800';
+            default: return '#666666';
         }
     };
 
-    // Fonction pour obtenir l'itinéraire en voiture
-    const getCarRoute = async (start, end) => {
-        const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${API_CONFIG.mapbox}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        return data.routes[0].geometry.coordinates.map(coord => ({
+    const getTransportIcon = (mode) => {
+        switch (mode) {
+            case 'car': return 'car-outline';
+            case 'train': return 'train-outline';
+            case 'plane': return 'airplane-outline';
+            default: return 'navigate-outline';
+        }
+    };
+
+    const convertGeoJSONtoCoordinates = (geometry) => {
+        if (!geometry || !geometry.coordinates) return [];
+        return geometry.coordinates.map(coord => ({
             latitude: coord[1],
-            longitude: coord[0],
+            longitude: coord[0]
         }));
     };
 
-    // Fonction pour obtenir l'itinéraire en train
-    const getTrainRoute = async (start, end) => {
-        // Simuler un itinéraire en train (à remplacer par une vraie API de train)
-        return [
-            { latitude: start[1], longitude: start[0] },
-            // Points intermédiaires simulant une voie ferrée
-            { latitude: end[1], longitude: end[0] }
-        ];
+    const formatDuration = (minutes) => {
+        const hours = Math.floor(minutes / 60);
+        const mins = Math.round(minutes % 60);
+        return hours > 0 ? `${hours}h${mins}min` : `${mins}min`;
     };
 
-    // Fonction pour obtenir l'itinéraire mixte
-    const getMixedRoute = async (start, end) => {
-        // Simuler un itinéraire mixte (à remplacer par une vraie API)
-        const midPoint1 = {
-            latitude: (start[1] + end[1]) * 0.3,
-            longitude: (start[0] + end[0]) * 0.3
-        };
-        const midPoint2 = {
-            latitude: (start[1] + end[1]) * 0.7,
-            longitude: (start[0] + end[0]) * 0.7
-        };
+    const formatPrice = (price) => {
+        return Math.round(price).toString();
+    };
+
+    const generateReservationJson = (route) => {
+        const randomId = Math.floor(Math.random() * 10000);
+        
+        const sousTrajets = route.segments.map((segment) => ({
+            BD: segment.mode === 'train' ? 'SNCF' : segment.mode === 'plane' ? 'AF' : 'RATP',
+            numDossier: Math.floor(Math.random() * 10000),
+            departure: segment.from.name,
+            arrival: segment.to.name,
+            departureTime: new Date().toISOString(),
+            arrivalTime: new Date(Date.now() + segment.duration * 60000).toISOString()
+        }));
 
         return {
-            car1: [
-                { latitude: start[1], longitude: start[0] },
-                { latitude: midPoint1.latitude, longitude: midPoint1.longitude }
-            ],
-            train: [
-                { latitude: midPoint1.latitude, longitude: midPoint1.longitude },
-                { latitude: midPoint2.latitude, longitude: midPoint2.longitude }
-            ],
-            car2: [
-                { latitude: midPoint2.latitude, longitude: midPoint2.longitude },
-                { latitude: end[1], longitude: end[0] }
-            ],
-            stations: [
-                [midPoint1.longitude, midPoint1.latitude],
-                [midPoint2.longitude, midPoint2.latitude]
-            ]
+            "id-dossier": randomId,
+            "idPMR": randomId,
+            "enregistre": 0,
+            "Assistance": 1,
+            "sousTrajets": sousTrajets,
+            "bagage": [randomId, randomId + 1]
         };
     };
 
-    // Fonction pour récupérer les gares de train
-    const fetchTrainStations = async () => {
-        const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node["railway"="station"](around:50000,48.8566,2.3522);out;`;
+    const handleReservation = async (route) => {
         try {
-            const response = await fetch(overpassUrl);
+            const reservationData = generateReservationJson(route);
+            const API_URL = 'http://172.20.10.7:80/API/Reservation';
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(reservationData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur serveur: ${response.status}`);
+            }
+
             const data = await response.json();
-            console.log('Données des gares:', data); // Afficher les données dans la console
-            setTrainStations(data.elements);
+            Alert.alert('Succès', 'Réservation effectuée avec succès!');
         } catch (error) {
-            console.error('Erreur lors de la récupération des gares:', error);
+            console.error('Erreur réservation:', error);
+            Alert.alert('Erreur', 'Impossible de finaliser la réservation. Veuillez réessayer.');
         }
     };
 
-    // Fonction pour récupérer tous les aéroports
-    const fetchAirports = async () => {
-        const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];(node["aeroway"="aerodrome"](around:50000,48.8566,2.3522);way["aeroway"="aerodrome"](around:50000,48.8566,2.3522);relation["aeroway"="aerodrome"](around:50000,48.8566,2.3522););out;`;
-        try {
-            const response = await fetch(overpassUrl);
-            const data = await response.json();
-            console.log('Données des aéroports:', data); // Afficher les données dans la console
+    const fitMapToRoute = (route) => {
+        if (!mapRef.current || !route) return;
 
-            // Liste des aéroports connus (noms ou codes IATA)
-            const knownAirports = ['CDG', 'ORY', 'Paris-Charles de Gaulle', 'Paris-Orly'];
+        const allCoordinates = route.segments.flatMap(segment =>
+            convertGeoJSONtoCoordinates(segment.geometry)
+        );
 
-            // Traiter les aéroports pour extraire les coordonnées
-            const processedAirports = data.elements
-                .map((airport) => {
-                    let latitude, longitude;
-
-                    if (airport.type === 'node') {
-                        // Si c'est un node, utiliser directement lat et lon
-                        latitude = airport.lat;
-                        longitude = airport.lon;
-                    } else if (airport.type === 'way' || airport.type === 'relation') {
-                        // Si c'est un way ou une relation, utiliser le centre géométrique
-                        latitude = airport.center?.lat;
-                        longitude = airport.center?.lon;
-                    }
-
-                    return {
-                        ...airport,
-                        latitude,
-                        longitude,
-                    };
-                })
-                .filter((airport) => {
-                    // Filtrer les aéroports connus
-                    const name = airport.tags?.name || '';
-                    const iata = airport.tags?.iata || '';
-                    return knownAirports.includes(name) || knownAirports.includes(iata);
-                })
-                .filter((airport) => airport.latitude && airport.longitude); // Filtrer les aéroports sans coordonnées valides
-
-            setAirports(processedAirports);
-        } catch (error) {
-            console.error('Erreur lors de la récupération des aéroports:', error);
-        }
-    };
-
-    // Charger les données au montage du composant
-    useEffect(() => {
-        fetchTrainStations();
-        fetchAirports();
-    }, []);
-
-    // Fonction pour sélectionner un itinéraire
-    const selectRoute = (route) => {
-        setSelectedRoute(route);
-        
-        // Ajuster la vue de la carte pour montrer l'itinéraire complet
-        if (mapRef.current && route.segments) {
-            const coordinates = route.segments.flatMap(segment => segment.coordinates);
-            const minLat = Math.min(...coordinates.map(c => c.latitude));
-            const maxLat = Math.max(...coordinates.map(c => c.latitude));
-            const minLng = Math.min(...coordinates.map(c => c.longitude));
-            const maxLng = Math.max(...coordinates.map(c => c.longitude));
-
-            mapRef.current.fitToCoordinates(coordinates, {
+        if (allCoordinates.length > 0) {
+            mapRef.current.fitToCoordinates(allCoordinates, {
                 edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
                 animated: true
             });
         }
     };
 
-    // Charger les itinéraires multimodaux lorsque les coordonnées de départ et d'arrivée sont disponibles
-    useEffect(() => {
-        if (departureCoords && arrivalCoords) {
+    const selectRoute = (route) => {
+        setSelectedRoute(route);
+        fitMapToRoute(route);
+    };
+
+    const initializeData = async () => {
+        if (!departureCoords || !arrivalCoords) {
+            console.warn('Coordonnées manquantes');
+            return;
+        }
+
+        try {
+            setLoading(true);
             const startCoords = JSON.parse(departureCoords);
             const endCoords = JSON.parse(arrivalCoords);
 
-            setSelectedDeparture({
+            const departurePoint = {
                 coords: startCoords,
                 name: departure,
-                type: 'address',
-            });
+                type: 'address'
+            };
 
-            setSelectedArrival({
+            const arrivalPoint = {
                 coords: endCoords,
                 name: arrival,
-                type: 'address',
-            });
+                type: 'address'
+            };
 
-            getMultimodalRoutes(startCoords, endCoords);
+            const [nearbyStations, nearbyAirports] = await Promise.all([
+                TransportService.findNearestStation(startCoords),
+                TransportService.findNearestAirport(startCoords)
+            ]);
+
+            setStations([nearbyStations].filter(Boolean));
+            setAirports([nearbyAirports].filter(Boolean));
+
+            const multimodalRoutes = await TransportService.generateMultimodalRoutes(
+                departurePoint,
+                arrivalPoint
+            );
+
+            setRoutes(multimodalRoutes);
+
+            if (multimodalRoutes.length > 0) {
+                setSelectedRoute(multimodalRoutes[0]);
+                fitMapToRoute(multimodalRoutes[0]);
+            }
+        } catch (error) {
+            console.error('Erreur lors de l\'initialisation:', error);
+            Alert.alert('Erreur', 'Impossible de charger les itinéraires. Veuillez réessayer.');
+        } finally {
+            setLoading(false);
         }
+    };
+
+    useEffect(() => {
+        initializeData();
     }, [departureCoords, arrivalCoords]);
-
-    // Fonction pour obtenir l'icône du mode de transport
-    const getTransportIcon = (mode) => {
-        switch (mode) {
-            case 'car':
-                return 'car-outline';
-            case 'train':
-                return 'train-outline';
-            case 'plane':
-                return 'airplane-outline';
-            default:
-                return 'navigate-outline';
-        }
-    };
-
-    // Fonction pour formater la durée
-    const formatDuration = (minutes) => {
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return hours > 0 ? `${hours}h${mins}min` : `${mins}min`;
-    };
 
     return (
         <View style={styles.container}>
@@ -298,104 +187,164 @@ const MapComponent = () => {
                     longitudeDelta: 0.0421,
                 }}
             >
-                {/* Afficher les gares de train avec une icône de train */}
-                {trainStations.map((station, index) => (
+                {departureCoords && (
+                    <Marker
+                        coordinate={{
+                            latitude: JSON.parse(departureCoords)[1],
+                            longitude: JSON.parse(departureCoords)[0]
+                        }}
+                        title="Départ"
+                        pinColor="#2196F3"
+                    />
+                )}
+                {arrivalCoords && (
+                    <Marker
+                        coordinate={{
+                            latitude: JSON.parse(arrivalCoords)[1],
+                            longitude: JSON.parse(arrivalCoords)[0]
+                        }}
+                        title="Arrivée"
+                        pinColor="#f44336"
+                    />
+                )}
+
+                {stations.map((station, index) => (
                     <Marker
                         key={`station-${index}`}
                         coordinate={{
-                            latitude: station.lat,
-                            longitude: station.lon,
+                            latitude: station.coords[1],
+                            longitude: station.coords[0]
                         }}
-                        title={station.tags?.name || 'Gare inconnue'}
+                        title={station.name}
                     >
-                        <View style={styles.iconContainer}>
+                        <View style={styles.markerContainer}>
                             <Ionicons name="train-outline" size={24} color="#4CAF50" />
                         </View>
                     </Marker>
                 ))}
 
-                {/* Afficher les aéroports connus avec un logo d'avion personnalisé */}
                 {airports.map((airport, index) => (
                     <Marker
                         key={`airport-${index}`}
                         coordinate={{
-                            latitude: airport.latitude,
-                            longitude: airport.longitude,
+                            latitude: airport.coords[1],
+                            longitude: airport.coords[0]
                         }}
-                        title={airport.tags?.name || 'Aéroport inconnu'}
+                        title={airport.name}
                     >
-                        <Image
-                            source={require('../../assets/images/airport-icon.png')} // Chemin vers votre logo d'avion
-                            style={{ width: 30, height: 30 }}
-                        />
+                        <View style={styles.markerContainer}>
+                            <Ionicons name="airplane-outline" size={24} color="#FF9800" />
+                        </View>
                     </Marker>
                 ))}
 
-                {/* Afficher les itinéraires */}
                 {selectedRoute && selectedRoute.segments.map((segment, index) => (
-                    <React.Fragment key={index}>
+                    <React.Fragment key={`segment-${index}`}>
                         <Polyline
-                            coordinates={segment.coordinates}
-                            strokeColor={segment.color}
+                            coordinates={convertGeoJSONtoCoordinates(segment.geometry)}
+                            strokeColor={getSegmentColor(segment.mode)}
                             strokeWidth={4}
+                            tappable={true}
+                            onPress={() => {
+                                Alert.alert(
+                                    'Mode de transport',
+                                    `${segment.mode === 'car' ? 'Trajet en voiture' : 
+                                      segment.mode === 'train' ? 'Trajet en train' : 
+                                      'Trajet en avion'}\n` +
+                                    `De: ${segment.from.name}\n` +
+                                    `À: ${segment.to.name}\n` +
+                                    `Durée: ${formatDuration(segment.duration)}\n` +
+                                    `Distance: ${Math.round(segment.distance / 1000)} km`
+                                );
+                            }}
                         />
-                        {segment.stations?.map((station, stationIndex) => (
+                        {segment.mode === 'train' && segment.stations?.map((station, stationIndex) => (
                             <Marker
                                 key={`station-${index}-${stationIndex}`}
                                 coordinate={{
                                     latitude: station.coords[1],
-                                    longitude: station.coords[0],
+                                    longitude: station.coords[0]
                                 }}
                                 title={station.name}
-                                pinColor="#FFC107"
-                            />
+                            >
+                                <View style={styles.markerContainer}>
+                                    <Ionicons name="train-outline" size={20} color="#4CAF50" />
+                                </View>
+                            </Marker>
                         ))}
                     </React.Fragment>
                 ))}
             </MapView>
 
             <View style={styles.routesList}>
-                <Text style={styles.routesTitle}>Itinéraires disponibles</Text>
-                <ScrollView>
-                    {routes.map(route => (
-                        <TouchableOpacity
-                            key={route.id}
-                            style={[
-                                styles.routeCard,
-                                selectedRoute?.id === route.id && styles.selectedRouteCard
-                            ]}
-                            onPress={() => selectRoute(route)}
-                        >
-                            <View style={styles.routeHeader}>
-                                <View style={styles.transportIcons}>
-                                    {route.segments.map((segment, index) => (
-                                        <Ionicons
-                                            key={index}
-                                            name={getTransportIcon(segment.mode)}
-                                            size={24}
-                                            color={selectedRoute?.id === route.id ? 'white' : '#666'}
-                                            style={styles.transportIcon}
-                                        />
-                                    ))}
+                <TouchableOpacity 
+                    style={styles.routesHeader}
+                    onPress={() => setIsExpanded(!isExpanded)}
+                >
+                    <Text style={styles.routesTitle}>Itinéraires disponibles ({routes.length})</Text>
+                    <Ionicons 
+                        name={isExpanded ? "chevron-up-outline" : "chevron-down-outline"} 
+                        size={24} 
+                        color="#333"
+                    />
+                </TouchableOpacity>
+                {isExpanded && (loading ? (
+                    <ActivityIndicator size="large" color="#0000ff" />
+                ) : (
+                    <ScrollView 
+                        horizontal 
+                        style={styles.routesScrollView}
+                        contentContainerStyle={styles.routesContentContainer}
+                    >
+                        {routes.map((route) => (
+                            <TouchableOpacity
+                                key={route.id}
+                                style={[
+                                    styles.routeCard,
+                                    selectedRoute?.id === route.id && styles.selectedRouteCard
+                                ]}
+                                onPress={() => selectRoute(route)}
+                            >
+                                <View style={styles.routeHeader}>
+                                    <View style={styles.transportIcons}>
+                                        {route.segments.map((segment, index) => (
+                                            <View key={index} style={styles.iconContainer}>
+                                                <Ionicons
+                                                    name={getTransportIcon(segment.mode)}
+                                                    size={24}
+                                                    color={getSegmentColor(segment.mode)}
+                                                    style={styles.transportIcon}
+                                                />
+                                            </View>
+                                        ))}
+                                    </View>
+                                    <Text style={[
+                                        styles.routePrice,
+                                        selectedRoute?.id === route.id && styles.selectedText
+                                    ]}>
+                                        {formatPrice(route.price)}€
+                                    </Text>
                                 </View>
-                                <Text style={[
-                                    styles.routePrice,
-                                    selectedRoute?.id === route.id && styles.selectedText
-                                ]}>
-                                    {route.price}€
-                                </Text>
-                            </View>
-                            <View style={styles.routeDetails}>
-                                <Text style={[
-                                    styles.routeInfo,
-                                    selectedRoute?.id === route.id && styles.selectedText
-                                ]}>
-                                    {formatDuration(route.totalDuration)} • {route.totalDistance}km
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
+                                <View style={styles.routeDetails}>
+                                    <Text style={[
+                                        styles.routeInfo,
+                                        selectedRoute?.id === route.id && styles.selectedText
+                                    ]}>
+                                        {formatDuration(route.totalDuration)} • {Math.round(route.totalDistance)}km
+                                    </Text>
+                                </View>
+                                {selectedRoute?.id === route.id && (
+                                    <TouchableOpacity
+                                        style={styles.reserveButton}
+                                        onPress={() => handleReservation(route)}
+                                    >
+                                        <Text style={styles.reserveButtonText}>Réserver</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                ))}
             </View>
         </View>
     );
@@ -408,7 +357,7 @@ const styles = StyleSheet.create({
     map: {
         flex: 1,
     },
-    iconContainer: {
+    markerContainer: {
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 5,
@@ -417,30 +366,45 @@ const styles = StyleSheet.create({
     },
     routesList: {
         position: 'absolute',
-        top: 20,
+        top: 40,
+        left: 20,
         right: 20,
         backgroundColor: 'white',
         borderRadius: 12,
         padding: 16,
-        width: '35%',
-        maxHeight: '80%',
+        maxHeight: '30%',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
     },
+    routesHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
     routesTitle: {
         fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 12,
+        fontWeight: '600',
         color: '#333',
+    },
+    routesScrollView: {
+        marginTop: 8,
+    },
+    routesContentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     routeCard: {
         backgroundColor: '#f5f5f5',
         borderRadius: 8,
         padding: 12,
-        marginBottom: 8,
+        marginRight: 8,
+        width: width * 0.6,
     },
     selectedRouteCard: {
         backgroundColor: '#007AFF',
@@ -455,8 +419,24 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    transportIcon: {
+    iconContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 12,
+        padding: 4,
         marginRight: 8,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.41,
+        elevation: 2,
+    },
+    transportIcon: {
+        marginRight: 0,
     },
     routePrice: {
         fontSize: 16,
@@ -466,6 +446,7 @@ const styles = StyleSheet.create({
     routeDetails: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 4,
     },
     routeInfo: {
         fontSize: 14,
@@ -474,6 +455,17 @@ const styles = StyleSheet.create({
     selectedText: {
         color: 'white',
     },
+    reserveButton: {
+        backgroundColor: '#4CAF50',
+        padding: 8,
+        borderRadius: 4,
+        marginTop: 8,
+        alignItems: 'center',
+    },
+    reserveButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    }
 });
 
 export default MapComponent;

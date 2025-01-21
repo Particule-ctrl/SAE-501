@@ -6,12 +6,13 @@ const listEndpoints = require('express-list-endpoints');
 var userRouter = require('./routes/user');
 var agentRouter = require('./routes/agent');
 var handicapRouter = require('./routes/handicap');
-var reservationRouter = require('./routes/reservation')
+var reservationRouter = require('./routes/reservation');
+var textRecognitionRouter = require('./routes/textrecognition'); // Nouvelle ligne
 
 var app = express();
-const db = require('./sql-database'); // Adjust path as necessary
+const db = require('./sql-database');
 
-db.sequelize.sync({ alter: true }) // Adjust 'force: true' or 'alter: true' depending on your needs
+db.sequelize.sync({ alter: true })
   .then(() => {
     console.log('Database synchronized');
   })
@@ -23,7 +24,7 @@ const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http:
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true); // Allow requests from allowed origins
+      callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
@@ -38,9 +39,10 @@ app.use('/api/user/', userRouter);
 app.use('/api/agent/', agentRouter);
 app.use('/api/handicap/', handicapRouter);
 app.use('/api/reservation/', reservationRouter);
+app.use('/api/textrecognition/', textRecognitionRouter); // Nouvelle ligne
+
 app.get('/list-routes', (req, res) => {
   res.json(listEndpoints(app));
 });
-
 
 module.exports = app;

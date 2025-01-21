@@ -12,6 +12,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Checkbox } from 'react-native-paper';
@@ -23,6 +24,26 @@ import { CameraView as ExpoCamera, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImageManipulator from 'expo-image-manipulator';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
+import bcrypt from 'react-native-bcrypt';
+
+
+// Composant de barre de progression
+const ProgressBar = ({ steps, currentStep }) => {
+  return (
+    <View style={styles.progressBarContainer}>
+      {steps.map((step, index) => (
+        <View
+          key={index}
+          style={[
+            styles.progressStep,
+            index < currentStep && styles.completedStep,
+            index === currentStep - 1 && styles.activeStep,
+          ]}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function Register() {
   // États pour les champs du formulaire
@@ -38,6 +59,7 @@ export default function Register() {
   const [civility, setCivility] = useState('');
   const [tel, setTel] = useState('');
   const [note, setNote] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // États pour la caméra
   const [cameraActive, setCameraActive] = useState(false);
@@ -135,33 +157,26 @@ export default function Register() {
     let foundNames = [];
     
     lines.forEach((line) => {
-      console.log("Analysing line:", line); // Pour le débogage
+      console.log("Analysing line:", line);
   
-      // Recherche de la date de naissance (format JJ/MM/AAAA ou JJ MM AAAA)
       const dateMatch = line.match(/(\d{2}[/.]\d{2}[/.]\d{4}|\d{2}\s+\d{2}\s+\d{4})/);
       if (dateMatch) {
         result.birthdate = dateMatch[1].replace(/\s+/g, '/');
         result.found = true;
-        console.log("Found birthdate:", result.birthdate);
       }
   
-      // Recherche des noms (en majuscules)
       if (/^[A-ZÀ-Ÿ\s-]{2,}$/.test(line) && 
           !line.includes('CARTE') && 
           !line.includes('IDENTITE')) {
         foundNames.push(line.trim());
-        console.log("Found name:", line.trim());
       }
   
-      // Recherche du genre (M/F)
       if (/^[MF]$/.test(line.trim())) {
         result.civility = line.trim() === 'M' ? 'Mr' : 'Mme';
         result.found = true;
-        console.log("Found civility:", result.civility);
       }
     });
   
-    // Attribution des noms trouvés
     if (foundNames.length >= 2) {
       result.lastName = foundNames[0];
       result.firstName = foundNames[1];
@@ -174,60 +189,74 @@ export default function Register() {
   // Fonction pour prendre la photo
   const takePicture = async () => {
     if (cameraRef.current) {
-      try {
-        // Prendre la photo
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 1,
-        });
-  
-        console.log("Photo prise, début de la reconnaissance...");
-  
-        // Reconnaissance du texte
-        const result = await TextRecognition.recognize(photo.uri);
-        console.log("Texte reconnu :", result.text);
-  
-        // Extraire les informations
-        const extractedInfo = extractInfoFromText(result.text);
-        
-        if (extractedInfo.found) {
-          Alert.alert(
-            "Informations trouvées",
-            `Nom: ${extractedInfo.lastName}\nPrénom: ${extractedInfo.firstName}\nDate de naissance: ${extractedInfo.birthdate}\nCivilité: ${extractedInfo.civility}\n\nVoulez-vous utiliser ces informations ?`,
-            [
-              {
-                text: "Oui",
-                onPress: () => {
-                  setFirstName(extractedInfo.firstName);
-                  setLastName(extractedInfo.lastName);
-                  setBirthdate(extractedInfo.birthdate);
-                  setCivility(extractedInfo.civility);
-                  setCameraActive(false);
-                }
-              },
-              {
-                text: "Non",
-                style: "cancel",
-                onPress: () => setCameraActive(false)
-              }
-            ]
-          );
-        } else {
-          Alert.alert(
-            "Attention",
-            "Aucune information n'a pu être extraite de l'image. Veuillez réessayer avec une photo plus nette ou remplir les champs manuellement.",
-            [{ text: "OK" }]
-          );
+        try {
+            setIsLoading(true); // Activer le chargement
+            const photo = await cameraRef.current.takePictureAsync({
+                quality: 1,
+            });
+
+            const formData = new FormData();
+            formData.append('image', {
+                uri: photo.uri,
+                type: 'image/jpeg',
+                name: 'id_card.jpg',
+            });
+
+            const response = await fetch('http://172.20.10.7:80/api/textrecognition/analyze', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'multipart/form-data',
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Server response was not ok');
+            }
+
+            const extractedInfo = await response.json();
+
+            if (extractedInfo.data) {
+                Alert.alert(
+                    "Informations trouvées",
+                    `Nom: ${extractedInfo.data.lastName}\nPrénom: ${extractedInfo.data.firstName}\nDate de naissance: ${extractedInfo.data.birthdate}\nCivilité: ${extractedInfo.data.civility}\n\nVoulez-vous utiliser ces informations ?`,
+                    [
+                        {
+                            text: "Oui",
+                            onPress: () => {
+                                setFirstName(extractedInfo.data.firstName);
+                                setLastName(extractedInfo.data.lastName);
+                                setBirthdate(extractedInfo.data.birthdate);
+                                setCivility(extractedInfo.data.civility);
+                                setCameraActive(false);
+                            }
+                        },
+                        {
+                            text: "Non",
+                            style: "cancel",
+                            onPress: () => setCameraActive(false)
+                        }
+                    ]
+                );
+            } else {
+                Alert.alert(
+                    "Attention",
+                    "Aucune information n'a pu être extraite de l'image. Veuillez réessayer avec une photo plus nette ou remplir les champs manuellement.",
+                    [{ text: "OK" }]
+                );
+            }
+        } catch (error) {
+            console.error("Erreur lors de la prise de photo :", error);
+            Alert.alert(
+                "Erreur",
+                "Impossible de traiter l'image. Veuillez réessayer."
+            );
+        } finally {
+            setIsLoading(false); // Désactiver le chargement
         }
-  
-      } catch (error) {
-        console.error("Erreur lors de la prise de photo :", error);
-        Alert.alert(
-          "Erreur",
-          "Impossible de traiter l'image. Veuillez réessayer."
-        );
-      }
     }
-  };
+};
 
   // Fonction pour valider l'étape actuelle
   const validateStep = (step) => {
@@ -241,7 +270,19 @@ export default function Register() {
       case 4:
         return true; // Note est optionnelle
       case 5:
-        return password && confirmPassword && password === confirmPassword && password.length >= 8;
+        if (!password || !confirmPassword) {
+          Alert.alert('Erreur', 'Veuillez remplir les deux champs de mot de passe');
+          return false;
+        }
+        if (password !== confirmPassword) {
+          Alert.alert('Erreur', 'Les mots de passe ne correspondent pas');
+          return false;
+        }
+        if (password.length < 8) {
+          Alert.alert('Erreur', 'Le mot de passe doit faire au moins 8 caractères');
+          return false;
+        }
+        return true;
       case 6:
         if (hasAccompagnateur) {
           return accompagnateurInfo.firstName && 
@@ -278,17 +319,17 @@ export default function Register() {
       Alert.alert('Erreur', 'Les mots de passe ne correspondent pas.');
       return;
     }
-
+  
     if (password.length < 8) {
       Alert.alert('Erreur', 'Le mot de passe doit contenir au moins 8 caractères.');
       return;
     }
-
+  
     if (!firstName || !lastName || !age || !email || !password || !birthdate || !civility || !tel) {
       Alert.alert('Erreur', 'Tous les champs sont obligatoires !');
       return;
     }
-
+  
     if (hasAccompagnateur) {
       const { firstName, lastName, age, birthdate, civility } = accompagnateurInfo;
       if (!firstName || !lastName || !age || !birthdate || !civility) {
@@ -296,11 +337,14 @@ export default function Register() {
         return;
       }
     }
-
+  
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const salt = bcrypt.genSaltSync(10);
+      const hashedPassword = bcrypt.hashSync(password, salt);
+      
+      const userCredential = await createUserWithEmailAndPassword(auth, email, hashedPassword);
       const user = userCredential.user;
-
+  
       const accompagnateurData = hasAccompagnateur ? {
         firstName: accompagnateurInfo.firstName,
         lastName: accompagnateurInfo.lastName,
@@ -308,7 +352,7 @@ export default function Register() {
         birthdate: accompagnateurInfo.birthdate,
         civility: accompagnateurInfo.civility
       } : null;
-
+  
       const userDocRef = doc(db, 'users', user.uid);
       await setDoc(userDocRef, {
         Name: `${firstName} ${lastName}`,
@@ -328,7 +372,7 @@ export default function Register() {
         },
         Accompagnateur: accompagnateurData
       });
-
+  
       Alert.alert('Succès', 'Inscription réussie !');
       router.push('./Login');
     } catch (error) {
@@ -360,21 +404,30 @@ export default function Register() {
                       Positionnez votre carte d'identité dans le cadre
                     </Text>
                     <View style={styles.buttonContainer}>
-                      <TouchableOpacity 
-                        style={styles.captureButton}
-                        onPress={takePicture}
-                      >
-                        <Text style={styles.captureButtonText}>Prendre la photo</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity 
-                        style={styles.cancelButton}
-                        onPress={() => {
-                          setCameraActive(false);
-                          setHasPermission(false);
-                        }}
-                      >
-                        <Text style={styles.cancelButtonText}>Annuler</Text>
-                      </TouchableOpacity>
+                      {isLoading ? (
+                        <View style={styles.loadingContainer}>
+                          <ActivityIndicator size="large" color="#12B3A8" />
+                          <Text style={styles.loadingText}>Traitement en cours...</Text>
+                        </View>
+                      ) : (
+                        <>
+                          <TouchableOpacity 
+                            style={styles.captureButton}
+                            onPress={takePicture}
+                          >
+                            <Text style={styles.captureButtonText}>Prendre la photo</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity 
+                            style={styles.cancelButton}
+                            onPress={() => {
+                              setCameraActive(false);
+                              setHasPermission(false);
+                            }}
+                          >
+                            <Text style={styles.cancelButtonText}>Annuler</Text>
+                          </TouchableOpacity>
+                        </>
+                      )}
                     </View>
                   </View>
                 )}
@@ -632,6 +685,8 @@ export default function Register() {
     }
   };
 
+  const steps = [1, 2, 3, 4, 5, 6];
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -643,6 +698,8 @@ export default function Register() {
           style={styles.logo}
         />
         <Text style={styles.text}>Créer un compte</Text>
+
+        <ProgressBar steps={steps} currentStep={currentStep} />
 
         {renderStep()}
 
@@ -670,7 +727,6 @@ export default function Register() {
         </View>
       </ScrollView>
 
-      {/* Modal pour le Picker de civilité */}
       <Modal
         transparent={true}
         visible={isPickerVisible}
@@ -697,7 +753,6 @@ export default function Register() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Modal pour le Picker de civilité de l'accompagnateur */}
       <Modal
         transparent={true}
         visible={isAccompagnateurPickerVisible}
@@ -726,7 +781,6 @@ export default function Register() {
     </KeyboardAvoidingView>
   );
 }
-
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -976,5 +1030,45 @@ const styles = StyleSheet.create({
   },
   accompagnateurForm: {
     width: '100%',
+  },
+  // Styles pour la barre de progression
+  progressBarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '90%',
+    marginBottom: 24,
+  },
+  progressStep: {
+    flex: 1,
+    height: 4,
+    backgroundColor: '#2C3A4A',
+    marginHorizontal: 2,
+    borderRadius: 2,
+  },
+  completedStep: {
+    backgroundColor: '#12B3A8',
+  },
+  activeStep: {
+    backgroundColor: '#12B3A8',
+    height: 6,
+  },
+  // Nouveaux styles pour le loading
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: 'center',
   },
 });
