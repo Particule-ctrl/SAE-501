@@ -185,3 +185,4 @@ volumes:
   af_data:
   sncf_data:
   ratp_data:
+  taxi_data:
