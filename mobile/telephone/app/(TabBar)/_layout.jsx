@@ -10,7 +10,6 @@ export default function TabLayout() {
           <Tabs.Screen name="Maps" options={{ title: "Map",}}/>
           <Tabs.Screen name="Trafic" options={{title: "Trafic",}}/>
           <Tabs.Screen name="Setting" options={{ title: "Setting", }}/>
-          <Tabs.Screen name="Modif" options={{ title: "Modif", }}/>
         </Tabs>
     </>
   );
