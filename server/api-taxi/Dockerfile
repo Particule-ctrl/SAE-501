@@ -10,4 +10,4 @@ COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
 EXPOSE 80
-CMD ["wait-for-it", "db-taxi:3307", "--", "node", "index.js"]
+CMD ["wait-for-it", "db-taxi:3306", "--", "node", "index.js"]

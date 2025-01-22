@@ -141,7 +141,7 @@ services:
       MYSQL_USER: user4
       MYSQL_PASSWORD: password4
     ports:
-      - "3309:3307"
+      - "3310:3306"
     volumes:
       - taxi_data:/var/lib/mysql
 
@@ -154,7 +154,7 @@ services:
       DATABASE_PORT: 3306
       DATABASE_USER: user4
       DATABASE_PASSWORD: password4
-      DATABASE_NAME: ratp
+      DATABASE_NAME: taxi
     depends_on:
       - db-taxi
     ports:
