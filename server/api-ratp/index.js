@@ -15,24 +15,47 @@ const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_
 // Définition du modèle Item
 const Reservations = sequelize.define('Reservation', {
     numDossier: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true
     },
     departure: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
     },
     arrival: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
     },
     departureTime: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
         allowNull: false
     },
     arrivalTime: {
-        type: DataTypes.DATE,
+        type: Sequelize.DATE,
+        allowNull: false
+    }
+});
+
+const Agent = sequelize.define('Agent',{
+    name: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    email: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    tel: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+    },
+    password: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    lieu: {
+        type: Sequelize.STRING,
         allowNull: false
     }
 });
@@ -59,7 +82,11 @@ app.get('/reservations', async (req, res) => {
 // GET - Récupérer un élément par son ID
 app.get('/reservations/:id', async (req, res) => {
     const { id } = req.params;
-    const reservation = await Reservations.findByPk(id);
+    const reservation = await Reservations.findOne(
+        {
+            where: { numDossier: req.params.id }
+          }
+    );
 
     if (!reservation) {
         return res.status(404).json({ error: 'Item not found' });
@@ -91,7 +118,11 @@ app.post('/reservations/delete', async (req, res) => {
         return res.status(400).json({ error: 'ID is required' });
     }
 
-    const item = await Reservations.findByPk(id);
+    const item = await Reservations.findOne(
+        {
+            where: { numDossier: req.params.id }
+          }
+    );
 
     if (!item) {
         return res.status(404).json({ error: 'Item not found' });

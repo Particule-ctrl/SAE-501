@@ -12,28 +12,29 @@ afterAll(async () => {
 describe('Database Models', () => {
     test('User model should create a new User record', async () => {
         const user = await User.create({
-            name: 'John Doe',
+            firstname: 'John',
+            lastname: 'Doe',
             birthdate: '1980-01-01',
             email: 'john.doe@example.com',
             tel: 1234567890,
             password: 'securepassword'
         });
 
-        expect(user.name).toBe('John Doe');
+        expect(user.firstname).toBe('John');
+        expect(user.lastname).toBe('Doe');
         expect(user.email).toBe('john.doe@example.com');
     });
 
     test('Agent should work as expected', async () => {
 
         const agent = await Agent.create({
-            name: 'Agent Smith',
             email: 'smith@example.com',
-            tel: 1122334455,
+            entreprise: 'SNCF',
             password: 'agentpassword'
         });
 
         const foundAgent = await Agent.findOne({ where: { id: agent.id }});
-        expect(foundAgent.name).toBe('Agent Smith');
+        expect(foundAgent.email).toBe('smith@example.com');
     });
 });
 
@@ -54,7 +55,8 @@ describe('Handicap Model and Associations', () => {
 
         // Create a User and associate it with the Handicap
         const user = await User.create({
-            name: 'John Doe',
+            firstname: 'John',
+            lastname: 'Doe',
             birthdate: '1980-01-01',
             email: 'john.doe@example.com',
             tel: 1234567890,
