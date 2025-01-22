@@ -1,7 +1,8 @@
 const API_MAPPING = {
     AF: 'http://api-af:3000/reservations',  // Updated to Docker service name and correct port
     SNCF: 'http://api-sncf:3000/reservations',
-    RATP: 'http://api-ratp:3000/reservations'
+    RATP: 'http://api-ratp:3000/reservations',
+    TAXI: 'http://api-taxi:3000/reservations'
 };
 
 
