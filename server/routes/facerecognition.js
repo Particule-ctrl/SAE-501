@@ -2,12 +2,8 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const faceapi = require('face-api.js');
-const { Canvas, Image } = require('canvas');
 const fs = require('fs');
 const path = require('path');
-
-// Configuration de face-api.js
-faceapi.env.monkeyPatch({ Canvas, Image });
 
 // Chargement des modèles
 const loadModels = async () => {
@@ -34,6 +30,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Fonction pour charger une image en tant que buffer
+const loadImageBuffer = (filePath) => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, (err, data) => {
+      if (err) reject(err);
+      else resolve(data);
+    });
+  });
+};
+
 // Route pour la vérification faciale
 router.post('/verify', upload.fields([
   { name: 'selfie', maxCount: 1 },
@@ -47,9 +53,13 @@ router.post('/verify', upload.fields([
     const selfiePath = req.files['selfie'][0].path;
     const idPhotoPath = req.files['idPhoto'][0].path;
 
-    // Chargement des images
-    const selfieImage = await Canvas.loadImage(selfiePath);
-    const idImage = await Canvas.loadImage(idPhotoPath);
+    // Charger les images en tant que buffers
+    const selfieBuffer = await loadImageBuffer(selfiePath);
+    const idBuffer = await loadImageBuffer(idPhotoPath);
+
+    // Convertir les buffers en images pour face-api.js
+    const selfieImage = await faceapi.bufferToImage(selfieBuffer);
+    const idImage = await faceapi.bufferToImage(idBuffer);
 
     // Détection des visages
     const selfieDetections = await faceapi.detectSingleFace(selfieImage)
