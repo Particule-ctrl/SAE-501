@@ -127,30 +127,51 @@ export default function Register() {
 
   // Fonction pour gérer l'activation de la caméra
   const handleScanPress = async () => {
-    try {
-      if (!permission?.granted) {
-        const { status } = await requestPermission();
-        if (status === 'granted') {
-          setHasPermission(true);
-          setCameraActive(true);
-        } else {
-          Alert.alert(
-            "Permission refusée",
-            "L'accès à la caméra est nécessaire pour scanner votre carte d'identité.",
-            [
-              { text: "Réessayer", onPress: handleScanPress },
-              { text: "Annuler", style: "cancel" }
-            ]
-          );
+    Alert.alert(
+      "Conditions Générales d'Utilisation",
+      "En utilisant la fonction de scan de carte d'identité, vous acceptez que C&FM traite vos données personnelles conformément à nos CGU.",
+      [
+        {
+          text: "En savoir plus",
+          onPress: () => router.push("/cgu"),
+          style: "default"
+        },
+        {
+          text: "Refuser",
+          style: "cancel"
+        },
+        {
+          text: "Accepter",
+          onPress: async () => {
+            try {
+              if (!permission?.granted) {
+                const { status } = await requestPermission();
+                if (status === 'granted') {
+                  setHasPermission(true);
+                  setCameraActive(true);
+                } else {
+                  Alert.alert(
+                    "Permission refusée",
+                    "L'accès à la caméra est nécessaire pour scanner votre carte d'identité.",
+                    [
+                      { text: "Réessayer", onPress: handleScanPress },
+                      { text: "Annuler", style: "cancel" }
+                    ]
+                  );
+                }
+              } else {
+                setHasPermission(true);
+                setCameraActive(true);
+              }
+            } catch (error) {
+              console.error("Erreur lors de la demande de permission:", error);
+              Alert.alert("Erreur", "Impossible d'accéder à la caméra. Veuillez vérifier vos paramètres.");
+            }
+          }
         }
-      } else {
-        setHasPermission(true);
-        setCameraActive(true);
-      }
-    } catch (error) {
-      console.error("Erreur lors de la demande de permission:", error);
-      Alert.alert("Erreur", "Impossible d'accéder à la caméra. Veuillez vérifier vos paramètres.");
-    }
+      ],
+      { cancelable: false }
+    );
   };
 
   // Fonction pour extraire les informations du texte

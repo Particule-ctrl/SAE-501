@@ -10,6 +10,8 @@ var agentRouter = require('./routes/agent');
 var handicapRouter = require('./routes/handicap');
 var reservationRouter = require('./routes/reservation');
 var textRecognitionRouter = require('./routes/textrecognition'); // Nouvelle ligne
+var faceRecognitionRouter = require('./routes/facerecognition');
+
 
 var app = express();
 const db = require('./sql-database');
@@ -42,6 +44,7 @@ app.use('/api/agent/', agentRouter);
 app.use('/api/handicap/', handicapRouter);
 app.use('/api/reservation/', reservationRouter);
 app.use('/api/textrecognition/', textRecognitionRouter); // Nouvelle ligne
+app.use('/api/facerecognition/', faceRecognitionRouter);
 
 app.get('/list-routes', (req, res) => {
   res.json(listEndpoints(app));
