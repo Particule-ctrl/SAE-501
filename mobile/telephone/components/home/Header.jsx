@@ -70,8 +70,8 @@ export default function Header() {
             </View>
             <View style={styles.ConText}>
               <Text style={styles.Text1}>Bienvenue,</Text>
-              {user && user.Name && (
-                <Text style={styles.Text2}> {user.Name.split(' ')[0]} 👋</Text>
+              {user && user.firstName && (
+                <Text style={styles.Text2}> {user.firstName} 👋</Text>
               )}
             </View>
             <View style={styles.ConText2}>
@@ -80,9 +80,9 @@ export default function Header() {
               </Text>
             </View>
           </View>
-          <View style={styles.rightContainer}>
+          {/* <View style={styles.rightContainer}>
             {user && <Text style={styles.Text3}> {user.Name} </Text>}
-          </View>
+          </View> */}
         </View>
       </View>
 
