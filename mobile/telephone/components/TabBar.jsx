@@ -12,11 +12,11 @@ export default function TabBar({ state, descriptors, navigation }) {
     const icones = {
         Home : (props) => <AntDesign name="home" size={26} color= {secondColor} {...props} />,
         Maps : (props) => <Feather name="map" size={26}  color= {secondColor} {...props} />,
-        Setting : (props) => <AntDesign name="setting" size={26} color= {secondColor} {...props} />,
+        Settings : (props) => <AntDesign name="setting" size={26} color= {secondColor} {...props} />,
         Trafic : (props) => <Entypo name="traffic-cone" size={26} color= {secondColor} {...props} />
     }
     const primaryColor = "#12B3A8";
-    const secondColor = "#737373";
+    const secondColor = "white";
   return (
     <View style={styles.tabbar}>
       {state.routes.map((route, index) => {
@@ -81,7 +81,7 @@ export default function TabBar({ state, descriptors, navigation }) {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "white",
+        backgroundColor: "#2C2C2E",
         marginHorizontal: 20,
         paddingVertical:15,
         borderRadius: 25,
