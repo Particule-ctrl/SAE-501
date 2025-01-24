@@ -2,6 +2,8 @@ import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Text, Alert } from 'react-native';
 import { getAuth, updateEmail, updatePassword } from 'firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import PhotoButton from '../Photos/PhotoButton'; // Importez le composant PhotoButton
+
 
 const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
   const auth = getAuth();
@@ -44,7 +46,7 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
         <Text style={styles.label}>Prénom</Text>
         <TextInput
           style={styles.input}
-          value={editedProfile.firstName}
+          value={'editedProfile.firstName'}
           onChangeText={(text) => onChange({ ...editedProfile, firstName: text })}
           placeholder="Entrez votre prénom"
         />
@@ -54,7 +56,7 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
         <Text style={styles.label}>Nom</Text>
         <TextInput
           style={styles.input}
-          value={editedProfile.lastName}
+          value={'editedProfile.lastName'}
           onChangeText={(text) => onChange({ ...editedProfile, lastName: text })}
           placeholder="Entrez votre nom"
         />
@@ -64,7 +66,7 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
-          value={editedProfile.email}
+          value={'editedProfile@.email'}
           onChangeText={(text) => onChange({ ...editedProfile, email: text })}
           placeholder="Entrez votre email"
           keyboardType="email-address"
@@ -75,7 +77,7 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
         <Text style={styles.label}>Téléphone</Text>
         <TextInput
           style={styles.input}
-          value={editedProfile.tel}
+          value={'editedProfile.tel'}
           onChangeText={(text) => onChange({ ...editedProfile, tel: text })}
           placeholder="Entrez votre téléphone"
           keyboardType="phone-pad"
@@ -86,12 +88,14 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
         <Text style={styles.label}>Mot de passe</Text>
         <TextInput
           style={styles.input}
-          value={editedProfile.password}
+          value={'editedProfile.password'}
           onChangeText={(text) => onChange({ ...editedProfile, password: text })}
           placeholder="Entrez un nouveau mot de passe"
           secureTextEntry
         />
       </View>
+
+      <PhotoButton />
 
       <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={handleSave}>
         <Text style={styles.buttonText}>Sauvegarder</Text>

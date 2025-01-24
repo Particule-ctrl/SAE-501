@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from "expo-status-bar";
 import { db } from '../../app/authentication/firebaseConfig';
 import SearchBar from './SearchBar';
+import Photo from '../Photos/Photo';
 
 import { doc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
@@ -63,10 +64,7 @@ export default function Header() {
         <View style={styles.container2}>
           <View style={styles.leftContainer}>
             <View style={styles.logoWrapper}>
-              <Image
-                source={require("./../../assets/Profile/profil.jpeg")}
-                style={styles.logo}
-              />
+              <Photo/>
             </View>
             <View style={styles.ConText}>
               <Text style={styles.Text1}>Bienvenue,</Text>
@@ -152,13 +150,6 @@ const styles = StyleSheet.create({
     paddingRight: 8,
     marginTop: 52,
     left: 10,
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2, // Largeur de la bordure
-    borderColor: "white", // Couleur de la bordure
   },
   rightContainer: {
     width: "37%",

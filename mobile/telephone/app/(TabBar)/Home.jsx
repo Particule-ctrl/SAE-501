@@ -6,7 +6,7 @@ import Header from '../../components/home/Header'
 export default function Home() {
   return (
     <View>
-       <Header/>
+        <Header/>
     </View>
   )
 }

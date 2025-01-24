@@ -1,13 +1,17 @@
 import { Stack } from "expo-router";
+import React from 'react';
+import { PhotoProvider } from '../components/Photos/PhotoContext2'; // Importez le fournisseur de contexte
 
 export default function RootLayout() {
   return (
-    <Stack>
-      {/* Page principale */}
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+    <PhotoProvider>
+      <Stack>
+        {/* Page principale */}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
 
-      {/* Groupe des onglets */}
-      <Stack.Screen name="(TabBar)" options={{ headerShown: false }} />
-    </Stack>
+        {/* Groupe des onglets */}
+        <Stack.Screen name="(TabBar)" options={{ headerShown: false }} />
+      </Stack>
+    </PhotoProvider>
   );
 }
