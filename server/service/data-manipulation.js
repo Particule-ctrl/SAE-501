@@ -19,7 +19,10 @@ const transformData = (incomingData) => {
             numDossier: st.numDossier,
             statusValue: 0
         })),
-        bagage: incomingData.bagage
+        bagage: incomingData.bagage,
+        specialAssistance: incomingData.specialAssistance,
+        security: incomingData.security,
+        additionalInfo: incomingData.additionalInfo
     };
 };
 
@@ -86,8 +89,10 @@ const getDataFromAPIs = async (incomingData) => {
             idPMR: incomingData.idPMR,
             googleId: incomingData.googleId,
             enregistre: incomingData.enregistre,
-            Assistance: incomingData.Assistance,
             bagage: incomingData.bagage,
+            specialAssistance: incomingData.specialAssistance,
+            security: incomingData.security,
+            additionalInfo: incomingData.additionalInfo,
             sousTrajets: []
         }; // Clone l'objet pour éviter de modifier directement l'entrée
 
