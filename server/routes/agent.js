@@ -1,8 +1,10 @@
 var express = require('express');
 var router = express.Router();
-const {db, sequelize} = require('../sql-database');
+const db = require('../sql-database');
 const path = require('path');
 const { stringify } = require('querystring');
+const data_manip = require('../service/data-manipulation');
+
 
 router.use(express.json());
 
@@ -33,8 +35,13 @@ router.post('/', function(req, res){
   db.Agent.create({
     email: req.body.email,
     password: req.body.password,
-    entreprise: req.body.entreprise
+    entreprise: req.body.entreprise,
+    googleUUID: req.body.googleUUID,
+    tel: req.body.tel
   })
+  .then( agent => 
+    res.status(200).send(JSON.stringify(agent))
+  )
   .catch( err => {
     res.status(500).send(JSON.stringify(err));
   });
@@ -51,6 +58,32 @@ router.get("/delete/:id", function(req, res){
     res.status(500).send(JSON.stringify(err));
   });
 });
+
+router.get('/getTrajetsFromAgent/:id',async function(req,res){
+  try{
+    const agent = await db.Agent.findByPk(req.params.id);
+    const voyages = await data_manip.getTrajetsForPlace(agent);
+    res.status(200).json(voyages)
+  } catch (err) {
+    console.error('Error in GET /getTrajetsFromAgent/:id', err.message);
+    res.status(500).json({ error: err.message });
+  }
+})
+
+router.get('/getTrajetsFromUuid/:uuid',async function(req,res){
+  try{
+    const agent = await db.Agent.findOne({
+      where: { googleUUID: req.params.uuid }
+    })
+    const voyages = await data_manip.getTrajetsForPlace(agent);
+    res.status(200).json(voyages)
+  } catch (err) {
+    console.error('Error in GET /getTrajetsFromUuid/:uuid', err.message);
+    res.status(500).json({ error: err.message });
+  }
+  
+})
+
 
 module.exports = router;
 

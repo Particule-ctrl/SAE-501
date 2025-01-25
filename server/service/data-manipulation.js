@@ -1,8 +1,8 @@
 const API_MAPPING = {
-    AF: 'http://api-af:3000/reservations',  // Updated to Docker service name and correct port
-    SNCF: 'http://api-sncf:3000/reservations',
-    RATP: 'http://api-ratp:3000/reservations',
-    TAXI: 'http://api-taxi:3000/reservations'
+    AF: 'http://api-af:3000',  // Updated to Docker service name and correct port
+    SNCF: 'http://api-sncf:3000',
+    RATP: 'http://api-ratp:3000',
+    TAXI: 'http://api-taxi:3000'
 };
 
 
@@ -40,7 +40,7 @@ const sendDataToAPIs = async (incomingData) => {
 
             try {
                 console.log('Data to send: ',dataToSend)
-                const response = await fetch(apiUrl, {
+                const response = await fetch(`${apiUrl}/reservations`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -62,6 +62,21 @@ const sendDataToAPIs = async (incomingData) => {
         throw error;
     }
 };
+
+const getTrajetFromAPIs = async(incomingData) => {
+    const apiUrl = API_MAPPING[incomingData.BD];
+    const response = await fetch(`${apiUrl}/reservations/${incomingData.numDossier}`);
+    const responseData = await response.json();
+    return {
+        BD: incomingData.BD,
+        numDossier: incomingData.numDossier,
+        statusValue: incomingData.statusValue,
+        departure: responseData.departure,
+        arrival: responseData.arrival,
+        departureTime: responseData.departureTime,
+        arrivalTime: responseData.arrivalTime
+    };
+}
 
 const getDataFromAPIs = async (incomingData) => {
     try {
@@ -86,7 +101,7 @@ const getDataFromAPIs = async (incomingData) => {
             }
 
             try {
-                const response = await fetch(`${apiUrl}/${trajet.numDossier}`);
+                const response = await fetch(`${apiUrl}/reservations/${trajet.numDossier}`);
                 if (!response.ok) {
                     console.warn(`Failed to fetch data for numDossier ${trajet.numDossier}: ${response.status}`);
                     continue;
@@ -121,9 +136,40 @@ const getDataFromAPIs = async (incomingData) => {
     }
 };
 
+const getTrajetsForPlace = async (incomingData) => {
+    try {
+      // Fetch the agent details
+      const agentResponse = await fetch(`${API_MAPPING[incomingData.entreprise]}/agent/?email=${incomingData.email}`);
+      if (!agentResponse.ok) {
+        throw new Error(`Failed to fetch agent: ${agentResponse.statusText}`);
+      }
+      const agentData = await agentResponse.json();
+      console.log("A")
+      console.log("Agent Data:", agentData);
+  
+      // Fetch the voyage details using the agent and incoming data
+      const voyageResponse = await fetch(`${API_MAPPING[incomingData.entreprise]}/reservations/fromLieu/${agentData.lieu}`);
+      if (!voyageResponse.ok) {
+        throw new Error(`Failed to fetch voyage: ${voyageResponse.statusText}`);
+      }
+      const voyageData = await voyageResponse.json();
+      console.log("Voyage Data:", voyageData);
+  
+      // Return both agent and voyage data as a result
+      return voyageData ;
+    } catch (error) {
+      console.error("Error in getTrajetsForPlace:", error.message);
+      throw error;
+    }
+  };
+  
+
 functions = {
     transformData: transformData,
     sendDataToAPIs: sendDataToAPIs,
-    getDataFromAPIs: getDataFromAPIs
+    getDataFromAPIs: getDataFromAPIs,
+    getTrajetFromAPIs: getTrajetFromAPIs,
+    getTrajetsForPlace: getTrajetsForPlace,
+    API_MAPPING: API_MAPPING
 }
 module.exports = functions

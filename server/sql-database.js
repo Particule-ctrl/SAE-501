@@ -64,6 +64,9 @@ const Agent = sequelize.define('Agent',{
     entreprise: {
         type: Sequelize.STRING,
         allowNull: false
+    },
+    googleUUID: {
+        type: Sequelize.STRING
     }
 });
 
@@ -80,10 +83,10 @@ User.belongsTo(Handicap, { foreignKey: 'handicap', as: 'Handicap'});
 
 
 const db = {
-    sequelize: sequelize,
-    User: User,
-    Agent: Agent,
-    Handicap: Handicap
+    sequelize,
+    User,
+    Agent,
+    Handicap
 }
 
 module.exports = db
