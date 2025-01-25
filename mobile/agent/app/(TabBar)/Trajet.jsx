@@ -1,22 +1,27 @@
-import { View, Text, SafeAreaView } from 'react-native';
-import React from 'react';
+import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import { useRoute } from '@react-navigation/native';
 
 export default function Trajet() {
     const route = useRoute();
-    const param1 = route.params?.param1 || null;
+    const [param, setParam] = useState(null);
+    const verifieParam = () => param !== null;
 
-    const verifieParam = () => param1 !== null;
+    useEffect(() => {
+        if (route.params["idDossier"]) {
+            setParam(route.params["idDossier"]);
+        }
+    }, [route.params]);
      
     return (
         verifieParam() ? (
             <SafeAreaView style={{ flex: 1 }}>
                 <View>
-                    <Text>Trajet en cours avec le paramètre : {param1}</Text>
+                    <Text>Trajet en cours avec le paramètre : {param}</Text>
                 </View>
             </SafeAreaView>
         ) : (
-            <SafeAreaView style={{ flex: 1 }}>
+            <SafeAreaView style={styles.notFound}> 
                 <View>
                     <Text>Aucun trajet en cours</Text>
                 </View>
@@ -24,3 +29,22 @@ export default function Trajet() {
         )
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "#90ee90", 
+    },
+    text: {
+      fontSize: 16,
+    },
+    notFound: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        fontWeight: "bold",
+        backgroundColor: "#ff6347",
+    }
+  });
