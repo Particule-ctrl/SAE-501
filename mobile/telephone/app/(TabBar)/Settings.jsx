@@ -327,11 +327,12 @@
 import { View, StyleSheet } from 'react-native';
 import React from 'react';
 import ProfileScreen from '../../components/Settings/ProfileScreen';
+import Test from '../../components/Settings/test';
 
 export default function Settings() {
   return (
     <View style={styles.container}>
-      <ProfileScreen />
+      <Test />
     </View>
   );
 }
