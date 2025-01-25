@@ -138,7 +138,7 @@ export default function Header() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <FlatList
+            <FlatList 
                 style={{ marginTop: 10 }}
                 data={trajets}
                 keyExtractor={(item) => item['id-dossier'].toString()}
@@ -178,12 +178,13 @@ const styles = StyleSheet.create({
         backgroundColor: 'efefef',
     },
     item: {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#2D3956',
         padding: 15,
         marginVertical: 8,
         marginHorizontal: 16,
-        borderRadius: 0,
-        borderWidth: 0.2,
+        borderRadius: 2,
+        borderWidth: 0.5,
+        borderColor: 'gray',
     },
     top: {
         flexDirection: 'row',
@@ -192,6 +193,8 @@ const styles = StyleSheet.create({
     header: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: 'white',
+
     },
     middle: {
         flexDirection: 'row',
@@ -204,7 +207,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     buttonVert: {
-        backgroundColor: '#44b668',
+        backgroundColor: '#12B3A8',
         padding: 10,
         borderRadius: 2,
     },
@@ -219,6 +222,8 @@ const styles = StyleSheet.create({
     },
     middleText: {
         fontSize: 16,
+        color: 'white',
+
     }
 
 });
