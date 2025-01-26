@@ -3,7 +3,8 @@ import { View, StyleSheet, ActivityIndicator, Text, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from "expo-status-bar";
 import { db } from '../../app/authentication/firebaseConfig';
-import Tickets from '../Tickects/Tickets';
+import Tickets from '../../components/Tickets/Tickets';
+import OnGoingHeader from '../Tickets/onGoingHeader';
 
 import { doc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
@@ -57,7 +58,7 @@ export default function Profil() {
         </View>
       )}
 
-      
+
 
       <View style={styles.box}>
         <View style={styles.container2}>
@@ -74,24 +75,27 @@ export default function Profil() {
                 <Text style={styles.Text2}> {user.firstName} 👋</Text>
               )}
             </View>
-             
+
           </View>
           <View style={styles.rightContainer}>
-          <Text style={styles.Text3}>
-                Mes trajets
-              </Text>
+            <Text style={styles.Text3}>
+              Mes trajets
+            </Text>
           </View>
 
         </View>
       </View>
+      <View style={styles.onGoingHeader}>
+        <OnGoingHeader />
+      </View>
 
       <View style={styles.box2}>
-          <Tickets/>
+        <Tickets />
       </View>
 
 
 
-      
+
     </View>
   );
 }
@@ -112,10 +116,10 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
 
-  box2:{
-    width:"100%",
-    height: 350, 
-    top: 690
+  box2: {
+    width: "100%",
+    height: 350,
+    top: 690,
   },
 
   pending: {
@@ -140,7 +144,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 8,
     height: 66,
-    top: 5, 
+    top: 5,
   },
   leftContainer: {
     width: "50%",
@@ -176,10 +180,10 @@ const styles = StyleSheet.create({
   },
   ConText2: {
     width: 300,
-    marginTop:240,
+    marginTop: 240,
     marginLeft: 1,
     height: 80,
-    right:120
+    right: 120
   },
 
   rightContainer: {
@@ -187,13 +191,14 @@ const styles = StyleSheet.create({
     height: 45,
     marginTop: 60,
     borderRadius: 25,
-    top: 10, 
+    top: 10,
   },
   Text3: {
     color: "white",
     marginTop: 3,
     fontWeight: "bold",
     fontStyle: "italic",
-    fontSize:20
+    fontSize: 20
   },
+
 });

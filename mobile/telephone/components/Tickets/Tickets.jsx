@@ -38,7 +38,7 @@ const DATA = [
         ],
         "bagage": [1234, 4321]
     },
-        {
+    {
         "id-dossier": 127834,
         "idPMR": 1234,
         "enregistre": 0,
@@ -71,7 +71,7 @@ const DATA = [
         ],
         "bagage": [1234, 4321]
     },
-        {
+    {
         "id-dossier": 143434,
         "idPMR": 1234,
         "enregistre": 0,
@@ -103,7 +103,7 @@ const DATA = [
             }
         ],
         "bagage": [1234, 4321]
-    },    {
+    }, {
         "id-dossier": 1222234,
         "idPMR": 1234,
         "enregistre": 0,
@@ -202,7 +202,7 @@ const DATA = [
         ],
         "bagage": [1234, 4321]
     },
-    
+
 ];
 
 export default function Tickets() {
@@ -212,7 +212,7 @@ export default function Tickets() {
 
     const bouton = (id) => {
         setID(idTrajet === id ? null : id);
-        
+
     };
 
     const exctratTime = (time) => {
@@ -241,12 +241,13 @@ export default function Tickets() {
     return (
         <SafeAreaView style={styles.container}>
             <FlatList
-                style={{marginTop: 10}}
+                style={{ marginTop: 10 }}
                 data={DATA}
                 keyExtractor={(item) => item["id-dossier"].toString()}
+
                 renderItem={({ item, index }) => (
                     <TouchableOpacity activeOpacity={0.9} onPress={() => bouton(item["id-dossier"])}>
-                        
+
                         <View style={[styles.item]}>
                             <View style={styles.top}>
                                 <Text style={styles.idTrajet}>Id Trajet: {item["id-dossier"]}</Text>
@@ -256,7 +257,7 @@ export default function Tickets() {
                                 <Text style={styles.isAssisted}>Besoin assistance: {item.Assistance ? "Oui" : "Non"}</Text>
                                 <Text style={styles.trajet}>Nombre trajet: {item.sousTrajets.length}</Text>
                             </View>
-                             <BarreVoyage points={item.sousTrajets} ordre={["Train", "Plane", "Bus"]} />
+                            <BarreVoyage points={item.sousTrajets} ordre={["Train", "Plane", "Bus"]} />
 
                             {idTrajet === item["id-dossier"] && (
                                 <View style={styles.details}>
@@ -276,15 +277,15 @@ export default function Tickets() {
                                                     <Text style={styles.detailsTime}>{exctratTime(sousTrajet.arrivalTime)}</Text>
                                                 </View>
                                                 <View style={styles.sousTrajetBarre}>
-                                                <BarreTrajet style={styles.sousTrajetBarre} />
+                                                    <BarreTrajet style={styles.sousTrajetBarre} />
                                                 </View>
-                                           
-                                            {isSousTrajet === sousTrajet.numDossier && (
-                                                <View style={styles.qrCode}>
-                                                    <QRCodeTrajet id={qrData(idTrajet,isSousTrajet)} />
-                                                </View>
-                                            )}
-                                             </View>
+
+                                                {isSousTrajet === sousTrajet.numDossier && (
+                                                    <View style={styles.qrCode}>
+                                                        <QRCodeTrajet id={qrData(idTrajet, isSousTrajet)} />
+                                                    </View>
+                                                )}
+                                            </View>
                                         </TouchableOpacity>
                                     ))}
                                 </View>
@@ -313,6 +314,7 @@ const styles = StyleSheet.create({
         marginVertical: 8,
         marginHorizontal: 16,
         borderRadius: 10,
+        borderWidth: 0.2,
     },
     top: {
         flexDirection: 'row',
@@ -331,7 +333,7 @@ const styles = StyleSheet.create({
     },
     isAssisted: {
         fontSize: 17,
-        
+
     },
     trajet: {
         fontSize: 17,
@@ -350,16 +352,16 @@ const styles = StyleSheet.create({
     details: {
         marginTop: 10,
         padding: 10,
-        
+
     },
-    
+
     sousTrajet: {
         marginBottom: 20,
         borderRadius: 10,
         padding: 5,
         borderRadius: 5,
         borderColor: 'gray',
-        borderWidth: 1.5,
+        borderWidth: 0.2,
     },
     place: {
         flexDirection: 'row',
@@ -375,7 +377,7 @@ const styles = StyleSheet.create({
     },
 
     detailsDate: {
-       fontSize: 16,
+        fontSize: 16,
     },
     detailsTime: {
         fontSize: 15,

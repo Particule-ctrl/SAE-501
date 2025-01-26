@@ -1,5 +1,7 @@
 import { ProgressBar, Colors } from 'react-native-paper';
 import { View, StyleSheet, Text } from 'react-native';
+import ProgressBar from 'react-native-paper';
+import { white } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 
 const DATA = [
     {
@@ -38,23 +40,35 @@ const DATA = [
         ],
         "bagage": [1234, 4321]
     },
-      
-    
+
+
 ];
 
 export default function OnGoingHeader() {
-    const ongoingSubTrajets = DATA.flatMap(dossier => 
+    const ongoingSubTrajets = DATA.flatMap(dossier =>
         dossier.sousTrajets.filter(trajet => trajet.statusValue === 1)
     );
 
     return (
         <View>
             {ongoingSubTrajets.map((trajet, index) => (
-                <View key={index}>
-                    <Text>{trajet.departure} to {trajet.arrival}</Text>
+                <View key={index} style={styles.header}>
+                    <Text>{trajet.departure} {trajet.arrival}</Text>
                     <Text>{trajet.departureTime} - {trajet.arrivalTime}</Text>
+                    <ProgressBar progress={0.5} color={white} />
                 </View>
             ))}
         </View>
     );
+
+
 }
+
+const styles = StyleSheet.create({
+    header: {
+        backgroundColor: Colors.grey200,
+        padding: 10,
+        marginVertical: 8,
+        marginHorizontal: 16,
+    },
+});
