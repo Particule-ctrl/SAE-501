@@ -37,7 +37,7 @@ const DATA = [
         ],
         "bagage": [1234, 4321]
     },
-        {
+    {
         "id-dossier": 127834,
         "idPMR": 1234,
         "enregistre": 0,
@@ -70,7 +70,7 @@ const DATA = [
         ],
         "bagage": [1234, 4321]
     },
-        {
+    {
         "id-dossier": 143434,
         "idPMR": 1234,
         "enregistre": 0,
@@ -103,7 +103,7 @@ const DATA = [
         ],
         "bagage": [1234, 4321]
     },
-    
+
 ];
 
 export default function Header() {
@@ -124,26 +124,27 @@ export default function Header() {
         setTrajets((prevTrajets) => prevTrajets.filter(trajet => trajet['id-dossier'] !== idDossier));
     };
     useEffect(() => {
-        setTrajets(DATA); 
+        setTrajets(DATA);
     }, []);
 
     const handleValider = (idDossier) => {
-    router.push({
-        pathname: './Trajet',
-        params: { idDossier }, 
-    });
-};
+        setTrajets((prevTrajets) => prevTrajets.filter(trajet => trajet['id-dossier'] !== idDossier));
+        router.push({
+            pathname: './Trajet',
+            params: { idDossier },
+        });
+    };
 
-    
+
 
     return (
         <SafeAreaView style={styles.container}>
-            <FlatList 
+            <FlatList
                 style={{ marginTop: 10 }}
                 data={trajets}
                 keyExtractor={(item) => item['id-dossier'].toString()}
                 renderItem={({ item }) => (
-                    <TouchableOpacity activeOpacity={0.9} onPress={() => {}}>
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => { }}>
                         <View style={[styles.item]}>
                             <View style={styles.top}>
                                 <Text style={styles.header}>Jean Dupont</Text>
@@ -161,7 +162,7 @@ export default function Header() {
                                     <Text style={styles.bouttonText}>Refuser</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.buttonVert}
-                                onPress={() => handleValider(item['id-dossier'])}>
+                                    onPress={() => handleValider(item['id-dossier'])}>
                                     <Text style={styles.bouttonText}>Accepter</Text>
                                 </TouchableOpacity>
                             </View>
