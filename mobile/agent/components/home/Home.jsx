@@ -129,7 +129,8 @@ export default function Header() {
 
     const handleValider = (idDossier) => {
     router.push({
-        pathname: './Trajet',
+        // pathname: './Trajet',
+        pathname: './Trafic', 
         params: { idDossier }, 
     });
 };

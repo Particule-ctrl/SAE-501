@@ -13,7 +13,8 @@ export default function TabBar({ state, descriptors, navigation }) {
         Home : (props) => <AntDesign name="home" size={26} color= {secondColor} {...props} />,
         Maps : (props) => <Feather name="map" size={26}  color= {secondColor} {...props} />,
         Settings : (props) => <AntDesign name="setting" size={26} color= {secondColor} {...props} />,
-        Trafic : (props) => <Entypo name="traffic-cone" size={26} color= {secondColor} {...props} />
+        Trafic : (props) => <Entypo name="traffic-cone" size={26} color= {secondColor} {...props} />,
+        // Trajet: (props) => <Entypo name="traffic-cone" size={26} color= {secondColor} {...props} />,
     }
     const primaryColor = "#12B3A8";
     const secondColor = "#737373";

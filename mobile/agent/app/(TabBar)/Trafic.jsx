@@ -1,32 +1,55 @@
-import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
-import { Link } from 'expo-router';
-
+import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import CurrentTrajet from '../../components/trajet/TrajetEnCours';
+import { useRoute } from '@react-navigation/native';
 
 export default function Trafic() {
-    return (
-        <View style={styles.container}>
-            <Text style={styles.text}>
-                Trafic
-            </Text>
-            <Link href="../">
-              <Text>Go to interface</Text>
-            </Link>
-        </View>
+  const route = useRoute();
+  const [param, setParam] = useState(null);
+  const verifieParam = () => param !== null;
+
+  useEffect(() => {
+  try {
+      if (route.params && route.params["idDossier"]) {
+          setParam(route.params["idDossier"]);
+      }
+  } catch (error) {
+      console.error("Erreur lors de l'accès à idDossier :", error);
+  }
+}, [route.params]);
+
+
+   
+  return (
+      verifieParam() ? (
+          <SafeAreaView style={styles.container}>
+              <CurrentTrajet id={param} />
+          </SafeAreaView>
+      ) : (
+          <SafeAreaView style={styles.notFound}> 
+              <View>
+                  <Text style={styles.textNotFound}>Aucun trajet en cours</Text>
+              </View>
+          </SafeAreaView>
       )
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
+  container: {
+    flex: 1,
+    backgroundColor: "#192031", 
+  },
+  notFound: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: "#90ee90", 
-    },
-    text: {
-      fontSize: 16,
-    },
-  });
-
-
-  Trafic
+      fontWeight: "bold",
+      backgroundColor: "#192031",
+  },
+  textNotFound: {
+      fontSize: 20,
+      color: "#fff",
+      fontWeight: "bold",
+  },
+});
