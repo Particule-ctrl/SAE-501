@@ -4,6 +4,7 @@ import { getAuth, signOut } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import UserProfile from './UserProfile';
 import EditProfile from './EditProfile';
+import PhotoButton from '../Photos/PhotoButton';
 
 const ProfileScreen = () => {
   const [profile, setProfile] = useState(null);
@@ -14,7 +15,7 @@ const ProfileScreen = () => {
   const auth = getAuth();
   const [id, setId] = useState(null);
 
-  const ipaddress = '192.168.1.29';  // changer ipaddress par rapport au reseau
+  const ipaddress = '172.20.10.2'; // Remplacez par votre adresse IP
 
   const fetchUserProfile = async () => {
     try {
@@ -28,9 +29,19 @@ const ProfileScreen = () => {
       if (response.ok) {
         const responseData = await response.json();
         setId(responseData.id);
-        const [firstName, lastName] = responseData.name.split(' ') || ['', ''];
-        setProfile({ firstName, lastName, email: responseData.email, tel: responseData.tel });
-        setEditedProfile({ firstName, lastName, email: responseData.email, tel: responseData.tel, password: '' });
+        setProfile({
+          firstName: responseData.firstname,
+          lastName: responseData.lastname,
+          email: responseData.email,
+          tel: responseData.tel,
+        });
+        setEditedProfile({
+          firstName: responseData.firstname,
+          lastName: responseData.lastname,
+          email: responseData.email,
+          tel: responseData.tel,
+          password: '',
+        });
       } else {
         Alert.alert('Erreur', 'Données utilisateur non disponibles.');
       }
@@ -44,7 +55,7 @@ const ProfileScreen = () => {
   const handleSaveProfile = async () => {
     try {
       const response = await fetch(`http://${ipaddress}/api/user/${id}`, {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editedProfile),
       });
@@ -59,27 +70,71 @@ const ProfileScreen = () => {
   };
 
   const handleDeleteProfile = async () => {
-    try {
-      const userId = auth.currentUser?.uid;
-      const response = await fetch(`http://${ipaddress}/api/user/byGoogleID/${userId}`);
-      if (!response.ok) throw new Error('Erreur lors de la suppression.');
-      const responseData = await response.json();
-      const pu = await fetch(`http://${ipaddress}/api/user/delete/${responseData.id}`);
-      if (pu.ok) Alert.alert('Compte supprimé', 'Votre compte a été supprimé.');
-    } catch (error) {
-      Alert.alert('Erreur', 'Impossible de supprimer le profil.');
-    }
+    Alert.alert(
+      'Confirmation',
+      'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const userId = auth.currentUser?.uid;
+
+              const response = await fetch(`http://${ipaddress}/api/user/byGoogleID/${userId}`);
+              if (!response.ok) throw new Error('Erreur lors de la suppression des données utilisateur.');
+              
+              const responseData = await response.json();
+              const deleteResponse = await fetch(`http://${ipaddress}/api/user/delete/${responseData.id}`, {
+                method: 'DELETE',
+              });
+
+              if (!deleteResponse.ok) throw new Error('Erreur lors de la suppression dans la base de données.');
+
+              await auth.currentUser?.delete();
+              Alert.alert('Compte supprimé', 'Votre compte a été supprimé avec succès.');
+              router.replace('/');
+            } catch (error) {
+              console.error('Erreur lors de la suppression du profil :', error.message);
+
+              if (error.code === 'auth/requires-recent-login') {
+                Alert.alert(
+                  'Reconnexion requise',
+                  'Vous devez vous reconnecter récemment pour supprimer votre compte. Veuillez vous déconnecter et vous reconnecter.',
+                );
+              } else {
+                Alert.alert('Erreur', 'Impossible de supprimer le profil.');
+              }
+            }
+          },
+        },
+      ],
+    );
   };
 
   const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      console.log('Utilisateur déconnecté avec succès !');
-      router.replace('/');
-    } catch (error) {
-      console.error('Erreur lors de la déconnexion :', error.message);
-      Alert.alert('Erreur', 'Impossible de se déconnecter.');
-    }
+    Alert.alert(
+      'Confirmation',
+      'Êtes-vous sûr de vouloir vous déconnecter ?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Se déconnecter',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut(auth);
+              console.log('Utilisateur déconnecté avec succès !');
+              router.replace('/');
+            } catch (error) {
+              console.error('Erreur lors de la déconnexion :', error.message);
+              Alert.alert('Erreur', 'Impossible de se déconnecter.');
+            }
+          },
+        },
+      ],
+    );
   };
 
   useEffect(() => {
@@ -105,6 +160,7 @@ const ProfileScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profil Utilisateur</Text>
+      <PhotoButton />
 
       <View style={styles.mainContent}>
         {isEditing ? (

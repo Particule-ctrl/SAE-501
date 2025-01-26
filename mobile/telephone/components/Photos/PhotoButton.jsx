@@ -1,50 +1,52 @@
 import React, { useContext } from 'react';
 import { TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker'; // Pour sélectionner une image ou prendre une photo
-import * as FileSystem from 'expo-file-system'; // Pour gérer les fichiers
-import * as MediaLibrary from 'expo-media-library'; // Pour enregistrer dans la galerie
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Pour persister la photo
-import { PhotoContext } from './PhotoContext2'; // Importez le contexte
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PhotoContext } from './PhotoContext2';
+import { getAuth } from 'firebase/auth';
 
 const PhotoButton = () => {
-  const { photo, setPhoto } = useContext(PhotoContext); // Utilisez le contexte
+  const { photo, setPhoto } = useContext(PhotoContext);
+  const auth = getAuth();
+  const userId = auth.currentUser?.uid; // Récupérer l'identifiant Firebase de l'utilisateur
 
-  // Chemin du dossier Photos dans le répertoire de documents de l'application
   const photosFolderPath = `${FileSystem.documentDirectory}Photos/`;
 
-  // Fonction pour vérifier si un fichier existe
   const checkIfFileExists = async (filePath) => {
     try {
       const fileInfo = await FileSystem.getInfoAsync(filePath);
-      return fileInfo.exists; // Retourne true si le fichier existe
+      return fileInfo.exists;
     } catch (error) {
       console.error("Erreur lors de la vérification du fichier :", error);
       return false;
     }
   };
 
-  // Fonction pour sauvegarder l'image dans le stockage local
   const savePhotoToStorage = async (filePath) => {
     try {
-      await AsyncStorage.setItem('profilePhoto', filePath); // Sauvegarder le chemin de la photo
+      if (userId) {
+        await AsyncStorage.setItem(`profilePhoto_${userId}`, filePath); // Utiliser l'identifiant comme clé
+      }
     } catch (error) {
       console.error("Erreur lors de la sauvegarde de la photo :", error);
     }
   };
 
-  // Fonction pour charger la photo depuis le stockage local
   const loadPhotoFromStorage = async () => {
     try {
-      const savedPhoto = await AsyncStorage.getItem('profilePhoto');
-      if (savedPhoto) {
-        setPhoto({ uri: savedPhoto }); // Mettre à jour l'état avec la photo sauvegardée
+      if (userId) {
+        const savedPhoto = await AsyncStorage.getItem(`profilePhoto_${userId}`);
+        if (savedPhoto) {
+          setPhoto({ uri: savedPhoto });
+        }
       }
     } catch (error) {
       console.error("Erreur lors du chargement de la photo :", error);
     }
   };
 
-  // Fonction pour enregistrer l'image dans la galerie
   const saveImageToGallery = async (filePath) => {
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
@@ -61,14 +63,11 @@ const PhotoButton = () => {
     }
   };
 
-  // Charger la photo au démarrage
   React.useEffect(() => {
     loadPhotoFromStorage();
-  }, []);
+  }, [userId]);
 
-  // Fonction pour ouvrir la galerie ou l'appareil photo
   const pickImage = async (source) => {
-    // Demander la permission d'accéder à la galerie ou à l'appareil photo
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       alert("Désolé, nous avons besoin de la permission d'accéder à la galerie ou à l'appareil photo pour continuer.");
@@ -78,47 +77,38 @@ const PhotoButton = () => {
     let result;
     if (source === 'camera') {
       result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Seulement les images
-        allowsEditing: true, // Permettre à l'utilisateur de recadrer l'image
-        aspect: [1, 1], // Ratio carré
-        quality: 1, // Qualité maximale
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
       });
     } else {
       result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Seulement les images
-        allowsEditing: true, // Permettre à l'utilisateur de recadrer l'image
-        aspect: [1, 1], // Ratio carré
-        quality: 1, // Qualité maximale
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
       });
     }
 
-    // Si l'utilisateur a sélectionné ou pris une photo
     if (!result.canceled) {
       const selectedImage = result.assets[0].uri;
-
-      // Nom unique pour l'image
       const fileName = `profile_${Date.now()}.jpg`;
       const filePath = `${photosFolderPath}${fileName}`;
 
       try {
-        // Créer le dossier Photos s'il n'existe pas
         await FileSystem.makeDirectoryAsync(photosFolderPath, { intermediates: true });
-
-        // Copier l'image sélectionnée dans le dossier Photos
         await FileSystem.copyAsync({
           from: selectedImage,
           to: filePath,
         });
 
-        // Vérifier si le fichier existe
         const fileExists = await checkIfFileExists(filePath);
 
         if (fileExists) {
-          setPhoto({ uri: filePath }); // Mettre à jour l'état avec la nouvelle image
-          await savePhotoToStorage(filePath); // Sauvegarder le chemin de la photo
+          setPhoto({ uri: filePath });
+          await savePhotoToStorage(filePath);
           console.log("Image sauvegardée et affichée :", filePath);
-
-          // Enregistrer l'image dans la galerie publique
           await saveImageToGallery(filePath);
         } else {
           console.error("Le fichier n'existe pas :", filePath);
@@ -129,18 +119,18 @@ const PhotoButton = () => {
     }
   };
 
-  // Fonction pour supprimer la photo
   const deletePhoto = async () => {
     try {
-      await AsyncStorage.removeItem('profilePhoto'); // Supprimer la photo du stockage local
-      setPhoto(require("./../../assets/Profile/profil.jpeg")); // Revenir à la photo par défaut
-      console.log("Photo supprimée et remplacée par la photo par défaut.");
+      if (userId) {
+        await AsyncStorage.removeItem(`profilePhoto_${userId}`); // Supprimer la photo associée à l'utilisateur
+        setPhoto(require("./../../assets/Profile/profil.jpeg"));
+        console.log("Photo supprimée et remplacée par la photo par défaut.");
+      }
     } catch (error) {
       console.error("Erreur lors de la suppression de la photo :", error);
     }
   };
 
-  // Fonction pour afficher une alerte avec les options
   const showOptions = () => {
     Alert.alert(
       "Modifier la photo de profil",

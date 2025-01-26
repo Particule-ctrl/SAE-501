@@ -4,16 +4,16 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 const UserProfile = ({ profile, onEdit, onDelete }) => (
   <View style={styles.profileContainer}>
     <Text style={styles.label}>Prénom</Text>
-    <Text style={styles.value}>{'profile.firstName'}</Text>
+    <Text style={styles.value}>{profile.firstname}</Text>
 
     <Text style={styles.label}>Nom</Text>
-    <Text style={styles.value}>{'profile.lastName'}</Text>
+    <Text style={styles.value}>{profile.lastname}</Text>
 
     <Text style={styles.label}>Email</Text>
-    <Text style={styles.value}>{'profile.email'}</Text>
+    <Text style={styles.value}>{profile.email}</Text>
 
     <Text style={styles.label}>Téléphone</Text>
-    <Text style={styles.value}>{'profile.tel' || 'Non renseigné'}</Text>
+    <Text style={styles.value}>{profile.tel || 'Non renseigné'}</Text>
 
     <TouchableOpacity style={[styles.button, styles.editButton]} onPress={onEdit}>
       <Text style={styles.buttonText}>Modifier le profil</Text>
@@ -27,7 +27,8 @@ const UserProfile = ({ profile, onEdit, onDelete }) => (
 
 const styles = StyleSheet.create({
   profileContainer: {
-    width: '90%',
+    width: 350,
+    height:400,
     backgroundColor: '#f9f9f9',
     borderRadius: 12,
     padding: 16,
