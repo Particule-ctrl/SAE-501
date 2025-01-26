@@ -1,7 +1,5 @@
 import { ProgressBar, Colors } from 'react-native-paper';
 import { View, StyleSheet, Text } from 'react-native';
-import ProgressBar from 'react-native-paper';
-import { white } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 
 const DATA = [
     {
@@ -55,7 +53,7 @@ export default function OnGoingHeader() {
                 <View key={index} style={styles.header}>
                     <Text>{trajet.departure} {trajet.arrival}</Text>
                     <Text>{trajet.departureTime} - {trajet.arrivalTime}</Text>
-                    <ProgressBar progress={0.5} color={white} />
+                    <ProgressBar progress={0.5} />
                 </View>
             ))}
         </View>
@@ -66,7 +64,6 @@ export default function OnGoingHeader() {
 
 const styles = StyleSheet.create({
     header: {
-        backgroundColor: Colors.grey200,
         padding: 10,
         marginVertical: 8,
         marginHorizontal: 16,

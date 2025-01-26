@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, SafeAreaView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
+import { getAuth } from 'firebase/auth';
+
 
 
 const DATA = [
@@ -109,6 +111,7 @@ const DATA = [
 export default function Header() {
     const [trajets, setTrajets] = useState([]);
     const router = useRouter();
+    const auth = getAuth();
 
     const exctratTime = (time) => {
         return time.split(' ')[1];
@@ -135,6 +138,12 @@ export default function Header() {
         });
     };
 
+
+    const getTrajets = async () => {
+        const response = await fetch(`http://localhost:3000/api/agent/getTrajetsFromUuid/${auth.currentUser.uid}`);
+        const data = await response.json();
+        setTrajets(data);
+    }
 
 
     return (
