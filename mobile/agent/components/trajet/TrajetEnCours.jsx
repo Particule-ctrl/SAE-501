@@ -73,7 +73,7 @@ export default function CurrentTrajet({ id }) {
     const changeTrajetStatue = async () => {
         try {
             if (status == 0) {
-                await fetch(`http://localhost:3000/reservation/setOngoing/${idDossier}/${idTrajet}`, {
+                await fetch(`http://192.168.1.22/reservation/setOngoing/${idDossier}/${idTrajet}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ export default function CurrentTrajet({ id }) {
                     body: JSON.stringify({ status: 1 }),
                 });
             } else if (status == 1) {
-                await fetch(`http://localhost:3000/reservation/setDone/${idDossier}/${idTrajet}`, {
+                await fetch(`http://192.168.1.22/reservation/setDone/${idDossier}/${idTrajet}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -116,7 +116,7 @@ export default function CurrentTrajet({ id }) {
 
     const getTrajet = async () => {
         try {
-            const response = await fetch(`http://localhost/reservation/${id}`);
+            const response = await fetch(`http://192.168.1.22/reservation/${id}`);
             const json = await response.json();
             console.log(json);
             if (response.ok) {

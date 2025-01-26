@@ -42,7 +42,7 @@ export default function Register() {
 
   // address ip 
 
-  const ipaddress = '192.168.1.29';
+  const ipaddress = '192.168.1.22';
 
   // États pour la caméra
   const [cameraActive, setCameraActive] = useState(false);
@@ -94,7 +94,7 @@ export default function Register() {
     })();
   }, []);
 
- 
+
 
   // Fonction pour formater la date de naissance
   const formatBirthdate = (text) => {
@@ -146,12 +146,12 @@ export default function Register() {
       civility: '',
       found: false
     };
-  
+
     let foundNames = [];
-    
+
     lines.forEach((line) => {
       console.log("Analysing line:", line); // Pour le débogage
-  
+
       // Recherche de la date de naissance (format JJ/MM/AAAA ou JJ MM AAAA)
       const dateMatch = line.match(/(\d{2}[/.]\d{2}[/.]\d{4}|\d{2}\s+\d{2}\s+\d{4})/);
       if (dateMatch) {
@@ -159,15 +159,15 @@ export default function Register() {
         result.found = true;
         console.log("Found birthdate:", result.birthdate);
       }
-  
+
       // Recherche des noms (en majuscules)
-      if (/^[A-ZÀ-Ÿ\s-]{2,}$/.test(line) && 
-          !line.includes('CARTE') && 
-          !line.includes('IDENTITE')) {
+      if (/^[A-ZÀ-Ÿ\s-]{2,}$/.test(line) &&
+        !line.includes('CARTE') &&
+        !line.includes('IDENTITE')) {
         foundNames.push(line.trim());
         console.log("Found name:", line.trim());
       }
-  
+
       // Recherche du genre (M/F)
       if (/^[MF]$/.test(line.trim())) {
         result.civility = line.trim() === 'M' ? 'Mr' : 'Mme';
@@ -175,14 +175,14 @@ export default function Register() {
         console.log("Found civility:", result.civility);
       }
     });
-  
+
     // Attribution des noms trouvés
     if (foundNames.length >= 2) {
       result.lastName = foundNames[0];
       result.firstName = foundNames[1];
       result.found = true;
     }
-  
+
     return result;
   };
 
@@ -194,16 +194,16 @@ export default function Register() {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 1,
         });
-  
+
         console.log("Photo prise, début de la reconnaissance...");
-  
+
         // Reconnaissance du texte
         const result = await TextRecognition.recognize(photo.uri);
         console.log("Texte reconnu :", result.text);
-  
+
         // Extraire les informations
         const extractedInfo = extractInfoFromText(result.text);
-        
+
         if (extractedInfo.found) {
           Alert.alert(
             "Informations trouvées",
@@ -233,7 +233,7 @@ export default function Register() {
             [{ text: "OK" }]
           );
         }
-  
+
       } catch (error) {
         console.error("Erreur lors de la prise de photo :", error);
         Alert.alert(
@@ -259,11 +259,11 @@ export default function Register() {
         return password && confirmPassword && password === confirmPassword && password.length >= 8;
       case 6:
         if (hasAccompagnateur) {
-          return accompagnateurInfo.firstName && 
-                 accompagnateurInfo.lastName && 
-                 accompagnateurInfo.age && 
-                 accompagnateurInfo.birthdate && 
-                 accompagnateurInfo.civility;
+          return accompagnateurInfo.firstName &&
+            accompagnateurInfo.lastName &&
+            accompagnateurInfo.age &&
+            accompagnateurInfo.birthdate &&
+            accompagnateurInfo.civility;
         }
         return true;
       default:
@@ -396,13 +396,13 @@ export default function Register() {
                       Positionnez votre carte d'identité dans le cadre
                     </Text>
                     <View style={styles.buttonContainer}>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={styles.captureButton}
                         onPress={takePicture}
                       >
                         <Text style={styles.captureButtonText}>Prendre la photo</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={styles.cancelButton}
                         onPress={() => {
                           setCameraActive(false);
@@ -417,7 +417,7 @@ export default function Register() {
                 {!hasPermission && (
                   <View style={styles.errorContainer}>
                     <Text style={styles.errorText}>Permission de caméra non accordée</Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.retryButton}
                       onPress={handleScanPress}
                     >
@@ -559,14 +559,14 @@ export default function Register() {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.eyeIcon}
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <Ionicons 
-                  name={showPassword ? "eye-off" : "eye"} 
-                  size={24} 
-                  color="#888" 
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={24}
+                  color="#888"
                 />
               </TouchableOpacity>
             </View>
@@ -580,14 +580,14 @@ export default function Register() {
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.eyeIcon}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                <Ionicons 
-                  name={showConfirmPassword ? "eye-off" : "eye"} 
-                  size={24} 
-                  color="#888" 
+                <Ionicons
+                  name={showConfirmPassword ? "eye-off" : "eye"}
+                  size={24}
+                  color="#888"
                 />
               </TouchableOpacity>
             </View>
@@ -601,13 +601,13 @@ export default function Register() {
             <View style={styles.accompagnateurChoice}>
               <Text style={styles.questionText}>Avez-vous un accompagnateur ?</Text>
               <View style={styles.choiceButtons}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.choiceButton, hasAccompagnateur && styles.choiceButtonActive]}
                   onPress={() => setHasAccompagnateur(true)}
                 >
                   <Text style={styles.choiceButtonText}>Oui</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.choiceButton, !hasAccompagnateur && styles.choiceButtonActive]}
                   onPress={() => setHasAccompagnateur(false)}
                 >
@@ -623,21 +623,21 @@ export default function Register() {
                   placeholder="Prénom de l'accompagnateur"
                   placeholderTextColor="#888"
                   value={accompagnateurInfo.firstName}
-                  onChangeText={(text) => setAccompagnateurInfo({...accompagnateurInfo, firstName: text})}
+                  onChangeText={(text) => setAccompagnateurInfo({ ...accompagnateurInfo, firstName: text })}
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="Nom de l'accompagnateur"
                   placeholderTextColor="#888"
                   value={accompagnateurInfo.lastName}
-                  onChangeText={(text) => setAccompagnateurInfo({...accompagnateurInfo, lastName: text})}
+                  onChangeText={(text) => setAccompagnateurInfo({ ...accompagnateurInfo, lastName: text })}
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="Âge"
                   placeholderTextColor="#888"
                   value={accompagnateurInfo.age}
-                  onChangeText={(text) => setAccompagnateurInfo({...accompagnateurInfo, age: text})}
+                  onChangeText={(text) => setAccompagnateurInfo({ ...accompagnateurInfo, age: text })}
                   keyboardType="numeric"
                 />
                 <TextInput
@@ -647,7 +647,7 @@ export default function Register() {
                   value={accompagnateurInfo.birthdate}
                   onChangeText={(text) => {
                     const formatted = formatBirthdate(text);
-                    setAccompagnateurInfo({...accompagnateurInfo, birthdate: formatted});
+                    setAccompagnateurInfo({ ...accompagnateurInfo, birthdate: formatted });
                   }}
                   keyboardType="numeric"
                 />
@@ -689,15 +689,15 @@ export default function Register() {
             </TouchableOpacity>
           )}
           {currentStep < 6 ? (
-            <TouchableOpacity 
-              style={[styles.navButton, currentStep === 1 && styles.navButtonFullWidth]} 
+            <TouchableOpacity
+              style={[styles.navButton, currentStep === 1 && styles.navButtonFullWidth]}
               onPress={nextStep}
             >
               <Text style={styles.navButtonText}>Suivant</Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity 
-              style={[styles.registerButton, currentStep === 1 && styles.navButtonFullWidth]} 
+            <TouchableOpacity
+              style={[styles.registerButton, currentStep === 1 && styles.navButtonFullWidth]}
               onPress={handleRegister}
             >
               <Text style={styles.registerButtonText}>S'inscrire</Text>
@@ -746,7 +746,7 @@ export default function Register() {
               <Picker
                 selectedValue={accompagnateurInfo.civility}
                 onValueChange={(itemValue) => {
-                  setAccompagnateurInfo({...accompagnateurInfo, civility: itemValue});
+                  setAccompagnateurInfo({ ...accompagnateurInfo, civility: itemValue });
                   setIsAccompagnateurPickerVisible(false);
                 }}
                 style={{ color: 'white' }}
@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
   // Styles pour la caméra
   cameraContainer: {
     width: '100%',
-    aspectRatio: 3/4,
+    aspectRatio: 3 / 4,
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 16,
