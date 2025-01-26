@@ -124,7 +124,7 @@ export default function Index() {
             {/* Login Button */}
             <Pressable
               style={[styles.Button, styles.shadow]}
-              onPress={() => router.push("/authentication/Login")}
+              onPress={() => router.push("./authentication/Login")}
             >
               <Text style={styles.buttonText}>🔑 Connexion</Text>
             </Pressable>
@@ -133,7 +133,7 @@ export default function Index() {
             <Text style={styles.title}>Vous n'êtes pas encore inscrit ?</Text>
             <Pressable
               style={[styles.inscription, styles.shadow]}
-              onPress={() => router.push("/authentication/Register")}
+              onPress={() => router.push("./authentication/Register")}
             >
               <Text style={styles.inscriptionText}>📄 Inscription</Text>
             </Pressable>

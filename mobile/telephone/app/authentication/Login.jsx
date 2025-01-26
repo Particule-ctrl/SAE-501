@@ -18,7 +18,6 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      alert('Connexion réussie !');
       router.replace("../(TabBar)/Home");
     } catch (error) {
       console.error('Erreur de connexion :', error.message);

@@ -9,6 +9,7 @@ var userRouter = require('./routes/user');
 var agentRouter = require('./routes/agent');
 var handicapRouter = require('./routes/handicap');
 var reservationRouter = require('./routes/reservation')
+var qrScannerRouter = require('./routes/qrScanner')
 
 var app = express();
 const db = require('./sql-database'); // Adjust path as necessary
@@ -40,6 +41,7 @@ app.use('/api/user/', userRouter);
 app.use('/api/agent/', agentRouter);
 app.use('/api/handicap/', handicapRouter);
 app.use('/api/reservation/', reservationRouter);
+app.use('/api/qrScanner/', reservationRouter);
 app.get('/list-routes', (req, res) => {
   res.json(listEndpoints(app));
 });

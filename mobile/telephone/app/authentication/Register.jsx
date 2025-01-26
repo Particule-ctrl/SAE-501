@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import {
   Text,
   TextInput,
@@ -39,6 +39,11 @@ export default function Register() {
   const [tel, setTel] = useState('');
   const [note, setNote] = useState('');
 
+
+  // address ip 
+
+  const ipaddress = '192.168.1.29';
+
   // États pour la caméra
   const [cameraActive, setCameraActive] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
@@ -74,12 +79,22 @@ export default function Register() {
 
   const navigation = useNavigation();
 
+
+  // Masquer l'en-tête de la navigation
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
   useEffect(() => {
     (async () => {
       const { status } = await useCameraPermissions();
       setHasPermission(status === 'granted');
     })();
   }, []);
+
+ 
 
   // Fonction pour formater la date de naissance
   const formatBirthdate = (text) => {
@@ -311,7 +326,8 @@ export default function Register() {
 
       const userDocRef = doc(db, 'users', user.uid);
       await setDoc(userDocRef, {
-        Name: `${firstName} ${lastName}`,
+        firstName: firstName, // Prénom
+        lastName: lastName,   // Nom de famille
         Age: parseInt(age),
         Email: email,
         Birthdate: birthdate,
@@ -326,17 +342,18 @@ export default function Register() {
           autre: handicaps.autre,
           autreHandicap: handicaps.autre ? autreHandicap : null,
         },
-        Accompagnateur: accompagnateurData
+        Accompagnateur: accompagnateurData,
       });
 
-      fetch('http://172.20.10.11/api/user', {
+      fetch(`http://${ipaddress}/api/user`, {
         method: "POST",
         headers: {
           Accept: "application/json",
           'Content-Type': "application/json",
         },
         body: JSON.stringify({
-          name: `${firstName} ${lastName}`, 
+          firstName,
+          lastName,
           birthdate: birthdate,
           email,
           tel,
@@ -769,7 +786,7 @@ const styles = StyleSheet.create({
   },
   stepContainer: {
     width: '90%',
-    marginBottom: 24,
+    marginBottom: 30,
   },
   stepTitle: {
     fontSize: 20,
@@ -833,6 +850,7 @@ const styles = StyleSheet.create({
   },
   navButtonFullWidth: {
     width: '100%',
+    marginBottom: 10,
   },
   navButtonText: {
     color: 'white',
