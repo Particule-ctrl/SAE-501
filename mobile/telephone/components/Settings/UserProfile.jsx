@@ -1,132 +1,76 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import Photo from '../Photos/Photo';
 
-const UserProfile = ({ profile, onEdit, onDelete }) => {
-  const renderField = (label, value) => (
-    <View style={styles.fieldWrapper}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{value || 'Non renseigné'}</Text>
-    </View>
-  );
+const UserProfile = ({ profile, onEdit, onDelete }) => (
+  <View style={styles.profileContainer}>
+    <Text style={styles.label}>Prénom</Text>
+    <Text style={styles.value}>{profile.firstname}</Text>
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.profileContainer}>
-        <View style={styles.header}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {profile?.firstName?.[0]}{profile?.lastName?.[0]}
-            </Text>
-          </View>
-        </View>
+    <Text style={styles.label}>Nom</Text>
+    <Text style={styles.value}>{profile.lastname}</Text>
 
-        <View style={styles.content}>
-          {renderField('PRÉNOM', profile?.firstName)}
-          {renderField('NOM', profile?.lastName)}
-          {renderField('EMAIL', 'mail@mail.fr')}
-          {renderField('TÉLÉPHONE', profile?.tel)}
-        </View>
+    <Text style={styles.label}>Email</Text>
+    <Text style={styles.value}>{profile.email}</Text>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={[styles.button, styles.editButton]} onPress={onEdit}>
-            <Text style={styles.buttonText}>Modifier le profil</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={onDelete}>
-            <Text style={[styles.buttonText, styles.deleteText]}>Déconnexion</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-};
+    <Text style={styles.label}>Téléphone</Text>
+    <Text style={styles.value}>{profile.tel || 'Non renseigné'}</Text>
+
+    <TouchableOpacity style={[styles.button, styles.editButton]} onPress={onEdit}>
+      <Text style={styles.buttonText}>Modifier le profil</Text>
+    </TouchableOpacity>
+    
+    <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={onDelete}>
+      <Text style={styles.buttonText}>Supprimer le compte</Text>
+    </TouchableOpacity>
+  </View>
+);
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 16,
-  },
   profileContainer: {
-    backgroundColor: '#0f172a',
-    borderRadius: 20,
-    marginHorizontal: 'auto',
+    width: 350,
+    height:400,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3, 
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
     elevation: 5,
   },
-  header: {
-    height: 100,
-    backgroundColor: '#0ea5e9',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#0284c7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#ffffff40',
-  },
-  avatarText: {
-    fontSize: 24,
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-  content: {
-    padding: 20,
-  },
-  fieldWrapper: {
-    marginBottom: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#334155',
-  },
   label: {
-    fontSize: 12,
-    color: '#94a3b8',
+    fontSize: 14,
+    color: '#888',
     marginBottom: 4,
     fontWeight: '600',
-    letterSpacing: 0.5,
   },
   value: {
+    color: 'white',
     fontSize: 16,
-    color: '#f8fafc',
-    fontWeight: '500',
-  },
-  buttonContainer: {
-    padding: 20,
-    paddingTop: 4,
-    gap: 12,
+    color: '#333',
+    marginBottom: 12,
+    fontWeight: 'bold',
   },
   button: {
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 10,
     alignItems: 'center',
+    width: '90%',
   },
   editButton: {
-    backgroundColor: '#0ea5e9',
+    backgroundColor: '#12b2a6',
   },
   deleteButton: {
-    backgroundColor: '#1e293b',
-    borderWidth: 1,
-    borderColor: '#ef4444',
+    backgroundColor: '#f44336',
   },
   buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
-  deleteText: {
-    color: '#ef4444',
-  },
- });
+});
 
 export default UserProfile;

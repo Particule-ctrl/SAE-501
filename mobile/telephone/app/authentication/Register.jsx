@@ -63,8 +63,7 @@ export default function Register() {
 
 
   // address ip 
-
-  const ipaddress = '172.20.10.7';
+  const ipaddress = ' 172.20.10.7';
 
   // États pour la caméra
   const [cameraActive, setCameraActive] = useState(false);
@@ -129,6 +128,16 @@ export default function Register() {
     }
     return formattedText;
   };
+
+  const formatISOBirthdate = (text) => {
+    let birthdateArray = birthdate.split('/');
+    const jour = birthdateArray[0].padStart(2, '0');
+    const mois = birthdateArray[1].padStart(2, '0');
+    const annee = birthdateArray[2];
+
+    // Retourne la date au format AAAA-MM-JJ
+    return `${annee}-${mois}-${jour}`;
+  }
 
   // Fonction pour gérer l'activation de la caméra
   const handleScanPress = async () => {
@@ -385,7 +394,7 @@ export default function Register() {
         firstName: accompagnateurInfo.firstName,
         lastName: accompagnateurInfo.lastName,
         age: parseInt(accompagnateurInfo.age),
-        birthdate: accompagnateurInfo.birthdate,
+        birthdate: formatISOBirthdate(accompagnateurInfo.birthdate),
         civility: accompagnateurInfo.civility
       } : null;
   
@@ -410,24 +419,38 @@ export default function Register() {
         Accompagnateur: accompagnateurData,
       });
 
-      fetch(`http://${ipaddress}/api/user`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          'Content-Type': "application/json",
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          birthdate: birthdate,
-          email,
-          tel,
-          password,
-          civility,
-          note,
-          googleUUID: user.uid,
-        })
-      });
+      try{
+        const response = await fetch(`http://${ipaddress}/api/user`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            'Content-Type': "application/json",
+          },
+          body: JSON.stringify({
+            firstname: firstName,
+            lastname: lastName,
+            birthdate: formatISOBirthdate(birthdate),
+            email,
+            tel,
+            password,
+            civility,
+            note,
+            handicap: 1,
+            googleUUID: user.uid,
+          })
+        });
+        console.log('Status: ',response.status)
+        if (!response.ok) {
+          console.error(`Failed with status ${response.status}: ${response.statusText}: ${response.body}`);
+        }
+        else{
+          console.log(`Data sent successfully to API:`);
+        }
+      }
+      catch (error){
+        console.error(`Error sending data to API:`, error.message);
+    }
+      
 
       console.log('Utilisateur enregistré avec succès et ajouté à Firestore !');
       alert('Inscription réussie !');

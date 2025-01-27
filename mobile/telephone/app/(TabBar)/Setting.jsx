@@ -20,7 +20,7 @@ export default function ProfileScreen() {
         return;
       }
   
-      const response = await fetch(`http://192.168.92.235/api/user/byGoogleID/${userId}`);
+      const response = await fetch(`http://172.20.10.7:80/api/user/byGoogleID/${userId}`);
       console.log('Response status:', response.status);
       console.log('Response URL:', response.url);
       console.log('Response headers:', response.headers);  
