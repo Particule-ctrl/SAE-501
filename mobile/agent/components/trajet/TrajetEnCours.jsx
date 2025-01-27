@@ -2,9 +2,10 @@ import React, { useEffect, useState, useRef } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
-import { getTrajet, retrievePassenger, changeTrajetStatue, formatDate, calculerAge } from "./api.js"; // Import des fonctions
+import { getTrajet, retrievePassenger, changeTrajetStatue, formatDate, calculerAge, getStuff, extractTime } from "./api.js";
 
 export default function CurrentTrajet({ idDossier, idTrajet }) {
+    const [bagage, setBagage] = useState([]);
     const [trajet, setTrajet] = useState(null);
     const [pmr, setPmr] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
@@ -18,35 +19,51 @@ export default function CurrentTrajet({ idDossier, idTrajet }) {
     console.log("idTrajet", idTrajet);
     useEffect(() => {
         (async () => {
-            if (permission.status !== "granted") {
-                const { status } = await requestPermission();
-                setHasPermission(status === "granted");
-            } else {
-                setHasPermission(true);
-            }
-
             try {
-                const trajetData = await getTrajet(idDossier);
-                setTrajet(trajetData);
-                console.log("Trajet data:", trajetData);
-                if (trajetData.idPMR) {
-                    const pmrData = await retrievePassenger(trajetData.idPMR);
-                    setPmr(pmrData);
-                    console.log("PMR data:", pmrData);
+                if (permission?.status !== "granted") {
+                    const { status } = await requestPermission();
+                    setHasPermission(status === "granted");
+                } else {
+                    setHasPermission(true);
                 }
-                setLoading(false);
+
+                const voyageData = await getStuff(idDossier);
+                if (!voyageData) {
+                    throw new Error("Voyage non trouvé !");
+                }
+                setBagage(voyageData?.bagage?.bagagesList || []);
+
+                if (voyageData.idPMR) {
+                    const pmrData = await retrievePassenger(voyageData.idPMR);
+                    if (!pmrData) {
+                        throw new Error("Données PMR non disponibles !");
+                    }
+                    setPmr(pmrData);
+                }
+
+                if (voyageData.idPMR) {
+                    const trajetData = await getTrajet(idDossier, idTrajet);
+                    if (!trajetData) {
+                        throw new Error("Trajet non trouvé !");
+                    }
+                    setTrajet(trajetData);
+                }
             } catch (error) {
                 console.error("Erreur lors de la récupération des données :", error);
+                Alert.alert("Erreur", "Impossible de charger les données. Veuillez réessayer.");
+            } finally {
                 setLoading(false);
             }
         })();
     }, []);
 
-
     const onScan = (result) => {
         if (result) {
             console.log("QR Code detected:", result.data);
-            changeTrajetStatue(idDossier, idTrajet, trajet.status);
+            console.log("Trajet status:", trajet.statusValue);
+            console.log("id Dossier:", idDossier);
+            console.log("id Trajet:", idTrajet);
+            changeTrajetStatue(idDossier, idTrajet, trajet.statusValue);
             setCameraActive(false);
         }
     };
@@ -91,17 +108,17 @@ export default function CurrentTrajet({ idDossier, idTrajet }) {
                 </View>
 
                 <View style={styles.bagage}>
-                    <Text style={styles.textBagage}>Bagage : {trajet.bagage.bagagesList.length}</Text>
+                    <Text style={styles.textBagage}>Bagage : {bagage.length}</Text>
 
                 </View>
                 <View style={styles.bodyMidBot}>
                     <View style={styles.trajetDepart}>
-                        <Text style={styles.textTrajet}>Lieu de Départ : Gare de Lyon</Text>
-                        <Text style={styles.textTrajet}>Heure : 14h30</Text>
+                        <Text style={styles.textTrajet}>Lieu de Départ : {trajet.departure}</Text>
+                        <Text style={styles.textTrajet}>Heure : {extractTime(trajet.departureTime)}</Text>
                     </View>
                     <View style={styles.trajetArrivee}>
-                        <Text style={styles.textTrajet}>Lieu d'Arrivée : CDG</Text>
-                        <Text style={styles.textTrajet}>Heure : 14h45</Text>
+                        <Text style={styles.textTrajet}>Lieu d'Arrivée : {trajet.arrival}</Text>
+                        <Text style={styles.textTrajet}>Heure : {extractTime(trajet.arrivalTime)}</Text>
                     </View>
 
                 </View>
@@ -110,7 +127,7 @@ export default function CurrentTrajet({ idDossier, idTrajet }) {
             </View>
             <View style={styles.buttonSection}>
                 <TouchableOpacity style={styles.buttonProbleme} onPress={() => { }}><Text style={styles.probleme}>Signaler un problème ?</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.buttonValider} onPress={() => validerTrajet()}><Text style={styles.valider}>Valider trajet</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.buttonValider} onPress={() => validerTrajet()}><Text style={styles.valider}>Valider voyage</Text></TouchableOpacity>
             </View>
 
             {cameraActive && hasPermission && (

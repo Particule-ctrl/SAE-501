@@ -5,7 +5,8 @@ import { getAuth } from 'firebase/auth';
 
 export default function Header() {
     const [trajets, setTrajets] = useState();
-    const [loading, setLoading] = useState(true); // État de chargement
+    const [loading, setLoading] = useState(true);
+
     const router = useRouter();
     const auth = getAuth();
 
@@ -49,17 +50,18 @@ export default function Header() {
             const response = await fetch(`http://192.168.1.22/api/agent/getTrajetsFromUuid/${auth.currentUser.uid}`);
             const data = await response.json();
             setTrajets(data);
-            setLoading(false); // Fin du chargement
+            setLoading(false);
         } catch (error) {
             console.error('Erreur lors de la récupération des trajets :', error);
-            setLoading(false); // En cas d'erreur, arrêter le chargement
+            setLoading(false);
         }
     };
 
     const retrievePassenger = async (idPMR) => {
         try {
-            const response = await fetch(`http://192.168.1.22/api/user/${idPMR}`);
 
+            const response = await fetch(`http://192.168.1.22/api/user/${idPMR}`);
+            console.log(response.url);
             const data = await response.json();
             return data.firstname + ' ' + data.lastname;
         } catch (error) {

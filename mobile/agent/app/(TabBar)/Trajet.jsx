@@ -16,11 +16,13 @@ export default function Trajet() {
         try {
             if (route.params && route.params["idDossier"] && route.params["numDossier"]) {
                 setParam([route.params["idDossier"], route.params["numDossier"]]);
+                console.log("Paramètres reçus :", param);
+                setLoading(false);
             }
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false); // Met à jour l'état lorsque useEffect est terminé
+            setLoading(false);
         }
     }, [route.params]);
 
