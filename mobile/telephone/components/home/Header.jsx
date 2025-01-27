@@ -72,12 +72,23 @@ export default function Header() {
                 <Text style={styles.Text2}> {user.firstName} 👋</Text>
               )}
             </View>
+
+            
+
+
+            
             <View style={styles.ConText2}>
               <Text style={styles.Text3}>
                 Réservez votre titre de transport facilement et en toute sérénité
               </Text>
             </View>
           </View>
+
+          <View style={styles.rightContainer}>
+              <Text style={styles.Text3}>
+                Mon accueil
+              </Text>
+            </View>
           {/* <View style={styles.rightContainer}>
             {user && <Text style={styles.Text3}> {user.Name} </Text>}
           </View> */}
@@ -154,9 +165,9 @@ const styles = StyleSheet.create({
   rightContainer: {
     width: "37%",
     height: 45,
-    backgroundColor: "grey",
     marginTop: 60,
     borderRadius: 25,
+    top: 10, 
   },
   ConText: {
     marginTop: 42,

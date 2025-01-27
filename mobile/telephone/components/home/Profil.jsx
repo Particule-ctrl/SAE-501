@@ -75,7 +75,7 @@ export default function Profil() {
              
           </View>
           <View style={styles.rightContainer}>
-          <Text style={styles.Text3}>
+              <Text style={styles.Text3}>
                 Mes trajets
               </Text>
           </View>

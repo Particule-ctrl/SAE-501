@@ -41,7 +41,7 @@ export default function Register() {
 
 
   // address ip 
-  const ipaddress = '192.168.1.29';
+  const ipaddress = '172.20.10.2';
 
   // États pour la caméra
   const [cameraActive, setCameraActive] = useState(false);

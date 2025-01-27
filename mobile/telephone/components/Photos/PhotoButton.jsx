@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
@@ -10,8 +11,9 @@ import { getAuth } from 'firebase/auth';
 const PhotoButton = () => {
   const { photo, setPhoto } = useContext(PhotoContext);
   const auth = getAuth();
-  const userId = auth.currentUser?.uid; // Récupérer l'identifiant Firebase de l'utilisateur
+  const userId = auth.currentUser?.uid;
 
+  // Garder toutes les fonctions existantes...
   const photosFolderPath = `${FileSystem.documentDirectory}Photos/`;
 
   const checkIfFileExists = async (filePath) => {
@@ -27,7 +29,7 @@ const PhotoButton = () => {
   const savePhotoToStorage = async (filePath) => {
     try {
       if (userId) {
-        await AsyncStorage.setItem(`profilePhoto_${userId}`, filePath); // Utiliser l'identifiant comme clé
+        await AsyncStorage.setItem(`profilePhoto_${userId}`, filePath);
       }
     } catch (error) {
       console.error("Erreur lors de la sauvegarde de la photo :", error);
@@ -122,7 +124,7 @@ const PhotoButton = () => {
   const deletePhoto = async () => {
     try {
       if (userId) {
-        await AsyncStorage.removeItem(`profilePhoto_${userId}`); // Supprimer la photo associée à l'utilisateur
+        await AsyncStorage.removeItem(`profilePhoto_${userId}`);
         setPhoto(require("./../../assets/Profile/profil.jpeg"));
         console.log("Photo supprimée et remplacée par la photo par défaut.");
       }
@@ -158,22 +160,33 @@ const PhotoButton = () => {
   };
 
   return (
-    <TouchableOpacity style={styles.button} onPress={showOptions}>
-      <Text style={styles.buttonText}>Modifier</Text>
+    <TouchableOpacity 
+      style={styles.editButton} 
+      onPress={showOptions}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+    >
+      <Feather name="edit-2" size={16} color="#192031" />
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  button: {
-    marginTop: 10,
-    padding: 5,
-    backgroundColor: '#192031',
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 12,
+  editButton: {
+    position: 'absolute',
+    bottom: 5,
+    right: 5,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 6,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 1,
   },
 });
 
