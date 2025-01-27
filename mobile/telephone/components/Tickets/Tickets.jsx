@@ -232,6 +232,7 @@ export default function Tickets() {
     const qrData = (id, idTrajet) => {
         const dataQR = JSON.stringify({
             trajet: DATA.find(item => item["id-dossier"] === id).sousTrajets.find(item => item.numDossier === idTrajet).numDossier,
+            sousTrajet: DATA.find(item => item["id-dossier"] === id).sousTrajets.find(item => item.numDossier === idTrajet),
             bagage: DATA.find(item => item["id-dossier"] === id).bagage
         });
         return dataQR;

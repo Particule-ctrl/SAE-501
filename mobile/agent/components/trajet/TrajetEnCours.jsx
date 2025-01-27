@@ -1,63 +1,44 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
-import { CameraView, Camera, useCameraPermissions } from 'expo-camera';
-import { useRouter } from 'expo-router';
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { useRouter } from "expo-router";
+import { getTrajet, retrievePassenger, changeTrajetStatue, formatDate, calculerAge } from "./api.js"; // Import des fonctions
 
-
-
-const DATA =
-{
-    "id-dossier": 1234,
-    "idPMR": 1234,
-    "enregistre": 0,
-    "Assistance": 1,
-    "sousTrajets": [
-        {
-            "BD": "SNCF",
-            "numDossier": 1234,
-            "departure": "Paris Est",
-            "arrival": "CDG",
-            "departureTime": "2024-12-23 03:25:44",
-            "arrivalTime": "2024-12-24 04:25:44"
-        },
-        {
-            "BD": "AF",
-            "numDossier": 5555,
-            "departure": "LAX",
-            "arrival": "CDG",
-            "departureTime": "2024-12-23 03:25:44",
-            "arrivalTime": "2024-12-24 04:25:44"
-        },
-        {
-            "BD": "RATP",
-            "numDossier": 8901,
-            "departure": "Chatelet",
-            "arrival": "Saint Lazare",
-            "departureTime": "2024-12-23 03:25:44",
-            "arrivalTime": "2024-12-24 04:25:44"
-        }
-    ],
-    "bagage": [1234, 4321]
-}
-
-
-export default function CurrentTrajet({ id }) {
+export default function CurrentTrajet({ idDossier, idTrajet }) {
     const [trajet, setTrajet] = useState(null);
+    const [pmr, setPmr] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
     const [hasPermission, setHasPermission] = useState(false);
     const cameraRef = useRef(null);
-    const [facing, setFacing] = useState('back');
+    const [facing, setFacing] = useState("back");
     const [permission, requestPermission] = useCameraPermissions();
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
-
-    useEffect(() => {
-        getTrajet();
-    }, []);
-
+    console.log("idDossier", idDossier);
+    console.log("idTrajet", idTrajet);
     useEffect(() => {
         (async () => {
-            const { status } = await Camera.requestCameraPermissionsAsync();
-            setHasPermission(status === 'granted');
+            if (permission.status !== "granted") {
+                const { status } = await requestPermission();
+                setHasPermission(status === "granted");
+            } else {
+                setHasPermission(true);
+            }
+
+            try {
+                const trajetData = await getTrajet(idDossier);
+                setTrajet(trajetData);
+                console.log("Trajet data:", trajetData);
+                if (trajetData.idPMR) {
+                    const pmrData = await retrievePassenger(trajetData.idPMR);
+                    setPmr(pmrData);
+                    console.log("PMR data:", pmrData);
+                }
+                setLoading(false);
+            } catch (error) {
+                console.error("Erreur lors de la récupération des données :", error);
+                setLoading(false);
+            }
         })();
     }, []);
 
@@ -65,70 +46,34 @@ export default function CurrentTrajet({ id }) {
     const onScan = (result) => {
         if (result) {
             console.log("QR Code detected:", result.data);
-            //changeTrajetStatue();
+            changeTrajetStatue(idDossier, idTrajet, trajet.status);
             setCameraActive(false);
         }
     };
 
-    const changeTrajetStatue = async () => {
-        try {
-            if (status == 0) {
-                await fetch(`http://192.168.1.22/reservation/setOngoing/${idDossier}/${idTrajet}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ status: 1 }),
-                });
-            } else if (status == 1) {
-                await fetch(`http://192.168.1.22/reservation/setDone/${idDossier}/${idTrajet}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ status: 2 }),
-                });
-            } else {
-                Alert.alert('Erreur', 'Le trajet est déjà terminé');
-            }
-
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
     const redirect = () => {
-        router.navigate('Home');
-    }
+        router.navigate("Home");
+    };
+
     const validerTrajet = () => {
-        try {
-            Alert.alert("Vous etes sur le point de valider le trajet", "Voulez-vous continuer ?", [{ text: "Annuler", onPress: () => console.log("Cancel Pressed"), style: "cancel" }, { text: "Valider", onPress: () => redirect() }]);
+        Alert.alert(
+            "Vous êtes sur le point de valider le trajet",
+            "Voulez-vous continuer ?",
+            [
+                { text: "Annuler", onPress: () => console.log("Cancel Pressed"), style: "cancel" },
+                { text: "Valider", onPress: () => redirect() },
+            ]
+        );
+    };
 
-        } catch (error) {
-            console.error(error);
-        }
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <ActivityIndicator size="large" color="#12B3A8" />
+                <Text style={styles.loadingText}>Chargement...</Text>
+            </SafeAreaView>
+        );
     }
-
-    const checkPermission = async () => {
-        const { status } = await requestPermission();
-        setHasPermission(status === 'granted');
-    };
-
-    const getTrajet = async () => {
-        try {
-            const response = await fetch(`http://192.168.1.22/reservation/${id}`);
-            const json = await response.json();
-            console.log(json);
-            if (response.ok) {
-                setTrajet(json);
-            } else {
-                console.error(json);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
 
     return (
         <SafeAreaView style={styles.container}>
@@ -137,19 +82,17 @@ export default function CurrentTrajet({ id }) {
             </View>
             <View style={styles.body}>
                 <View style={styles.bodyTop}>
-                    <Text style={styles.textTop}>Nom : Jean Dupont</Text>
-                    <Text style={styles.textTop}>Handicape : Sourd</Text>
+                    <Text style={styles.textTop}>Nom : {pmr.firstname + " " + pmr.lastname}</Text>
+                    <Text style={styles.textTop}>Handicape : {pmr.handicap}</Text>
                 </View>
                 <View style={styles.bodyTopMid}>
-                    <Text style={styles.textMiddle}>Age : 25</Text>
-                    <Text style={styles.textMiddle}>Naissance : 01/01/2000</Text>
+                    <Text style={styles.textMiddle}>Age : {calculerAge(pmr.birthdate)}</Text>
+                    <Text style={styles.textMiddle}>Naissance : {formatDate(pmr.birthdate)}</Text>
                 </View>
-                <View style={styles.bodyMiddle}>
-                    <Text style={styles.textMiddle}>Adresse : 12 rue des fleurs</Text>
-                    <Text style={styles.textMiddle}>Ville : Paris</Text>
-                </View>
+
                 <View style={styles.bagage}>
-                    <Text style={styles.textBagage}>Bagage : 2</Text>
+                    <Text style={styles.textBagage}>Bagage : {trajet.bagage.bagagesList.length}</Text>
+
                 </View>
                 <View style={styles.bodyMidBot}>
                     <View style={styles.trajetDepart}>

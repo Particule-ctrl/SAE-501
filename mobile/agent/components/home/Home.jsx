@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 
 export default function Header() {
     const [trajets, setTrajets] = useState();
+    const [loading, setLoading] = useState(true); // État de chargement
     const router = useRouter();
     const auth = getAuth();
 
@@ -15,6 +16,7 @@ export default function Header() {
         }
         return 'Heure inconnue';
     };
+
     const extractDate = (dateTime) => {
         if (!dateTime) return 'Date inconnue';
 
@@ -33,11 +35,11 @@ export default function Header() {
         setTrajets((prevTrajets) => prevTrajets.filter((trajet) => trajet['id-dossier'] !== idDossier));
     };
 
-    const handleValider = (idDossier) => {
+    const handleValider = (idDossier, numDossier) => {
         setTrajets((prevTrajets) => prevTrajets.filter((trajet) => trajet['id-dossier'] !== idDossier));
         router.push({
             pathname: './Trajet',
-            params: { idDossier },
+            params: { idDossier, numDossier },
         });
     };
 
@@ -47,16 +49,19 @@ export default function Header() {
             const response = await fetch(`http://192.168.1.22/api/agent/getTrajetsFromUuid/${auth.currentUser.uid}`);
             const data = await response.json();
             setTrajets(data);
+            setLoading(false); // Fin du chargement
         } catch (error) {
             console.error('Erreur lors de la récupération des trajets :', error);
+            setLoading(false); // En cas d'erreur, arrêter le chargement
         }
     };
 
     const retrievePassenger = async (idPMR) => {
         try {
             const response = await fetch(`http://192.168.1.22/api/user/${idPMR}`);
+
             const data = await response.json();
-            return data;
+            return data.firstname + ' ' + data.lastname;
         } catch (error) {
             console.error('Erreur lors de la récupération du passager :', error);
         }
@@ -68,38 +73,46 @@ export default function Header() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <FlatList
-                style={{ marginTop: 10 }}
-                data={trajets}
-                renderItem={({ item }) => (
-                    <TouchableOpacity activeOpacity={0.9}>
-                        <View style={styles.item}>
-                            <View style={styles.top}>
-                                <Text style={styles.header}>Jean Dupont</Text>
-                                <Text style={styles.header}>{extractDate(item.departureTime)}</Text>
+            {loading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#12B3A8" />
+                    <Text style={styles.loadingText}>Chargement des trajets...</Text>
+                </View>
+            ) : (
+                <FlatList
+                    style={{ marginTop: 10 }}
+                    data={trajets}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity activeOpacity={0.9}>
+                            <View style={styles.item}>
+                                <View style={styles.top}>
+                                    <Text style={styles.header}>{retrievePassenger(item.idPMR)}</Text>
+                                    <Text style={styles.header}>{extractDate(item.departureTime)}</Text>
+                                    <Text style={styles.middleText}>{extractTime(item.departureTime)}</Text>
+                                </View>
+                                <View style={styles.middle}>
+                                    <Text style={styles.middleText}>{item.departure}</Text>
+                                    <Text style={styles.middleText}>{(item.arrival)}</Text>
+                                </View>
+                                <View style={styles.bottom}>
+                                    <TouchableOpacity
+                                        style={styles.buttonRouge}
+                                        onPress={() => handleRefuser(item.idDossier)}
+                                    >
+                                        <Text style={styles.bouttonText}>Refuser</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.buttonVert}
+                                        onPress={() => handleValider(item.idDossier, item.numDossier)}
+                                    >
+                                        <Text style={styles.bouttonText}>Accepter</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                            <View style={styles.middle}>
-                                <Text style={styles.middleText}>{item.departure}</Text>
-                                <Text style={styles.middleText}>{extractTime(item.departureTime)}</Text>
-                            </View>
-                            <View style={styles.bottom}>
-                                <TouchableOpacity
-                                    style={styles.buttonRouge}
-                                    onPress={() => handleRefuser(item.idDossier)}
-                                >
-                                    <Text style={styles.bouttonText}>Refuser</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.buttonVert}
-                                    onPress={() => handleValider(item.idDossier)}
-                                >
-                                    <Text style={styles.bouttonText}>Accepter</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                )}
-            />
+                        </TouchableOpacity>
+                    )}
+                />
+            )}
         </SafeAreaView>
     );
 }
@@ -108,6 +121,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#192031',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        color: '#12B3A8',
+        fontSize: 18,
+        marginTop: 10,
     },
     item: {
         backgroundColor: '#2D3956',
