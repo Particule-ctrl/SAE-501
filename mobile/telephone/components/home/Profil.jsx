@@ -9,6 +9,8 @@ import Photo from '../Photos/Photo';
 import { doc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
+import OnGoingHeader from '../Tickects/OnGoingHeader';
+
 export default function Profil() {
 
   const navigation = useNavigation();
@@ -72,8 +74,15 @@ export default function Profil() {
                 <Text style={styles.Text2}> {user.firstName} 👋</Text>
               )}
             </View>
+            <View  style={styles.OnGoing} >
+                <OnGoingHeader/>
+            </View>
+            
              
           </View>
+
+
+          
           <View style={styles.rightContainer}>
               <Text style={styles.Text3}>
                 Mes trajets
@@ -187,4 +196,16 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     fontSize:20
   },
+  OnGoing: {
+    top: 150,
+    width: 330,
+    height: 130,
+    left: -95,
+    borderRadius: 7,
+    display: "flex", 
+    textAlign: "center", 
+    justifyContent: "center", // Centre verticalement les enfants
+    alignItems: "center", // Centre horizontalement les enfants
+  }
+
 });
