@@ -21,7 +21,7 @@ db.sequelize.sync({ alter: true }) // Adjust 'force: true' or 'alter: true' depe
     console.error('Error synchronizing the database:', err);
   });
 
-const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000'];
+const allowedOrigins = ['http://localhost:8081', 'http://localhost:8082', 'http://localhost:19006', 'http://localhost:3000', 'http://localhost:3001' ];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
