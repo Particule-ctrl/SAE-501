@@ -1,6 +1,4 @@
-// TransportService.js
 import { API_CONFIG } from '../../constants/API_CONFIG';
-// TransportService.js
 
 class TransportService {
     // Configuration des modes de transport
@@ -10,6 +8,16 @@ class TransportService {
             name: 'Bus',
             icon: 'bus-outline',
             color: '#9C27B0',
+            lineStyle: {
+                weight: 4,
+                dashArray: null
+            }
+        },
+        car: {
+            id: 'car',
+            name: 'Voiture',
+            icon: 'car-outline',
+            color: '#2196F3',
             lineStyle: {
                 weight: 4,
                 dashArray: null
@@ -257,7 +265,7 @@ class TransportService {
             const arrivalAirport = await this.findNearestAirport(arrivalStation.coords, 100000);
 
             // Options de transport terrestre
-            const groundOptions = ['bus', 'taxi'];
+            const groundOptions = ['bus', 'car'];
 
             for (const groundMode of groundOptions) {
                 // Transport terrestre initial
@@ -333,6 +341,7 @@ class TransportService {
     static calculatePrice(route) {
         const prices = {
             bus: { base: 2, perKm: 0.10 },
+            car: { base: 5, perKm: 0.20 },
             taxi: { base: 5, perKm: 0.25 },
             train: { base: 10, perKm: 0.20 },
             plane: { base: 50, perKm: 0.30 }
@@ -348,6 +357,7 @@ class TransportService {
     static calculateCO2(route) {
         const co2Factors = {
             bus: 0.1,
+            car: 0.15,
             taxi: 0.2,
             train: 0.02,
             plane: 0.25

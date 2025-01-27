@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import Photo from '../Photos/Photo';
+// import Photo from '../Photos/Photo';
 
 const UserProfile = ({ profile, onEdit, onDelete }) => (
   <View style={styles.profileContainer}>

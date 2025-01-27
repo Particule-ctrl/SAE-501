@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PhotoContext } from '../Photos/PhotoContext2';
+// import { PhotoContext } from '../Photos/PhotoContext2';
 import EditProfile from './EditProfile';
 // import PhotoButton from '../Photos/PhotoButton'; 
 

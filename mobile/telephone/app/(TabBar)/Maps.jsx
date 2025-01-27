@@ -22,19 +22,21 @@ const MapComponent = () => {
 
    const getSegmentColor = (mode) => {
        switch (mode) {
-           case 'car': return '#2196F3';
-           case 'train': return '#4CAF50'; 
-           case 'plane': return '#FF9800';
-           default: return '#666666';
+           case 'car': return '#2196F3'; // Bleu pour la voiture
+           case 'bus': return '#FFC107'; // Jaune pour le bus
+           case 'train': return '#4CAF50'; // Vert pour le train
+           case 'plane': return '#FF9800'; // Orange pour l'avion
+           default: return '#666666'; // Gris par défaut
        }
    };
 
    const getTransportIcon = (mode) => {
        switch (mode) {
-           case 'car': return 'car-outline';
-           case 'train': return 'train-outline';
-           case 'plane': return 'airplane-outline';
-           default: return 'navigate-outline';
+           case 'car': return 'car-outline'; // Icône pour la voiture
+           case 'bus': return 'bus-outline'; // Icône pour le bus
+           case 'train': return 'train-outline'; // Icône pour le train
+           case 'plane': return 'airplane-outline'; // Icône pour l'avion
+           default: return 'navigate-outline'; // Icône par défaut
        }
    };
 
@@ -44,6 +46,12 @@ const MapComponent = () => {
            latitude: coord[1],
            longitude: coord[0]
        }));
+   };
+
+   const getMidPoint = (coordinates) => {
+       if (!coordinates || coordinates.length === 0) return null;
+       const midIndex = Math.floor(coordinates.length / 2);
+       return coordinates[midIndex];
    };
 
    const formatDuration = (minutes) => {
@@ -169,6 +177,20 @@ const MapComponent = () => {
        }
    };
 
+   const showSegmentDetails = (segment) => {
+       Alert.alert(
+           'Détails du segment',
+           `${segment.mode === 'car' ? 'Trajet en voiture' : 
+             segment.mode === 'bus' ? 'Trajet en bus' : 
+             segment.mode === 'train' ? 'Trajet en train' : 
+             'Trajet en avion'}\n` +
+           `De: ${segment.from.name}\n` +
+           `À: ${segment.to.name}\n` +
+           `Durée: ${formatDuration(segment.duration)}\n` +
+           `Distance: ${Math.round(segment.distance / 1000)} km`
+       );
+   };
+
    useEffect(() => {
        initializeData();
    }, [departureCoords, arrivalCoords]);
@@ -185,6 +207,7 @@ const MapComponent = () => {
                    longitudeDelta: 0.0421,
                }}
            >
+               {/* Point de départ */}
                {departureCoords && (
                    <Marker
                        coordinate={{
@@ -196,6 +219,7 @@ const MapComponent = () => {
                    />
                )}
 
+               {/* Point d'arrivée */}
                {arrivalCoords && (
                    <Marker
                        coordinate={{
@@ -207,58 +231,37 @@ const MapComponent = () => {
                    />
                )}
 
-               {stations.map((station, index) => (
-                   <Marker
-                       key={`station-${index}`}
-                       coordinate={{
-                           latitude: station.coords[1],
-                           longitude: station.coords[0]
-                       }}
-                       title={station.name}
-                   >
-                       <View style={styles.markerContainer}>
-                           <Ionicons name="train-outline" size={24} color="#4CAF50" />
-                       </View>
-                   </Marker>
-               ))}
+               {/* Polylignes et points médians */}
+               {selectedRoute && selectedRoute.segments.map((segment, index) => {
+                   const coordinates = convertGeoJSONtoCoordinates(segment.geometry);
+                   const midPoint = getMidPoint(coordinates);
 
-               {airports.map((airport, index) => (
-                   <Marker
-                       key={`airport-${index}`}
-                       coordinate={{
-                           latitude: airport.coords[1],
-                           longitude: airport.coords[0]
-                       }}
-                       title={airport.name}
-                   >
-                       <View style={styles.markerContainer}>
-                           <Ionicons name="airplane-outline" size={24} color="#FF9800" />
-                       </View>
-                   </Marker>
-               ))}
+                   return (
+                       <React.Fragment key={`segment-${index}`}>
+                           {/* Polyligne pour le segment */}
+                           <Polyline
+                               coordinates={coordinates}
+                               strokeColor={getSegmentColor(segment.mode)}
+                               strokeWidth={4}
+                               tappable={true}
+                               onPress={() => showSegmentDetails(segment)}
+                           />
 
-               {selectedRoute && selectedRoute.segments.map((segment, index) => (
-                   <React.Fragment key={`segment-${index}`}>
-                       <Polyline
-                           coordinates={convertGeoJSONtoCoordinates(segment.geometry)}
-                           strokeColor={getSegmentColor(segment.mode)}
-                           strokeWidth={4}
-                           tappable={true}
-                           onPress={() => {
-                               Alert.alert(
-                                   'Mode de transport',
-                                   `${segment.mode === 'car' ? 'Trajet en voiture' : 
-                                     segment.mode === 'train' ? 'Trajet en train' : 
-                                     'Trajet en avion'}\n` +
-                                   `De: ${segment.from.name}\n` +
-                                   `À: ${segment.to.name}\n` +
-                                   `Durée: ${formatDuration(segment.duration)}\n` +
-                                   `Distance: ${Math.round(segment.distance / 1000)} km`
-                               );
-                           }}
-                       />
-                   </React.Fragment>
-               ))}
+                           {/* Point médian avec l'icône du mode de transport */}
+                           {midPoint && (
+                               <Marker
+                                   key={`midpoint-${index}`}
+                                   coordinate={midPoint}
+                                   onPress={() => showSegmentDetails(segment)}
+                               >
+                                   <View style={styles.markerContainer}>
+                                       <Ionicons name={getTransportIcon(segment.mode)} size={24} color={getSegmentColor(segment.mode)} />
+                                   </View>
+                               </Marker>
+                           )}
+                       </React.Fragment>
+                   );
+               })}
            </MapView>
 
            <View style={styles.routesList}>
@@ -343,145 +346,146 @@ const MapComponent = () => {
 };
 
 const styles = StyleSheet.create({
-   container: {
-       flex: 1,
-   },
-   map: {
-       flex: 1,
-   },
-   markerContainer: {
-       backgroundColor: 'white',
-       borderRadius: 20,
-       padding: 5,
-       borderWidth: 1,
-       borderColor: '#ddd',
-   },
-   routesList: {
-       position: 'absolute',
-       top: 40,
-       left: 20,
-       right: 20,
-       backgroundColor: 'white',
-       borderRadius: 12,
-       padding: 16,
-       maxHeight: '30%',
-       shadowColor: '#000',
-       shadowOffset: { width: 0, height: 2 },
-       shadowOpacity: 0.25,
-       shadowRadius: 3.84,
-       elevation: 5,
-   },
-   routesHeader: {
-       flexDirection: 'row',
-       justifyContent: 'space-between',
-       alignItems: 'center',
-       paddingVertical: 8,
-       borderBottomWidth: 1,
-       borderBottomColor: '#eee',
-   },
-   routesTitle: {
-       fontSize: 16,
-       fontWeight: '600',
-       color: '#333',
-   },
-   routesScrollView: {
-       marginTop: 8,
-   },
-   routesContentContainer: {
-       flexDirection: 'row',
-       alignItems: 'center',
-   },
-   routeCard: {
-       backgroundColor: '#f5f5f5',
-       borderRadius: 8,
-       padding: 12,
-       marginRight: 8,
-       width: width * 0.6,
-   },
-   selectedRouteCard: {
-       backgroundColor: '#007AFF',
-   },
-   routeHeader: {
-       flexDirection: 'row',
-       justifyContent: 'space-between',
-       alignItems: 'center',
-       marginBottom: 8,
-   },
-   transportIcons: {
-       flexDirection: 'row',
-       alignItems: 'center',
-   },
-   iconContainer: {
-       flexDirection: 'row',
-       alignItems: 'center',
-       backgroundColor: 'rgba(255, 255, 255, 0.9)',
-       borderRadius: 12,
-       padding: 4,
-       marginRight: 8,
-       shadowColor: '#000',
-       shadowOffset: {
-           width: 0,
-           height: 1,
-       },
-       shadowOpacity: 0.2,
-       shadowRadius: 1.41,
-       elevation: 2,
-   },
-   transportIcon: {
-       marginRight: 0,
-   },
-   routePrice: {
-       fontSize: 16,
-       fontWeight: 'bold',
-       color: '#333',
-   },
-   routeDetails: {
-       flexDirection: 'row',
-       alignItems: 'center',
-       marginTop: 4,
-   },
-   routeInfo: {
-       fontSize: 14,
-       color: '#666',
-   },
-   selectedText: {
-    color: 'white',
-},
-reserveButton: {
-    backgroundColor: '#4CAF50',
-    padding: 8,
-    borderRadius: 4,
-    marginTop: 8,
-    alignItems: 'center',
-},
-reserveButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-},
-summarySection: {
-    marginBottom: 20,
-},
-summaryTitle: {
-    color: '#12B3A8',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-},
-summaryText: {
-    color: 'white',
-    fontSize: 16,
-    lineHeight: 24,
-},
-segmentSummary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-},
-segmentText: {
-    color: 'white',
-    fontSize: 16,
-    marginLeft: 10,
-}
-});
+    container: {
+        flex: 1,
+    },
+    map: {
+        flex: 1,
+    },
+    markerContainer: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 5,
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    routesList: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        right: 20,
+        backgroundColor: 'white',
+        borderRadius: 12,
+        padding: 16,
+        maxHeight: '30%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    routesHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    routesTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+    },
+    routesScrollView: {
+        marginTop: 8,
+    },
+    routesContentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    routeCard: {
+        backgroundColor: '#f5f5f5',
+        borderRadius: 8,
+        padding: 12,
+        marginRight: 8,
+        width: width * 0.7, // Largeur augmentée
+    },
+    selectedRouteCard: {
+        backgroundColor: '#007AFF',
+    },
+    routeHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    transportIcons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    iconContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 12,
+        padding: 4,
+        marginRight: 8,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.41,
+        elevation: 2,
+    },
+    transportIcon: {
+        marginRight: 0,
+    },
+    routePrice: {
+        fontSize: 18, // Taille de police augmentée
+        fontWeight: 'bold',
+        color: '#333',
+        marginLeft: 8, // Marge à gauche ajoutée
+    },
+    routeDetails: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    routeInfo: {
+        fontSize: 14,
+        color: '#666',
+    },
+    selectedText: {
+        color: 'white',
+    },
+    reserveButton: {
+        backgroundColor: '#4CAF50',
+        padding: 8,
+        borderRadius: 4,
+        marginTop: 8,
+        alignItems: 'center',
+    },
+    reserveButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    summarySection: {
+        marginBottom: 20,
+    },
+    summaryTitle: {
+        color: '#12B3A8',
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    summaryText: {
+        color: 'white',
+        fontSize: 16,
+        lineHeight: 24,
+    },
+    segmentSummary: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    segmentText: {
+        color: 'white',
+        fontSize: 16,
+        marginLeft: 10,
+    }
+ });
 
 export default MapComponent;
