@@ -90,6 +90,22 @@ router.get('/bygoogleid/:id', async function (req, res) {
   }
 });
 
+router.get('/:dossier/:trajet', async function(req, res){
+  try{
+    const trajet = await no_sql_db.DataModel.findOne({idDossier:req.params.dossier, "sousTrajets.numDossier":req.params.trajet},
+      {
+        "sousTrajets.$": 1
+      });
+    console.log(trajet);
+    const updatedTrajet = await data_manip.getTrajetFromAPIs(trajet.sousTrajets[0]);
+
+    res.status(200).json(updatedTrajet)
+  } catch (err) {
+    console.error('Error in GET /:dossier/:trajet', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/setDone/:dossier/:trajet', function(req,res){
   no_sql_db.DataModel.updateOne({idDossier:req.params.dossier, "sousTrajets.numDossier":req.params.trajet}, { $set: {"sousTrajets.$.statusValue":2}})
   .then( reservation => {
