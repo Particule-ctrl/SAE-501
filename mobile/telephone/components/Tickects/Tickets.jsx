@@ -3,212 +3,229 @@ import { SafeAreaView, StyleSheet, Text, FlatList, View, TouchableOpacity } from
 import BarreTrajet from './BarreTrajet';
 import BarreVoyage from './BarreVoyages';
 import QRCodeTrajet from './QRCodeTrajet';
+import { getAuth } from 'firebase/auth';
 
-const DATA = [
-    {
-        "id-dossier": 1234,
-        "idPMR": 1234,
-        "enregistre": 0,
-        "Assistance": 1,
-        "sousTrajets": [
-            {
-                "BD": "SNCF",
-                "numDossier": 1234,
-                "departure": "Paris Est",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "AF",
-                "numDossier": 5555,
-                "departure": "LAX",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "RATP",
-                "numDossier": 8901,
-                "departure": "Chatelet",
-                "arrival": "Saint Lazare",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            }
-        ],
-        "bagage": [1234, 4321]
-    },
-        {
-        "id-dossier": 127834,
-        "idPMR": 1234,
-        "enregistre": 0,
-        "Assistance": 1,
-        "sousTrajets": [
-            {
-                "BD": "SNCF",
-                "numDossier": 1234,
-                "departure": "Paris Est",
-                "arrival": "CDG",
-                "departureTime": "2025-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "AF",
-                "numDossier": 5555,
-                "departure": "LAX",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "RATP",
-                "numDossier": 8901,
-                "departure": "Chatelet",
-                "arrival": "Saint Lazare",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            }
-        ],
-        "bagage": [1234, 4321]
-    },
-        {
-        "id-dossier": 143434,
-        "idPMR": 1234,
-        "enregistre": 0,
-        "Assistance": 1,
-        "sousTrajets": [
-            {
-                "BD": "SNCF",
-                "numDossier": 1234,
-                "departure": "Paris Est",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "AF",
-                "numDossier": 5555,
-                "departure": "LAX",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "RATP",
-                "numDossier": 8901,
-                "departure": "Chatelet",
-                "arrival": "Saint Lazare",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            }
-        ],
-        "bagage": [1234, 4321]
-    },    {
-        "id-dossier": 1222234,
-        "idPMR": 1234,
-        "enregistre": 0,
-        "Assistance": 1,
-        "sousTrajets": [
-            {
-                "BD": "SNCF",
-                "numDossier": 1234,
-                "departure": "Paris Est",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "AF",
-                "numDossier": 5555,
-                "departure": "LAX",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "RATP",
-                "numDossier": 8901,
-                "departure": "Chatelet",
-                "arrival": "Saint Lazare",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            }
-        ],
-        "bagage": [1234, 4321]
-    },
-    {
-        "id-dossier": 12212322234,
-        "idPMR": 1234,
-        "enregistre": 0,
-        "Assistance": 1,
-        "sousTrajets": [
-            {
-                "BD": "SNCF",
-                "numDossier": 1234,
-                "departure": "Paris Est",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "AF",
-                "numDossier": 5555,
-                "departure": "LAX",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "RATP",
-                "numDossier": 8901,
-                "departure": "Chatelet",
-                "arrival": "Saint Lazare",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            }
-        ],
-        "bagage": [1234, 4321]
-    },
-    {
-        "id-dossier": 12234342234,
-        "idPMR": 1234,
-        "enregistre": 0,
-        "Assistance": 1,
-        "sousTrajets": [
-            {
-                "BD": "SNCF",
-                "numDossier": 1234,
-                "departure": "Paris Est",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "AF",
-                "numDossier": 5555,
-                "departure": "LAX",
-                "arrival": "CDG",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "RATP",
-                "numDossier": 8901,
-                "departure": "Chatelet",
-                "arrival": "Saint Lazare",
-                "departureTime": "2024-12-23 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            }
-        ],
-        "bagage": [1234, 4321]
-    },
+// const DATA = [
+//     {
+//         "id-dossier": 1234,
+//         "idPMR": 1234,
+//         "enregistre": 0,
+//         "Assistance": 1,
+//         "sousTrajets": [
+//             {
+//                 "BD": "SNCF",
+//                 "numDossier": 1234,
+//                 "departure": "Paris Est",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "AF",
+//                 "numDossier": 5555,
+//                 "departure": "LAX",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "RATP",
+//                 "numDossier": 8901,
+//                 "departure": "Chatelet",
+//                 "arrival": "Saint Lazare",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             }
+//         ],
+//         "bagage": [1234, 4321]
+//     },
+//         {
+//         "id-dossier": 127834,
+//         "idPMR": 1234,
+//         "enregistre": 0,
+//         "Assistance": 1,
+//         "sousTrajets": [
+//             {
+//                 "BD": "SNCF",
+//                 "numDossier": 1234,
+//                 "departure": "Paris Est",
+//                 "arrival": "CDG",
+//                 "departureTime": "2025-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "AF",
+//                 "numDossier": 5555,
+//                 "departure": "LAX",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "RATP",
+//                 "numDossier": 8901,
+//                 "departure": "Chatelet",
+//                 "arrival": "Saint Lazare",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             }
+//         ],
+//         "bagage": [1234, 4321]
+//     },
+//         {
+//         "id-dossier": 143434,
+//         "idPMR": 1234,
+//         "enregistre": 0,
+//         "Assistance": 1,
+//         "sousTrajets": [
+//             {
+//                 "BD": "SNCF",
+//                 "numDossier": 1234,
+//                 "departure": "Paris Est",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "AF",
+//                 "numDossier": 5555,
+//                 "departure": "LAX",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "RATP",
+//                 "numDossier": 8901,
+//                 "departure": "Chatelet",
+//                 "arrival": "Saint Lazare",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             }
+//         ],
+//         "bagage": [1234, 4321]
+//     },    {
+//         "id-dossier": 1222234,
+//         "idPMR": 1234,
+//         "enregistre": 0,
+//         "Assistance": 1,
+//         "sousTrajets": [
+//             {
+//                 "BD": "SNCF",
+//                 "numDossier": 1234,
+//                 "departure": "Paris Est",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "AF",
+//                 "numDossier": 5555,
+//                 "departure": "LAX",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "RATP",
+//                 "numDossier": 8901,
+//                 "departure": "Chatelet",
+//                 "arrival": "Saint Lazare",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             }
+//         ],
+//         "bagage": [1234, 4321]
+//     },
+//     {
+//         "id-dossier": 12212322234,
+//         "idPMR": 1234,
+//         "enregistre": 0,
+//         "Assistance": 1,
+//         "sousTrajets": [
+//             {
+//                 "BD": "SNCF",
+//                 "numDossier": 1234,
+//                 "departure": "Paris Est",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "AF",
+//                 "numDossier": 5555,
+//                 "departure": "LAX",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "RATP",
+//                 "numDossier": 8901,
+//                 "departure": "Chatelet",
+//                 "arrival": "Saint Lazare",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             }
+//         ],
+//         "bagage": [1234, 4321]
+//     },
+//     {
+//         "id-dossier": 12234342234,
+//         "idPMR": 1234,
+//         "enregistre": 0,
+//         "Assistance": 1,
+//         "sousTrajets": [
+//             {
+//                 "BD": "SNCF",
+//                 "numDossier": 1234,
+//                 "departure": "Paris Est",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "AF",
+//                 "numDossier": 5555,
+//                 "departure": "LAX",
+//                 "arrival": "CDG",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             },
+//             {
+//                 "BD": "RATP",
+//                 "numDossier": 8901,
+//                 "departure": "Chatelet",
+//                 "arrival": "Saint Lazare",
+//                 "departureTime": "2024-12-23 03:25:44",
+//                 "arrivalTime": "2024-12-24 04:25:44"
+//             }
+//         ],
+//         "bagage": [1234, 4321]
+//     },
     
-];
+// ];
+
 
 export default function Tickets() {
     const [idTrajet, setID] = useState(null);
     const [isSousTrajet, setQRCode] = useState(null);
+    const googleID = getAuth().currentUser?.uid;
 
+    const ipaddress = '172.20.10.2';
+
+
+    const retrieveTrajet = async () => {
+        try {
+        const response = await fetch(`http://${ipaddress}/api/reservation/bygoogleid/${googleID}`);
+        const data = await response.json();
+        console.log(data);
+        return data;
+        } catch(error){
+            console.log(error);
+        }
+
+    }
 
     const bouton = (id) => {
         setID(idTrajet === id ? null : id);
@@ -242,8 +259,7 @@ export default function Tickets() {
         <SafeAreaView style={styles.container}>
             <FlatList
                 style={{marginTop: 10}}
-                data={DATA}
-                keyExtractor={(item) => item["id-dossier"].toString()}
+                data={retrieveTrajet()}
                 renderItem={({ item, index }) => (
                     <TouchableOpacity activeOpacity={0.9} onPress={() => bouton(item["id-dossier"])}>
                         

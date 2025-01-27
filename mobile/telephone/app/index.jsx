@@ -143,10 +143,15 @@ export default function Index() {
 
       {/* Copyright centré */}
       <View style={styles.footer}>
-        <Text style={styles.copyright}>
-          © 2025 C&FM. Tous droits réservés.
-        </Text>
-      </View>
+  <Text style={styles.copyright}>
+    © 2025 C&FM. Tous droits réservés.
+  </Text>
+  <Pressable onPress={() => router.push("./cgu")}>
+    <Text style={styles.cguLink}>
+      Conditions Générales d'Utilisation
+    </Text>
+  </Pressable>
+</View>
     </SafeAreaView>
   );
 }
@@ -258,5 +263,12 @@ const styles = StyleSheet.create({
   copyright: {
     color: 'white',
     fontSize: 12,
+    marginBottom: 8,
   },
+  cguLink: {
+    color: '#12B3A8',
+    fontSize: 12,
+    textDecorationLine: 'underline',
+    marginTop: 4,
+  }
 });

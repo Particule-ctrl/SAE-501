@@ -1,6 +1,107 @@
 import { API_CONFIG } from '../../constants/API_CONFIG';
 
 class TransportService {
+    // Configuration des modes de transport
+    static TRANSPORT_MODES = {
+        bus: {
+            id: 'bus',
+            name: 'Bus',
+            icon: 'bus-outline',
+            color: '#9C27B0',
+            lineStyle: {
+                weight: 4,
+                dashArray: null
+            }
+        },
+        car: {
+            id: 'car',
+            name: 'Voiture',
+            icon: 'car-outline',
+            color: '#2196F3',
+            lineStyle: {
+                weight: 4,
+                dashArray: null
+            }
+        },
+        taxi: {
+            id: 'taxi',
+            name: 'Taxi',
+            icon: 'car-outline',
+            color: '#FFC107',
+            lineStyle: {
+                weight: 4,
+                dashArray: null
+            }
+        },
+        train: {
+            id: 'train',
+            name: 'Train',
+            icon: 'train-outline',
+            color: '#4CAF50',
+            lineStyle: {
+                weight: 4,
+                dashArray: null
+            }
+        },
+        plane: {
+            id: 'plane',
+            name: 'Avion',
+            icon: 'airplane-outline',
+            color: '#FF9800',
+            lineStyle: {
+                weight: 4,
+                dashArray: null
+            }
+        }
+    };
+
+    // Liste des gares
+    static STATIONS = [
+        {
+            id: 'paris_nord',
+            name: 'Paris Nord',
+            type: 'station',
+            icon: 'train-outline',
+            coords: [2.3558, 48.8809]
+        },
+        {
+            id: 'marseille_st_charles',
+            name: 'Marseille Saint-Charles',
+            type: 'station',
+            coords: [5.3802, 43.3028]
+        },
+        {
+            id: 'lyon_part_dieu',
+            name: 'Lyon Part-Dieu',
+            type: 'station',
+            coords: [4.8590, 45.7605]
+        }
+    ];
+
+    // Liste des aéroports
+    static AIRPORTS = [
+        {
+            id: 'cdg',
+            name: 'Paris Charles de Gaulle',
+            type: 'airport',
+            icon: 'airplane-outline',
+            coords: [2.5479, 49.0097]
+        },
+        {
+            id: 'ory',
+            name: 'Paris Orly',
+            type: 'airport',
+            coords: [2.3652, 48.7262]
+        },
+        {
+            id: 'mrs',
+            name: 'Marseille Provence',
+            type: 'airport',
+            coords: [5.2145, 43.4365]
+        }
+    ];
+
+    // Calcul de distance
     static calculateDistance(fromCoords, toCoords) {
         const R = 6371e3;
         const φ1 = fromCoords[1] * Math.PI / 180;
@@ -9,407 +110,262 @@ class TransportService {
         const Δλ = (toCoords[0] - fromCoords[0]) * Math.PI / 180;
 
         const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                 Math.cos(φ1) * Math.cos(φ2) *
+                 Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return R * c;
     }
 
-    static calculateFlightDuration(fromCoords, toCoords) {
-        const distance = this.calculateDistance(fromCoords, toCoords);
-        const averageSpeed = 800; // km/h
-        return (distance / 1000) / averageSpeed * 60;
-    }
-
-    static async searchStations(query) {
-        try {
-            const response = await fetch(
-                `https://api.sncf.com/v1/coverage/sncf/places?` +
-                `q=${encodeURIComponent(query)}&type[]=stop_area&count=10`,
-                {
-                    headers: {
-                        'Authorization': `Basic ${btoa(API_CONFIG.sncf + ':')}`
-                    }
-                }
-            );
-
-            if (!response.ok) throw new Error('Erreur API SNCF');
-            const data = await response.json();
-            return data.places.map(place => ({
-                id: place.id,
-                name: place.name,
-                type: 'station',
-                coords: [place.stop_area.coord.lon, place.stop_area.coord.lat]
-            }));
-        } catch (error) {
-            console.error('Erreur recherche stations:', error);
-            return [];
-        }
-    }
-
-    static async findNearbyStations(coords, radius = 5000) {
-        try {
-            const response = await fetch(
-                `https://api.sncf.com/v1/coverage/sncf/coords/${coords[1]};${coords[0]}/places_nearby?` +
-                `type[]=stop_area&distance=${radius}`,
-                {
-                    headers: {
-                        'Authorization': `Basic ${btoa(API_CONFIG.sncf + ':')}`
-                    }
-                }
-            );
-
-            if (!response.ok) throw new Error('Erreur API SNCF');
-            const data = await response.json();
-
-            if (!data.places_nearby || !Array.isArray(data.places_nearby)) {
-                console.warn('Aucune station trouvée ou données invalides:', data);
-                return [];
+    // Trouver la gare la plus proche
+    static async findNearestStation(coords, maxDistance = null) {
+        console.log('Recherche de station près de:', coords);
+        let nearest = null;
+        let minDistance = Infinity;
+        
+        this.STATIONS.forEach(station => {
+            const distance = this.calculateDistance(coords, station.coords);
+            if ((!maxDistance || distance <= maxDistance) && distance < minDistance) {
+                minDistance = distance;
+                nearest = { ...station, distance };
             }
+        });
 
-            return data.places_nearby.map(place => ({
-                id: place.id,
-                name: place.name,
-                type: 'station',
-                coords: [place.stop_area.coord.lon, place.stop_area.coord.lat],
-                distance: place.distance
-            }));
-        } catch (error) {
-            console.error('Erreur recherche stations proximité:', error);
-            return [];
+        if (nearest) {
+            console.log('Station trouvée:', nearest.name);
         }
+        return nearest;
     }
 
-    static async findNearbyAirports(coords) {
-        try {
-            const response = await fetch(
-                `https://api.mapbox.com/geocoding/v5/mapbox.places/airport.json?` +
-                `proximity=${coords.join(',')}&` +
-                `types=poi&` +
-                `limit=3&` +
-                `access_token=${API_CONFIG.mapbox}`
-            );
-
-            if (!response.ok) throw new Error('Erreur Mapbox');
-            const data = await response.json();
-
-            if (!data.features || !Array.isArray(data.features)) {
-                console.warn('Aucun aéroport trouvé ou données invalides:', data);
-                return [];
+    // Trouver l'aéroport le plus proche
+    static async findNearestAirport(coords, maxDistance = null) {
+        console.log('Recherche d\'aéroport près de:', coords);
+        let nearest = null;
+        let minDistance = Infinity;
+        
+        this.AIRPORTS.forEach(airport => {
+            const distance = this.calculateDistance(coords, airport.coords);
+            if ((!maxDistance || distance <= maxDistance) && distance < minDistance) {
+                minDistance = distance;
+                nearest = { ...airport, distance };
             }
+        });
 
-            return data.features
-                .filter(feature => feature.properties.category === 'airport')
-                .map(feature => ({
-                    id: feature.id,
-                    name: feature.text,
-                    type: 'airport',
-                    coords: feature.center
-                }));
-        } catch (error) {
-            console.error('Erreur recherche aéroports:', error);
-            return [];
+        if (nearest) {
+            console.log('Aéroport trouvé:', nearest.name);
         }
+        return nearest;
     }
 
-    static async findNearestStationOrAirport(coords) {
-        const [stations, airports] = await Promise.all([
-            this.findNearbyStations(coords),
-            this.findNearbyAirports(coords)
-        ]);
-
-        // Retourne la station ou l'aéroport le plus proche
-        const nearestStation = stations[0];
-        const nearestAirport = airports[0];
-
-        if (!nearestStation && !nearestAirport) {
-            throw new Error('Aucune gare ou aéroport trouvé à proximité');
-        }
-
-        // Retourne le point le plus proche
-        if (!nearestAirport || (nearestStation && nearestStation.distance < nearestAirport.distance)) {
-            return nearestStation;
-        } else {
-            return nearestAirport;
-        }
-    }
-
-    static async searchAddress(query) {
+    // Obtenir un itinéraire routier
+    static async getDetailedRoadRoute(from, to, mode = 'bus') {
         try {
-            const response = await fetch(
-                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json` +
-                `?access_token=${API_CONFIG.mapbox}&country=FR&types=address,poi`
-            );
-
-            if (!response.ok) throw new Error('Erreur Mapbox');
-            const data = await response.json();
-
-            if (!data.features || !Array.isArray(data.features)) {
-                console.warn('Aucune adresse trouvée ou données invalides:', data);
-                return [];
-            }
-
-            return data.features.map(feature => ({
-                id: feature.id,
-                name: feature.place_name,
-                type: 'address',
-                coords: feature.center
-            }));
-        } catch (error) {
-            console.error('Erreur recherche adresse:', error);
-            return [];
-        }
-    }
-
-    static async getTrainRoute(from, to, datetime = new Date()) {
-        try {
-            const fromId = from.id.includes('SNCF') ? from.id : `stop_area:SNCF:${from.id}`;
-            const toId = to.id.includes('SNCF') ? to.id : `stop_area:SNCF:${to.id}`;
+            const modeConfig = this.TRANSPORT_MODES[mode];
+            console.log(`Calcul itinéraire ${mode} entre:`, from.name, 'et', to.name);
 
             const response = await fetch(
-                `https://api.sncf.com/v1/coverage/sncf/journeys?` +
-                `from=${fromId}&` +
-                `to=${toId}&` +
-                `datetime=${datetime.toISOString()}&` +
-                `data_freshness=realtime&` +
-                `min_nb_journeys=5&` +
-                `depth=2`,
-                {
-                    headers: {
-                        'Authorization': `Basic ${btoa(API_CONFIG.sncf + ':')}`
-                    }
-                }
+                `https://api.mapbox.com/directions/v5/mapbox/driving/` +
+                `${from.coords[0]},${from.coords[1]};${to.coords[0]},${to.coords[1]}?` +
+                `geometries=geojson&overview=full&steps=true&access_token=${API_CONFIG.mapbox}`
             );
 
-            if (!response.ok) throw new Error('Erreur API SNCF');
+            if (!response.ok) throw new Error(`Erreur itinéraire ${mode}`);
+            
             const data = await response.json();
-
-            if (!data.journeys || data.journeys.length === 0) {
-                console.log('Aucun trajet en train trouvé directement');
-                return [];
-            }
-
-            return data.journeys.map(journey => ({
-                id: `train-${Date.now()}-${Math.random()}`,
-                mode: 'train',
-                departureTime: new Date(journey.departure_date_time),
-                arrivalTime: new Date(journey.arrival_date_time),
-                duration: journey.duration / 60,
-                distance: this.calculateDistance(from.coords, to.coords),
-                price: this.calculateTrainPrice(journey.duration / 60),
-                returnable: true,
-                segments: journey.sections
-                    .filter(section => section.type === 'public_transport')
-                    .map(section => ({
-                        mode: 'train',
-                        from: {
-                            name: section.from.name,
-                            coords: [section.from.stop_point.coord.lon, section.from.stop_point.coord.lat]
-                        },
-                        to: {
-                            name: section.to.name,
-                            coords: [section.to.stop_point.coord.lon, section.to.stop_point.coord.lat]
-                        },
-                        train_number: section.display_informations?.headsign || 'Train',
-                        geometry: section.geojson
-                    }))
-            }));
-        } catch (error) {
-            console.error('Erreur route train:', error);
-            return [];
-        }
-    }
-
-    static async getPlaneRoute(from, to) {
-        const distance = this.calculateDistance(from.coords, to.coords);
-        const duration = this.calculateFlightDuration(from.coords, to.coords);
-
-        return {
-            id: `plane-${Date.now()}`,
-            mode: 'plane',
-            departureTime: new Date(),
-            arrivalTime: new Date(Date.now() + duration * 60000),
-            duration: duration,
-            distance: distance,
-            price: this.calculatePlanePrice(distance),
-            returnable: true,
-            segments: [{
-                mode: 'plane',
-                from: { name: from.name, coords: from.coords },
-                to: { name: to.name, coords: to.coords },
-                geometry: {
-                    type: 'LineString',
-                    coordinates: [from.coords, to.coords]
-                }
-            }]
-        };
-    }
-
-    static async getRoadRoute(from, to, mode) {
-        try {
-            if (mode === 'plane') {
-                return this.getPlaneRoute(from, to);
-            }
-
-            const profile = mode === 'car' ? 'driving' : 'driving-traffic';
-            const response = await fetch(
-                `https://api.mapbox.com/directions/v5/mapbox/${profile}/` +
-                `${from.coords.join(',')};${to.coords.join(',')}?` +
-                `geometries=geojson&overview=full&steps=true&` +
-                `access_token=${API_CONFIG.mapbox}`
-            );
-
-            if (!response.ok) throw new Error('Erreur Mapbox');
-            const data = await response.json();
-            const route = data.routes[0];
-
+            if (!data.routes?.length) throw new Error('Aucun itinéraire trouvé');
+            
+            const durationMultiplier = mode === 'bus' ? 1.5 : 0.9;
+            
             return {
-                id: `${mode}-${Date.now()}`,
-                mode: mode,
-                departureTime: new Date(),
-                arrivalTime: new Date(Date.now() + route.duration * 1000),
-                duration: route.duration / 60,
-                distance: route.distance,
-                price: mode === 'car' ?
-                    this.calculateCarCost(route.distance) :
-                    this.calculateBusPrice(route.distance),
-                returnable: mode === 'bus',
-                segments: [{
-                    mode: mode,
-                    from: { name: from.name, coords: from.coords },
-                    to: { name: to.name, coords: to.coords },
-                    geometry: route.geometry,
-                    steps: route.legs[0].steps
-                }]
+                mode,
+                type: mode,
+                icon: modeConfig.icon,
+                color: modeConfig.color,
+                lineStyle: modeConfig.lineStyle,
+                duration: data.routes[0].duration / 60 * durationMultiplier,
+                distance: data.routes[0].distance,
+                geometry: data.routes[0].geometry,
+                from,
+                to
             };
         } catch (error) {
-            console.error('Erreur route:', error);
+            console.error(`Erreur itinéraire ${mode}:`, error);
             return null;
         }
     }
 
-    static calculateTrainPrice(duration, distance) {
-        const basePrice = 10;
-        const pricePerKm = 0.15;
-        return Math.round((basePrice + (distance / 1000) * pricePerKm) * 100) / 100;
-    }
-
-    static calculateCarCost(distance) {
-        const fuelCostPerKm = 0.15;
-        return Math.round(distance / 1000 * fuelCostPerKm * 100) / 100;
-    }
-
-    static calculateBusPrice(distance) {
-        const basePrice = 15;
-        const pricePerKm = 0.10;
-        return Math.round((basePrice + (distance / 1000) * pricePerKm) * 100) / 100;
-    }
-
-    static calculatePlanePrice(distance) {
-        const basePrice = 50;
-        const pricePerKm = 0.25;
-        return Math.round((basePrice + (distance / 1000) * pricePerKm) * 100) / 100;
-    }
-
-    static async getMultiModalRoute(from, to, selectedModes) {
+    // Obtenir un itinéraire ferroviaire
+    static async getDetailedTrainRoute(fromStation, toStation) {
         try {
+            console.log('Calcul itinéraire ferroviaire entre:', fromStation.name, 'et', toStation.name);
+            
+            const modeConfig = this.TRANSPORT_MODES.train;
+            const distance = this.calculateDistance(fromStation.coords, toStation.coords);
+            const avgSpeed = 160; // km/h
+            const estimatedDuration = (distance / 1000 / avgSpeed * 60) + 30;
+            
+            return {
+                mode: 'train',
+                type: 'train',
+                icon: modeConfig.icon,
+                color: modeConfig.color,
+                lineStyle: modeConfig.lineStyle,
+                duration: estimatedDuration,
+                distance: distance,
+                geometry: {
+                    type: 'LineString',
+                    coordinates: [fromStation.coords, toStation.coords]
+                },
+                from: fromStation,
+                to: toStation
+            };
+        } catch (error) {
+            console.error('Erreur itinéraire ferroviaire:', error);
+            return null;
+        }
+    }
+
+    // Obtenir un itinéraire aérien
+    static getFlightRoute(fromAirport, toAirport) {
+        try {
+            const modeConfig = this.TRANSPORT_MODES.plane;
+            const distance = this.calculateDistance(fromAirport.coords, toAirport.coords);
+            
+            return {
+                mode: 'plane',
+                type: 'plane',
+                icon: modeConfig.icon,
+                color: modeConfig.color,
+                lineStyle: modeConfig.lineStyle,
+                duration: (distance / 1000) / 800 * 60 + 120,
+                distance: distance,
+                geometry: {
+                    type: 'LineString',
+                    coordinates: [fromAirport.coords, toAirport.coords]
+                },
+                from: fromAirport,
+                to: toAirport
+            };
+        } catch (error) {
+            console.error('Erreur itinéraire aérien:', error);
+            return null;
+        }
+    }
+
+    // Génération des itinéraires multimodaux
+    static async generateMultimodalRoutes(departure, arrival) {
+        try {
+            console.log('Génération des itinéraires entre:', departure.name, 'et', arrival.name);
             const routes = [];
-            const directDistance = this.calculateDistance(from.coords, to.coords);
-            console.log('Recherche d\'itinéraires multimodaux...');
 
-            // Vérifiez si les points de départ et d'arrivée sont des gares ou des aéroports
-            const isFromStationOrAirport = from.type === 'station' || from.type === 'airport';
-            const isToStationOrAirport = to.type === 'station' || to.type === 'airport';
+            // Points de passage obligatoires
+            const departureStation = await this.findNearestStation(departure.coords);
+            const departureAirport = await this.findNearestAirport(departureStation.coords, 100000);
+            const arrivalStation = await this.findNearestStation(arrival.coords);
+            const arrivalAirport = await this.findNearestAirport(arrivalStation.coords, 100000);
 
-            // Si ce n'est pas le cas, trouvez la gare ou l'aéroport le plus proche
-            const startPoint = isFromStationOrAirport ? from : await this.findNearestStationOrAirport(from.coords);
-            const endPoint = isToStationOrAirport ? to : await this.findNearestStationOrAirport(to.coords);
+            // Options de transport terrestre
+            const groundOptions = ['bus', 'car'];
 
-            // 1. Recherche des trajets mixtes optimaux
-            if (selectedModes.length > 1) {
-                const [departureAirports, departureStations] = await Promise.all([
-                    selectedModes.includes('plane') ? this.findNearbyAirports(startPoint.coords) : [],
-                    selectedModes.includes('train') ? this.findNearbyStations(startPoint.coords) : []
-                ]);
+            for (const groundMode of groundOptions) {
+                // Transport terrestre initial
+                const toStation = await this.getDetailedRoadRoute(
+                    departure,
+                    departureStation,
+                    groundMode
+                );
 
-                const [arrivalAirports, arrivalStations] = await Promise.all([
-                    selectedModes.includes('plane') ? this.findNearbyAirports(endPoint.coords) : [],
-                    selectedModes.includes('train') ? this.findNearbyStations(endPoint.coords) : []
-                ]);
+                // Train vers l'aéroport
+                const trainToAirport = await this.getDetailedTrainRoute(
+                    departureStation,
+                    departureAirport
+                );
 
-                const transferPoints = [...departureAirports, ...departureStations];
-                const endPoints = [...arrivalAirports, ...arrivalStations];
+                // Vol
+                const flight = this.getFlightRoute(
+                    departureAirport,
+                    arrivalAirport
+                );
 
-                for (const startTransferPoint of transferPoints) {
-                    for (const mode1 of selectedModes.filter(m => ['car', 'bus'].includes(m))) {
-                        const firstLeg = await this.getRoadRoute(startPoint, startTransferPoint, mode1);
-                        if (!firstLeg) continue;
+                // Train depuis l'aéroport
+                const trainFromAirport = await this.getDetailedTrainRoute(
+                    arrivalAirport,
+                    arrivalStation
+                );
 
-                        for (const endTransferPoint of endPoints) {
-                            for (const mode2 of selectedModes.filter(m => ['train', 'plane'].includes(m))) {
-                                let secondLeg = null;
+                // Transport terrestre final
+                const toFinal = await this.getDetailedRoadRoute(
+                    arrivalStation,
+                    arrival,
+                    groundMode
+                );
 
-                                if (mode2 === 'train' && startTransferPoint.type === 'station' && endTransferPoint.type === 'station') {
-                                    const trainRoutes = await this.getTrainRoute(startTransferPoint, endTransferPoint);
-                                    if (trainRoutes.length > 0) {
-                                        secondLeg = trainRoutes[0];
-                                    }
-                                } else if (mode2 === 'plane' && startTransferPoint.type === 'airport' && endTransferPoint.type === 'airport') {
-                                    secondLeg = await this.getPlaneRoute(startTransferPoint, endTransferPoint);
-                                }
-
-                                if (secondLeg) {
-                                    for (const mode3 of selectedModes.filter(m => ['car', 'bus'].includes(m))) {
-                                        const lastLeg = await this.getRoadRoute(endTransferPoint, endPoint, mode3);
-                                        if (!lastLeg) continue;
-
-                                        routes.push({
-                                            id: `multimodal-${Date.now()}-${Math.random()}`,
-                                            mode: 'multimodal',
-                                            departureTime: firstLeg.departureTime,
-                                            arrivalTime: new Date(secondLeg.arrivalTime.getTime() + lastLeg.duration * 60000),
-                                            duration: firstLeg.duration + secondLeg.duration + lastLeg.duration,
-                                            price: firstLeg.price + secondLeg.price + lastLeg.price,
-                                            segments: [...firstLeg.segments, ...secondLeg.segments, ...lastLeg.segments],
-                                            returnable: false
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
+                if (toStation && trainToAirport && flight && trainFromAirport && toFinal) {
+                    routes.push({
+                        id: `multimodal-${groundMode}-${Date.now()}`,
+                        type: `${groundMode}-train-avion-train-${groundMode}`,
+                        segments: [
+                            toStation,
+                            trainToAirport,
+                            flight,
+                            trainFromAirport,
+                            toFinal
+                        ],
+                        totalDuration: toStation.duration + trainToAirport.duration + 
+                                     flight.duration + trainFromAirport.duration + toFinal.duration,
+                        totalDistance: (toStation.distance + trainToAirport.distance + 
+                                     flight.distance + trainFromAirport.distance + toFinal.distance) / 1000,
+                        departureName: departure.name,
+                        arrivalName: arrival.name
+                    });
                 }
             }
 
-            // 2. Trajets directs
-            if (selectedModes.includes('plane') && directDistance > 500000) {
-                const planeRoute = await this.getPlaneRoute(startPoint, endPoint);
-                if (planeRoute) routes.push(planeRoute);
-            }
+            // Ajout prix et CO2
+            const routesWithInfo = routes.map(route => ({
+                ...route,
+                price: this.calculatePrice(route),
+                co2Emissions: this.calculateCO2(route)
+            }));
 
-            if (selectedModes.includes('train') && startPoint.type === 'station' && endPoint.type === 'station') {
-                const trainRoutes = await this.getTrainRoute(startPoint, endPoint);
-                routes.push(...trainRoutes);
-            }
-
-            for (const mode of selectedModes.filter(m => ['car', 'bus'].includes(m))) {
-                const roadRoute = await this.getRoadRoute(startPoint, endPoint, mode);
-                if (roadRoute) routes.push(roadRoute);
-            }
-
-            // Trier par durée et retourner les meilleurs itinéraires
-            const sortedRoutes = routes
-                .sort((a, b) => (a.duration + a.price / 100) - (b.duration + b.price / 100))
-                .slice(0, 5);
-
-            console.log(`Total routes trouvées: ${sortedRoutes.length}`);
-            return sortedRoutes;
+            // Tri par durée
+            return routesWithInfo.sort((a, b) => a.totalDuration - b.totalDuration);
 
         } catch (error) {
-            console.error('Erreur recherche multimodale:', error);
+            console.error('Erreur génération itinéraires:', error);
             return [];
         }
+    }
+
+    // Calcul du prix
+    static calculatePrice(route) {
+        const prices = {
+            bus: { base: 2, perKm: 0.10 },
+            car: { base: 5, perKm: 0.20 },
+            taxi: { base: 5, perKm: 0.25 },
+            train: { base: 10, perKm: 0.20 },
+            plane: { base: 50, perKm: 0.30 }
+        };
+
+        return route.segments.reduce((total, segment) => {
+            const price = prices[segment.mode];
+            return total + price.base + (segment.distance / 1000 * price.perKm);
+        }, 0);
+    }
+
+    // Calcul des émissions CO2
+    static calculateCO2(route) {
+        const co2Factors = {
+            bus: 0.1,
+            car: 0.15,
+            taxi: 0.2,
+            train: 0.02,
+            plane: 0.25
+        };
+
+        return route.segments.reduce((total, segment) => {
+            return total + (segment.distance / 1000) * co2Factors[segment.mode];
+        }, 0);
     }
 }
 
