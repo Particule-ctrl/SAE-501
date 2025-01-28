@@ -21,24 +21,24 @@ const MapComponent = () => {
    const [selectedRouteForReservation, setSelectedRouteForReservation] = useState(null);
 
    const getSegmentColor = (mode) => {
-       switch (mode) {
-           case 'car': return '#2196F3'; // Bleu pour la voiture
-           case 'bus': return '#FFC107'; // Jaune pour le bus
-           case 'train': return '#4CAF50'; // Vert pour le train
-           case 'plane': return '#FF9800'; // Orange pour l'avion
-           default: return '#666666'; // Gris par défaut
-       }
-   };
+    switch (mode) {
+        case 'TAXI': return '#2196F3';  // anciennement 'car'
+        case 'RATP': return '#FFC107';  // anciennement 'bus'
+        case 'SNCF': return '#4CAF50';  // anciennement 'train'
+        case 'AF': return '#FF9800';    // anciennement 'plane'
+        default: return '#666666';
+    }
+};
 
-   const getTransportIcon = (mode) => {
-       switch (mode) {
-           case 'car': return 'car-outline'; // Icône pour la voiture
-           case 'bus': return 'bus-outline'; // Icône pour le bus
-           case 'train': return 'train-outline'; // Icône pour le train
-           case 'plane': return 'airplane-outline'; // Icône pour l'avion
-           default: return 'navigate-outline'; // Icône par défaut
-       }
-   };
+const getTransportIcon = (mode) => {
+    switch (mode) {
+        case 'TAXI': return 'car-outline';      // anciennement 'car'
+        case 'RATP': return 'bus-outline';      // anciennement 'bus'
+        case 'SNCF': return 'train-outline';    // anciennement 'train'
+        case 'AF': return 'airplane-outline';   // anciennement 'plane'
+        default: return 'navigate-outline';
+    }
+};
 
    const convertGeoJSONtoCoordinates = (geometry) => {
        if (!geometry || !geometry.coordinates) return [];
@@ -69,43 +69,22 @@ const MapComponent = () => {
      setShowReservationModal(true);
    };
 
-   const handleConfirmReservation = async (formData) => {
-     try {
-       const reservationData = generateReservationJson(selectedRouteForReservation);
-       
-       reservationData.baggage = formData.baggage.hasBaggage ? 
-         Array(formData.baggage.count).fill().map((_, i) => i + 1) : [];
-       
-       reservationData.Assistance = 
-         Object.values(formData.specialAssistance).some(value => 
-           value === true || (typeof value === 'string' && value.length > 0)) ? 1 : 0;
+   const generateRandomTime = () => {
+    const hours = String(Math.floor(Math.random() * 24)).padStart(2, '0');
+    const minutes = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
 
-       reservationData.metadata = {
-         specialAssistance: formData.specialAssistance,
-         additionalInfo: formData.additionalInfo
-       };
-
-       const response = await fetch('http://172.20.10.7:80/api/reservation', {
-         method: "POST",
-         headers: {
-           Accept: "application/json",
-           'Content-Type': "application/json",
-         },
-         body: JSON.stringify(reservationData)
-       });
-
-       if (!response.ok) {
-         throw new Error('Erreur lors de la réservation');
-       }
-
-       Alert.alert('Succès', 'Réservation effectuée avec succès!', [
-         {text: 'OK', onPress: () => router.push('/Trajets')}
-       ]);
-     } catch (error) {
-       console.error('Erreur réservation:', error);
-       Alert.alert('Erreur', 'Impossible de finaliser la réservation. Veuillez réessayer.');
-     }
-   };
+  // Dans MapComponent, remplacer tout le handleConfirmReservation par :
+const handleConfirmReservation = async (formData) => {
+    try {
+      onClose();
+      router.push('/Trajets');
+    } catch (error) {
+      console.error('Erreur:', error);
+      Alert.alert('Erreur', 'Une erreur est survenue. Veuillez réessayer.');
+    }
+  };
 
    const fitMapToRoute = (route) => {
        if (!mapRef.current || !route) return;
@@ -178,18 +157,18 @@ const MapComponent = () => {
    };
 
    const showSegmentDetails = (segment) => {
-       Alert.alert(
-           'Détails du segment',
-           `${segment.mode === 'car' ? 'Trajet en voiture' : 
-             segment.mode === 'bus' ? 'Trajet en bus' : 
-             segment.mode === 'train' ? 'Trajet en train' : 
-             'Trajet en avion'}\n` +
-           `De: ${segment.from.name}\n` +
-           `À: ${segment.to.name}\n` +
-           `Durée: ${formatDuration(segment.duration)}\n` +
-           `Distance: ${Math.round(segment.distance / 1000)} km`
-       );
-   };
+    Alert.alert(
+        'Détails du segment',
+        `${segment.mode === 'TAXI' ? 'Trajet en voiture' : 
+          segment.mode === 'RATP' ? 'Trajet en bus' : 
+          segment.mode === 'SNCF' ? 'Trajet en train' : 
+          'Trajet en avion'}\n` +
+        `De: ${segment.from.name}\n` +
+        `À: ${segment.to.name}\n` +
+        `Durée: ${formatDuration(segment.duration)}\n` +
+        `Distance: ${Math.round(segment.distance / 1000)} km`
+    );
+};
 
    useEffect(() => {
        initializeData();
@@ -336,11 +315,11 @@ const MapComponent = () => {
            </View>
 
            <ReservationModal
-             visible={showReservationModal}
-             onClose={() => setShowReservationModal(false)}
-             onConfirm={handleConfirmReservation}
-             route={selectedRouteForReservation}
-           />
+  visible={showReservationModal}
+  onClose={() => setShowReservationModal(false)}
+  onConfirm={() => router.push('/Trajets')}
+  route={selectedRouteForReservation}
+/>
        </View>
    );
 };

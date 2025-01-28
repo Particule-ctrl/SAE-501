@@ -1,432 +1,592 @@
 import React, { useState } from 'react';
 import {
- Modal,
- View,
- Text,
- TouchableOpacity,
- TextInput,
- ScrollView,
- Switch,
- StyleSheet,
- Alert,
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  Switch,
+  StyleSheet,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getAuth } from 'firebase/auth';
+
+// Fonction utilitaire pour générer une heure aléatoire
+const generateRandomTime = () => {
+  const hours = String(Math.floor(Math.random() * 24)).padStart(2, '0');
+  const minutes = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
 
 const ReservationModal = ({ visible, onClose, onConfirm, route }) => {
- const [step, setStep] = useState(1);
- const [formData, setFormData] = useState({
-   baggage: {
-     hasBaggage: false,
-     count: 0,
-     specialBaggage: '',
-   },
-   specialAssistance: {
-     wheelchair: false,
-     visualAssistance: false,
-     hearingAssistance: false,
-     otherAssistance: '',
-   },
-   security: {
-     validDocuments: false,
-     documentsExpiry: '',
-     dangerousItems: [],
-     liquidVolume: '',
-     medicalEquipment: '',
-     securityQuestions: {
-       packedOwn: false,
-       leftUnattended: false,
-       acceptedItems: false,
-       receivedItems: false,
-       dangerousGoods: false
-     },
-     declarations: {
-       weaponsFirearms: false,
-       explosives: false,
-       flammableMaterials: false,
-       radioactiveMaterials: false,
-       toxicSubstances: false,
-       compressedGases: false,
-       illegalDrugs: false
-     }
-   },
-   additionalInfo: {
-     emergencyContact: '',
-     medicalInfo: '',
-     dietaryRestrictions: '',
-   },
- });
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    baggage: {
+      hasBaggage: false,
+      count: 0,
+      specialBaggage: '',
+    },
+    specialAssistance: {
+      wheelchair: false,
+      visualAssistance: false,
+      hearingAssistance: false,
+      otherAssistance: '',
+    },
+    security: {
+      validDocuments: false,
+      documentsExpiry: '',
+      dangerousItems: [],
+      liquidVolume: '',
+      medicalEquipment: '',
+      securityQuestions: {
+        packedOwn: false,
+        leftUnattended: false,
+        acceptedItems: false,
+        receivedItems: false,
+        dangerousGoods: false
+      },
+      declarations: {
+        weaponsFirearms: false,
+        explosives: false,
+        flammableMaterials: false,
+        radioactiveMaterials: false,
+        toxicSubstances: false,
+        compressedGases: false,
+        illegalDrugs: false
+      }
+    },
+    additionalInfo: {
+      emergencyContact: '',
+      medicalInfo: '',
+      dietaryRestrictions: '',
+    },
+  });
 
- const updateFormData = (section, field, value) => {
-   setFormData((prev) => ({
-     ...prev,
-     [section]: {
-       ...prev[section],
-       [field]: value,
-     },
-   }));
- };
+  const updateFormData = (section, field, value) => {
+    setFormData(prev => {
+      if (typeof value === 'object') {
+        // Pour les mises à jour d'objets imbriqués (comme les declarations)
+        return {
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: {
+              ...prev[section][field],
+              ...value
+            }
+          }
+        };
+      } else {
+        // Pour les mises à jour simples
+        return {
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: value
+          }
+        };
+      }
+    });
+  };
 
- const BaggageStep = () => (
-   <ScrollView style={styles.stepContainer}>
-     <Text style={styles.stepTitle}>Bagages</Text>
+  // Fonction pour formater les données selon le schéma MongoDB
+  
+  const generateReservationJson = () => {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    const idDossier = Math.floor(Math.random() * 1000000);
+  
+    // Création de l'objet de données formaté
+  
+    console.log('Données formatées:', formattedData);
+    return formattedData;
+  };
+  
+  const handleSubmitReservation = async () => {
+    try {
+      console.log('Préparation des données de réservation...');
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+  
+      // Récupérer l'ID du PMR depuis l'API
+      const userResponse = await fetch('http://172.20.10.7:80/api/user/all');
+      const users = await userResponse.json();
+      const userFound = users.find(user => user.googleUUID === currentUser?.uid);
+  
+      if (!userFound) {
+        throw new Error('Utilisateur non trouvé');
+      }
+  
+      const idDossier = Math.floor(Math.random() * 1000000);
+  
+      const reservationData = {
+        idDossier,
+        idPMR: userFound.id, // Utilisation de l'ID du PMR trouvé
+        googleId: currentUser?.uid || '',
+        enregistre: true,
+        sousTrajets: route.segments.map((segment, index) => ({
+          BD: segment.mode.toUpperCase(),
+          numDossier: idDossier + index,
+          statusValue: 0,
+          heure: generateRandomTime()
+        })),
+        bagage: {
+          bagagesList: formData.baggage.hasBaggage ? Array(formData.baggage.count).fill(1) : [],
+          specialBagage: formData.baggage.specialBaggage
+        },
+        specialAssistance: {
+          wheelchair: formData.specialAssistance.wheelchair,
+          visualAssistance: formData.specialAssistance.visualAssistance,
+          hearingAssistance: formData.specialAssistance.hearingAssistance,
+          otherAssistance: formData.specialAssistance.otherAssistance
+        },
+        security: {
+          validDocuments: formData.security.validDocuments,
+          documentsExpiry: formData.security.documentsExpiry,
+          dangerousItems: formData.security.dangerousItems,
+          liquidVolume: formData.security.liquidVolume,
+          medicalEquipment: formData.security.medicalEquipment,
+          securityQuestions: formData.security.securityQuestions,
+          declarations: formData.security.declarations
+        },
+        additionalInfo: formData.additionalInfo
+      };
+  
+      console.log('Envoi des données:', reservationData);
+  
+      const response = await fetch('http://172.20.10.7:80/api/reservation', {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          'Content-Type': "application/json",
+        },
+        body: JSON.stringify(reservationData)
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+  
+      const responseData = await response.json();
+      return { success: true, data: responseData };
+    } catch (error) {
+      console.error('Erreur réservation:', error);
+      return { success: false, error };
+    }
+  };
 
-     <View style={styles.switchContainer}>
-       <Text style={styles.label}>Avez-vous des bagages ?</Text>
-       <Switch
-         value={formData.baggage.hasBaggage}
-         onValueChange={(value) => updateFormData('baggage', 'hasBaggage', value)}
-         ios_backgroundColor="#3e3e3e"
-       />
-     </View>
+  
 
-     {formData.baggage.hasBaggage && (
-       <>
-         <Text style={styles.label}>Nombre de bagages</Text>
-         <TextInput
-           style={styles.input}
-           keyboardType="numeric"
-           value={formData.baggage.count.toString()}
-           onChangeText={(value) => updateFormData('baggage', 'count', parseInt(value) || 0)}
-           placeholder="Nombre de bagages"
-           placeholderTextColor="#888"
-         />
+  const BaggageStep = () => (
+    <ScrollView style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>Bagages</Text>
 
-         <Text style={styles.label}>Bagages spéciaux</Text>
-         <TextInput
-           style={[styles.input, styles.textArea]}
-           multiline
-           value={formData.baggage.specialBaggage}
-           onChangeText={(value) => updateFormData('baggage', 'specialBaggage', value)}
-           placeholder="Description des bagages spéciaux"
-           placeholderTextColor="#888"
-         />
-       </>
-     )}
-   </ScrollView>
- );
+      <View style={styles.switchContainer}>
+        <Text style={styles.label}>Avez-vous des bagages ?</Text>
+        <Switch
+          value={formData.baggage.hasBaggage}
+          onValueChange={(value) => updateFormData('baggage', 'hasBaggage', value)}
+          ios_backgroundColor="#3e3e3e"
+        />
+      </View>
 
- const AssistanceStep = () => (
-   <ScrollView style={styles.stepContainer}>
-     <Text style={styles.stepTitle}>Assistance Spéciale</Text>
+      {formData.baggage.hasBaggage && (
+        <>
+          <Text style={styles.label}>Nombre de bagages</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={formData.baggage.count.toString()}
+            onChangeText={(value) => updateFormData('baggage', 'count', parseInt(value) || 0)}
+            placeholder="Nombre de bagages"
+            placeholderTextColor="#888"
+          />
 
-     <View style={styles.switchContainer}>
-       <Text style={styles.label}>Fauteuil roulant</Text>
-       <Switch
-         value={formData.specialAssistance.wheelchair}
-         onValueChange={(value) => updateFormData('specialAssistance', 'wheelchair', value)}
-         ios_backgroundColor="#3e3e3e"
-       />
-     </View>
+          <Text style={styles.label}>Bagages spéciaux</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            multiline
+            value={formData.baggage.specialBaggage}
+            onChangeText={(value) => updateFormData('baggage', 'specialBaggage', value)}
+            placeholder="Description des bagages spéciaux"
+            placeholderTextColor="#888"
+          />
+        </>
+      )}
+    </ScrollView>
+  );
 
-     <View style={styles.switchContainer}>
-       <Text style={styles.label}>Assistance visuelle</Text>
-       <Switch
-         value={formData.specialAssistance.visualAssistance}
-         onValueChange={(value) => updateFormData('specialAssistance', 'visualAssistance', value)}
-         ios_backgroundColor="#3e3e3e"
-       />
-     </View>
+  const AssistanceStep = () => (
+    <ScrollView style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>Assistance Spéciale</Text>
 
-     <View style={styles.switchContainer}>
-       <Text style={styles.label}>Assistance auditive</Text>
-       <Switch
-         value={formData.specialAssistance.hearingAssistance}
-         onValueChange={(value) => updateFormData('specialAssistance', 'hearingAssistance', value)}
-         ios_backgroundColor="#3e3e3e"
-       />
-     </View>
+      <View style={styles.switchContainer}>
+        <Text style={styles.label}>Fauteuil roulant</Text>
+        <Switch
+          value={formData.specialAssistance.wheelchair}
+          onValueChange={(value) => updateFormData('specialAssistance', 'wheelchair', value)}
+          ios_backgroundColor="#3e3e3e"
+        />
+      </View>
 
-     <Text style={styles.label}>Autre assistance requise</Text>
-     <TextInput
-       style={[styles.input, styles.textArea]}
-       multiline
-       value={formData.specialAssistance.otherAssistance}
-       onChangeText={(value) => updateFormData('specialAssistance', 'otherAssistance', value)}
-       placeholder="Précisez vos besoins d'assistance"
-       placeholderTextColor="#888"
-     />
-   </ScrollView>
- );
+      <View style={styles.switchContainer}>
+        <Text style={styles.label}>Assistance visuelle</Text>
+        <Switch
+          value={formData.specialAssistance.visualAssistance}
+          onValueChange={(value) => updateFormData('specialAssistance', 'visualAssistance', value)}
+          ios_backgroundColor="#3e3e3e"
+        />
+      </View>
 
- const SecurityStep = () => (
-   <ScrollView style={styles.stepContainer}>
-     <Text style={styles.stepTitle}>Vérification de Sécurité</Text>
+      <View style={styles.switchContainer}>
+        <Text style={styles.label}>Assistance auditive</Text>
+        <Switch
+          value={formData.specialAssistance.hearingAssistance}
+          onValueChange={(value) => updateFormData('specialAssistance', 'hearingAssistance', value)}
+          ios_backgroundColor="#3e3e3e"
+        />
+      </View>
 
-     <View style={styles.securitySection}>
-       <View style={styles.iconHeader}>
-         <Ionicons name="document-text" size={24} color="#12B3A8" />
-         <Text style={styles.sectionTitle}>Documents de Voyage</Text>
-       </View>
-       <View style={styles.switchContainer}>
-         <Text style={styles.label}>Je confirme avoir des documents d'identité valides</Text>
-         <Switch
-           value={formData.security.validDocuments}
-           onValueChange={(value) => updateFormData('security', 'validDocuments', value)}
-           ios_backgroundColor="#3e3e3e"
-         />
-       </View>
-     </View>
+      <Text style={styles.label}>Autre assistance requise</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        multiline
+        value={formData.specialAssistance.otherAssistance}
+        onChangeText={(value) => updateFormData('specialAssistance', 'otherAssistance', value)}
+        placeholder="Précisez vos besoins d'assistance"
+        placeholderTextColor="#888"
+      />
+    </ScrollView>
+  );
 
-     <View style={styles.securitySection}>
-       <View style={styles.iconHeader}>
-         <Ionicons name="warning" size={24} color="#12B3A8" />
-         <Text style={styles.sectionTitle}>Déclarations de Non-Transport</Text>
-       </View>
-       {Object.entries({
-         weaponsFirearms: { icon: 'flash', label: 'Je déclare ne pas transporter d\'armes ou munitions' },
-         explosives: { icon: 'nuclear', label: 'Je déclare ne pas transporter d\'explosifs' },
-         flammableMaterials: { icon: 'flame', label: 'Je déclare ne pas transporter de matières inflammables' },
-         radioactiveMaterials: { icon: 'radio', label: 'Je déclare ne pas transporter de matières radioactives' },
-         toxicSubstances: { icon: 'skull', label: 'Je déclare ne pas transporter de substances toxiques' },
-         compressedGases: { icon: 'cube', label: 'Je déclare ne pas transporter de gaz comprimés' },
-         illegalDrugs: { icon: 'medkit', label: 'Je déclare ne pas transporter de substances illicites' }
-       }).map(([key, { icon, label }]) => (
-         <View key={key} style={styles.checkItem}>
-           <Ionicons name={icon} size={20} color="white" />
-           <Text style={styles.checkLabel}>{label}</Text>
-           <Switch
-             value={formData.security.declarations[key]}
-             onValueChange={(value) => {
-               updateFormData('security', 'declarations', {
-                 ...formData.security.declarations,
-                 [key]: value
-               });
-             }}
-             ios_backgroundColor="#3e3e3e"
-           />
-         </View>
-       ))}
-     </View>
+  const SecurityStep = () => (
+    <ScrollView style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>Vérification de Sécurité</Text>
 
-     <View style={styles.securitySection}>
-       <View style={styles.iconHeader}>
-         <Ionicons name="help-circle" size={24} color="#12B3A8" />
-         <Text style={styles.sectionTitle}>Questions de Sécurité</Text>
-       </View>
-       {[
-         { key: 'packedOwn', label: 'Avez-vous fait vos bagages vous-même ?' },
-         { key: 'leftUnattended', label: 'Vos bagages sont-ils restés sous votre surveillance ?' },
-         { key: 'acceptedItems', label: 'Avez-vous accepté des objets d\'autres personnes ?' },
-         { key: 'receivedItems', label: 'Transportez-vous des objets pour d\'autres personnes ?' }
-       ].map(({ key, label }) => (
-         <View key={key} style={styles.questionItem}>
-           <Text style={styles.questionText}>{label}</Text>
-           <Switch
-             value={formData.security.securityQuestions[key]}
-             onValueChange={(value) => {
-               updateFormData('security', 'securityQuestions', {
-                 ...formData.security.securityQuestions,
-                 [key]: value
-               });
-             }}
-             ios_backgroundColor="#3e3e3e"
-           />
-         </View>
-       ))}
-     </View>
-
-     <View style={styles.securitySection}>
-       <View style={styles.iconHeader}>
-         <Ionicons name="medical" size={24} color="#12B3A8" />
-         <Text style={styles.sectionTitle}>Équipement Médical</Text>
-       </View>
-       <TextInput
-         style={[styles.input, styles.textArea]}
-         multiline
-         value={formData.security.medicalEquipment}
-         onChangeText={(value) => updateFormData('security', 'medicalEquipment', value)}
-         placeholder="Décrivez tout équipement médical nécessaire"
-         placeholderTextColor="#888"
-       />
-     </View>
-   </ScrollView>
- );
-
- const AdditionalInfoStep = () => (
-   <ScrollView style={styles.stepContainer}>
-     <Text style={styles.stepTitle}>Informations Complémentaires</Text>
-
-     <Text style={styles.label}>Contact d'urgence</Text>
-     <TextInput
-       style={styles.input}
-       value={formData.additionalInfo.emergencyContact}
-       onChangeText={(value) => updateFormData('additionalInfo', 'emergencyContact', value)}
-       placeholder="Nom et numéro de téléphone"
-       placeholderTextColor="#888"
-     />
-
-     <Text style={styles.label}>Informations médicales importantes</Text>
-     <TextInput
-       style={[styles.input, styles.textArea]}
-       multiline
-       value={formData.additionalInfo.medicalInfo}
-       onChangeText={(value) => updateFormData('additionalInfo', 'medicalInfo', value)}
-       placeholder="Allergies, médicaments, etc."
-       placeholderTextColor="#888"
-     />
-
-     <Text style={styles.label}>Restrictions alimentaires</Text>
-     <TextInput
-       style={styles.input}
-       value={formData.additionalInfo.dietaryRestrictions}
-       onChangeText={(value) => updateFormData('additionalInfo', 'dietaryRestrictions', value)}
-       placeholder="Régime particulier"
-       placeholderTextColor="#888"
-     />
-   </ScrollView>
- );
-
- const ConfirmationStep = () => (
-   <ScrollView style={styles.stepContainer}>
-     <Text style={styles.stepTitle}>Confirmation de Réservation</Text>
-
-     <View style={styles.summarySection}>
-       <Text style={styles.summaryTitle}>Itinéraire</Text>
-       {route.segments.map((segment, index) => (
-         <View key={index} style={styles.segmentSummary}>
-           <Ionicons
-             name={segment.mode === 'train' ? 'train' : segment.mode === 'plane' ? 'airplane' : 'car'}
-             size={24}
-             color="#12B3A8"
-           />
-           <Text style={styles.segmentText}>
-             {segment.from.name} → {segment.to.name}
-           </Text>
-         </View>
-       ))}
-     </View>
-
-     <View style={styles.summarySection}>
-       <Text style={styles.summaryTitle}>Bagages</Text>
-       <Text style={styles.summaryText}>
-         {formData.baggage.hasBaggage
-           ? `${formData.baggage.count} bagage(s)${
-               formData.baggage.specialBaggage ? '\nSpécial: ' + formData.baggage.specialBaggage : ''
-             }`
-           : 'Aucun bagage'}
-       </Text>
-     </View>
-
-     <View style={styles.summarySection}>
-       <Text style={styles.summaryTitle}>Assistance</Text>
-       <Text style={styles.summaryText}>
-         {[
-           formData.specialAssistance.wheelchair ? '- Fauteuil roulant' : '',
-           formData.specialAssistance.visualAssistance ? '- Assistance visuelle' : '',
-           formData.specialAssistance.hearingAssistance ? '- Assistance auditive' : '',
-           formData.specialAssistance.otherAssistance ? `- ${formData.specialAssistance.otherAssistance}` : '',
-         ]
-           .filter(Boolean)
-           .join('\n') || 'Aucune assistance requise'}
-       </Text>
-     </View>
-
-     <View style={styles.summarySection}>
-       <Text style={styles.summaryTitle}>Informations Médicales</Text>
-       <Text style={styles.summaryText}>
-         {formData.additionalInfo.medicalInfo || 'Aucune information médicale fournie'}
-       </Text>
-     </View>
-   </ScrollView>
- );
-
- const renderCurrentStep = () => {
-   switch (step) {
-     case 1:
-       return <BaggageStep />;
-     case 2:
-       return <AssistanceStep />;
-     case 3:
-       return <SecurityStep />;
-     case 4:
-       return <AdditionalInfoStep />;
-     case 5:
-       return <ConfirmationStep />;
-     default:
-       return null;
-   }
- };
-
- const validateSecurityStep = () => {
-   if (!formData.security.validDocuments) {
-     Alert.alert('Documents Invalides', 'Vous devez confirmer avoir des documents valides.');
-     return false;
-   }
-
-   const declarations = formData.security.declarations;
-   const allDeclared = Object.values(declarations).every(value => value === true);
-
-   if (!allDeclared) {
-     Alert.alert(
-       'Déclarations Requises',
-       'Vous devez confirmer toutes les déclarations de non-transport d\'objets interdits.'
-     );
-     return false;
-   }
-
-   if (!formData.security.securityQuestions.packedOwn) {
-     Alert.alert('Vérification de Sécurité', 'Vous devez avoir fait vos bagages vous-même.');
-     return false;
-   }
-
-   if (formData.security.securityQuestions.leftUnattended ||
-       formData.security.securityQuestions.acceptedItems ||
-       formData.security.securityQuestions.receivedItems) {
-     Alert.alert('Alerte de Sécurité', 'Vos réponses aux questions de sécurité ne permettent pas de poursuivre la réservation.');
-     return false;
-   }
-
-   return true;
- };
-
- const handleNext = () => {
-   if (step === 3) {
-     if (!validateSecurityStep()) {
-       return;
-     }
-   }
-
-   if (step < 5) {
-     setStep(step + 1);
-   } else {
-     onConfirm(formData);
-   }
- };
-
- const handleBack = () => {
-  if (step > 1) {
-    setStep(step - 1);
-  } else {
-    onClose();
-  }
- };
- 
- return (
-  <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
-    <View style={styles.modalOverlay}>
-      <View style={styles.modalContent}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Étape {step}/5</Text>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Ionicons name="close" size={24} color="white" />
-          </TouchableOpacity>
+      <View style={styles.securitySection}>
+        <View style={styles.iconHeader}>
+          <Ionicons name="document-text" size={24} color="#12B3A8" />
+          <Text style={styles.sectionTitle}>Documents de Voyage</Text>
         </View>
- 
-        {renderCurrentStep()}
- 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Text style={styles.buttonText}>{step === 1 ? 'Annuler' : 'Retour'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-            <Text style={styles.buttonText}>{step === 5 ? 'Confirmer' : 'Suivant'}</Text>
-          </TouchableOpacity>
+        <View style={styles.switchContainer}>
+          <Text style={styles.label}>Je confirme avoir des documents d'identité valides</Text>
+          <Switch
+            value={formData.security.validDocuments}
+            onValueChange={(value) => updateFormData('security', 'validDocuments', value)}
+            ios_backgroundColor="#3e3e3e"
+          />
         </View>
       </View>
-    </View>
-  </Modal>
- );
- };
+
+      <View style={styles.securitySection}>
+        <View style={styles.iconHeader}>
+          <Ionicons name="warning" size={24} color="#12B3A8" />
+          <Text style={styles.sectionTitle}>Déclarations de Non-Transport</Text>
+        </View>
+        {Object.entries({
+          weaponsFirearms: { icon: 'flash', label: 'Je déclare ne pas transporter d\'armes ou munitions' },
+          explosives: { icon: 'nuclear', label: 'Je déclare ne pas transporter d\'explosifs' },
+          flammableMaterials: { icon: 'flame', label: 'Je déclare ne pas transporter de matières inflammables' },
+          radioactiveMaterials: { icon: 'radio', label: 'Je déclare ne pas transporter de matières radioactives' },
+          toxicSubstances: { icon: 'skull', label: 'Je déclare ne pas transporter de substances toxiques' },
+          compressedGases: { icon: 'cube', label: 'Je déclare ne pas transporter de gaz comprimés' },
+          illegalDrugs: { icon: 'medkit', label: 'Je déclare ne pas transporter de substances illicites' }
+        }).map(([key, { icon, label }]) => (
+          <View key={key} style={styles.checkItem}>
+            <Ionicons name={icon} size={20} color="white" />
+            <Text style={styles.checkLabel}>{label}</Text>
+            <Switch
+              value={formData.security.declarations[key] || false}
+              onValueChange={(value) => {
+                const updatedDeclarations = {
+                  ...formData.security.declarations,
+                  [key]: value
+                };
+                updateFormData('security', 'declarations', updatedDeclarations);
+              }}
+              ios_backgroundColor="#3e3e3e"
+            />
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.securitySection}>
+        <View style={styles.iconHeader}>
+          <Ionicons name="help-circle" size={24} color="#12B3A8" />
+          <Text style={styles.sectionTitle}>Questions de Sécurité</Text>
+        </View>
+        {[
+          { key: 'packedOwn', label: 'Avez-vous fait vos bagages vous-même ?' },
+          { key: 'leftUnattended', label: 'Vos bagages sont-ils restés sous votre surveillance ?' },
+          { key: 'acceptedItems', label: 'Avez-vous accepté des objets d\'autres personnes ?' },
+          { key: 'receivedItems', label: 'Transportez-vous des objets pour d\'autres personnes ?' }
+        ].map(({ key, label }) => (
+          <View key={key} style={styles.questionItem}>
+            <Text style={styles.questionText}>{label}</Text>
+            <Switch
+              value={formData.security.securityQuestions[key] || false}
+              onValueChange={(value) => {
+                const updatedQuestions = {
+                  ...formData.security.securityQuestions,
+                  [key]: value
+                };
+                updateFormData('security', 'securityQuestions', updatedQuestions);
+              }}
+              ios_backgroundColor="#3e3e3e"
+            />
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.securitySection}>
+        <View style={styles.iconHeader}>
+          <Ionicons name="medical" size={24} color="#12B3A8" />
+          <Text style={styles.sectionTitle}>Équipement Médical</Text>
+        </View>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          multiline
+          value={formData.security.medicalEquipment}
+          onChangeText={(value) => updateFormData('security', 'medicalEquipment', value)}
+          placeholder="Décrivez tout équipement médical nécessaire"
+          placeholderTextColor="#888"
+        />
+      </View>
+    </ScrollView>
+  );
+
+  const AdditionalInfoStep = () => (
+    <ScrollView style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>Informations Complémentaires</Text>
+
+      <Text style={styles.label}>Contact d'urgence</Text>
+      <TextInput
+        style={styles.input}
+        value={formData.additionalInfo.emergencyContact}
+        onChangeText={(value) => updateFormData('additionalInfo', 'emergencyContact', value)}
+        placeholder="Nom et numéro de téléphone"
+        placeholderTextColor="#888"
+      />
+
+      <Text style={styles.label}>Informations médicales importantes</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        multiline
+        value={formData.additionalInfo.medicalInfo}
+        onChangeText={(value) => updateFormData('additionalInfo', 'medicalInfo', value)}
+        placeholder="Allergies, médicaments, etc."
+        placeholderTextColor="#888"
+      />
+
+      <Text style={styles.label}>Restrictions alimentaires</Text>
+      <TextInput
+        style={styles.input}
+        value={formData.additionalInfo.dietaryRestrictions}
+        onChangeText={(value) => updateFormData('additionalInfo', 'dietaryRestrictions', value)}
+        placeholder="Régime particulier"
+        placeholderTextColor="#888"
+      />
+    </ScrollView>
+  );
+
+  const ConfirmationStep = () => (
+    <ScrollView style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>Confirmation de Réservation</Text>
+
+      <View style={styles.summarySection}>
+        <Text style={styles.summaryTitle}>Itinéraire</Text>
+        {route.segments.map((segment, index) => (
+          <View key={index} style={styles.segmentSummary}>
+            <Ionicons
+              name={segment.mode === 'train' ? 'train' : segment.mode === 'plane' ? 'airplane' : 'car'}
+              size={24}
+              color="#12B3A8"
+            />
+            <Text style={styles.segmentText}>
+              {segment.from.name} → {segment.to.name}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.summarySection}>
+        <Text style={styles.summaryTitle}>Bagages</Text>
+        <Text style={styles.summaryText}>
+          {formData.baggage.hasBaggage
+            ? `${formData.baggage.count} bagage(s)${
+                formData.baggage.specialBaggage ? '\nSpécial: ' + formData.baggage.specialBaggage : ''
+              }`
+            : 'Aucun bagage'}
+        </Text>
+      </View>
+
+      <View style={styles.summarySection}>
+        <Text style={styles.summaryTitle}>Assistance</Text>
+        <Text style={styles.summaryText}>
+          {[
+            formData.specialAssistance.wheelchair ? '- Fauteuil roulant' : '',
+            formData.specialAssistance.visualAssistance ? '- Assistance visuelle' : '',
+            formData.specialAssistance.hearingAssistance ? '- Assistance auditive' : '',
+            formData.specialAssistance.otherAssistance ? `- ${formData.specialAssistance.otherAssistance}` : '',
+          ]
+            .filter(Boolean)
+            .join('\n') || 'Aucune assistance requise'}
+        </Text>
+      </View>
+
+      <View style={styles.summarySection}>
+        <Text style={styles.summaryTitle}>Informations Médicales</Text>
+        <Text style={styles.summaryText}>
+          {formData.additionalInfo.medicalInfo || 'Aucune information médicale fournie'}
+        </Text>
+      </View>
+    </ScrollView>
+  );
+
+  const validateSecurityStep = () => {
+    if (!formData.security.validDocuments) {
+      Alert.alert('Documents Invalides', 'Vous devez confirmer avoir des documents valides.');
+      return false;
+    }
+
+    const declarations = formData.security.declarations;
+    const allDeclared = Object.values(declarations).every(value => value === true);
+
+    if (!allDeclared) {
+      Alert.alert(
+        'Déclarations Requises',
+        'Vous devez confirmer toutes les déclarations de non-transport d\'objets interdits.'
+      );
+      return false;
+    }
+
+    if (!formData.security.securityQuestions.packedOwn) {
+      Alert.alert('Vérification de Sécurité', 'Vous devez avoir fait vos bagages vous-même.');
+      return false;
+    }
+
+    if (formData.security.securityQuestions.leftUnattended ||
+        formData.security.securityQuestions.acceptedItems ||
+        formData.security.securityQuestions.receivedItems) {
+      Alert.alert('Alerte de Sécurité', 'Vos réponses aux questions de sécurité ne permettent pas de poursuivre la réservation.');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleConfirmation = async () => {
+    try {
+      const result = await handleSubmitReservation();
+      
+      if (result.success) {
+        Alert.alert(
+          'Succès',
+          'Votre réservation a été confirmée avec succès',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                onClose(); // Ferme d'abord le modal
+                onConfirm(); // Puis redirige vers la page Trajets
+              }
+            }
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Erreur',
+          'Une erreur est survenue lors de la confirmation de la réservation',
+          [
+            {
+              text: 'OK',
+              style: 'cancel'
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Erreur lors de la confirmation:', error);
+      Alert.alert(
+        'Erreur',
+        'Une erreur est survenue lors de la confirmation de la réservation',
+        [
+          {
+            text: 'OK',
+            style: 'cancel'
+          }
+        ]
+      );
+    }
+  };
+
+  const renderCurrentStep = () => {
+    switch (step) {
+      case 1:
+        return <BaggageStep />;
+      case 2:
+        return <AssistanceStep />;
+      case 3:
+        return <SecurityStep />;
+      case 4:
+        return <AdditionalInfoStep />;
+      case 5:
+        return <ConfirmationStep />;
+      default:
+        return null;
+    }
+  };
+
+  const handleNext = () => {
+    if (step === 3) {
+      if (!validateSecurityStep()) {
+        return;
+      }
+    }
+
+    if (step < 5) {
+      setStep(step + 1);
+    } else {
+      handleConfirmation();
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    } else {
+      onClose();
+    }
+  };
+
+  return (
+    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.header}>
+            <Text style={styles.headerText}>Étape {step}/5</Text>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Ionicons name="close" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          {renderCurrentStep()}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+              <Text style={styles.buttonText}>{step === 1 ? 'Annuler' : 'Retour'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+              <Text style={styles.buttonText}>{step === 5 ? 'Confirmer' : 'Suivant'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 const styles = StyleSheet.create({
   modalOverlay: {

@@ -22,10 +22,7 @@ import { auth, db } from './firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
 import { CameraView as ExpoCamera, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImageManipulator from 'expo-image-manipulator';
-import TextRecognition from '@react-native-ml-kit/text-recognition';
 import bcrypt from 'react-native-bcrypt';
-
 
 // Composant de barre de progression
 const ProgressBar = ({ steps, currentStep }) => {
@@ -61,9 +58,8 @@ export default function Register() {
   const [note, setNote] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-
-  // address ip 
-  const ipaddress = ' 172.20.10.7';
+  // Adresse IP de l'API
+  const ipaddress = '172.20.10.7';
 
   // États pour la caméra
   const [cameraActive, setCameraActive] = useState(false);
@@ -88,7 +84,7 @@ export default function Register() {
     lastName: '',
     age: '',
     birthdate: '',
-    civility: ''
+    civility: '',
   });
 
   // État pour gérer l'étape actuelle
@@ -100,7 +96,6 @@ export default function Register() {
 
   const navigation = useNavigation();
 
-
   // Masquer l'en-tête de la navigation
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -110,12 +105,10 @@ export default function Register() {
 
   useEffect(() => {
     (async () => {
-      const { status } = await useCameraPermissions();
+      const { status } = await requestPermission();
       setHasPermission(status === 'granted');
     })();
   }, []);
-
- 
 
   // Fonction pour formater la date de naissance
   const formatBirthdate = (text) => {
@@ -130,14 +123,14 @@ export default function Register() {
   };
 
   const formatISOBirthdate = (text) => {
-    let birthdateArray = birthdate.split('/');
+    let birthdateArray = text.split('/');
     const jour = birthdateArray[0].padStart(2, '0');
     const mois = birthdateArray[1].padStart(2, '0');
     const annee = birthdateArray[2];
 
     // Retourne la date au format AAAA-MM-JJ
     return `${annee}-${mois}-${jour}`;
-  }
+  };
 
   // Fonction pour gérer l'activation de la caméra
   const handleScanPress = async () => {
@@ -148,11 +141,11 @@ export default function Register() {
         {
           text: "En savoir plus",
           onPress: () => router.push("/cgu"),
-          style: "default"
+          style: "default",
         },
         {
           text: "Refuser",
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "Accepter",
@@ -169,7 +162,7 @@ export default function Register() {
                     "L'accès à la caméra est nécessaire pour scanner votre carte d'identité.",
                     [
                       { text: "Réessayer", onPress: handleScanPress },
-                      { text: "Annuler", style: "cancel" }
+                      { text: "Annuler", style: "cancel" },
                     ]
                   );
                 }
@@ -181,127 +174,81 @@ export default function Register() {
               console.error("Erreur lors de la demande de permission:", error);
               Alert.alert("Erreur", "Impossible d'accéder à la caméra. Veuillez vérifier vos paramètres.");
             }
-          }
-        }
+          },
+        },
       ],
       { cancelable: false }
     );
   };
 
-  // Fonction pour extraire les informations du texte
-  const extractInfoFromText = (text) => {
-    const lines = text.split('\n').map(line => line.trim());
-    let result = {
-      firstName: '',
-      lastName: '',
-      birthdate: '',
-      civility: '',
-      found: false
-    };
-  
-    let foundNames = [];
-    
-    lines.forEach((line) => {
-      console.log("Analysing line:", line);
-  
-      const dateMatch = line.match(/(\d{2}[/.]\d{2}[/.]\d{4}|\d{2}\s+\d{2}\s+\d{4})/);
-      if (dateMatch) {
-        result.birthdate = dateMatch[1].replace(/\s+/g, '/');
-        result.found = true;
-      }
-  
-      if (/^[A-ZÀ-Ÿ\s-]{2,}$/.test(line) && 
-          !line.includes('CARTE') && 
-          !line.includes('IDENTITE')) {
-        foundNames.push(line.trim());
-      }
-  
-      if (/^[MF]$/.test(line.trim())) {
-        result.civility = line.trim() === 'M' ? 'Mr' : 'Mme';
-        result.found = true;
-      }
-    });
-  
-    if (foundNames.length >= 2) {
-      result.lastName = foundNames[0];
-      result.firstName = foundNames[1];
-      result.found = true;
-    }
-  
-    return result;
-  };
-
   // Fonction pour prendre la photo
   const takePicture = async () => {
     if (cameraRef.current) {
-        try {
-            setIsLoading(true); // Activer le chargement
-            const photo = await cameraRef.current.takePictureAsync({
-                quality: 1,
-            });
+      try {
+        setIsLoading(true); // Activer le chargement
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 1,
+        });
 
-            const formData = new FormData();
-            formData.append('image', {
-                uri: photo.uri,
-                type: 'image/jpeg',
-                name: 'id_card.jpg',
-            });
+        const formData = new FormData();
+        formData.append('image', {
+          uri: photo.uri,
+          type: 'image/jpeg',
+          name: 'id_card.jpg',
+        });
 
-            const response = await fetch('http://172.20.10.7:80/api/textrecognition/analyze', {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'multipart/form-data',
-                },
-                body: formData
-            });
+        const response = await fetch(`http://${ipaddress}:80/api/textrecognition/analyze`, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'multipart/form-data',
+          },
+          body: formData,
+        });
 
-            if (!response.ok) {
-                throw new Error('Server response was not ok');
-            }
-
-            const extractedInfo = await response.json();
-
-            if (extractedInfo.data) {
-                Alert.alert(
-                    "Informations trouvées",
-                    `Nom: ${extractedInfo.data.lastName}\nPrénom: ${extractedInfo.data.firstName}\nDate de naissance: ${extractedInfo.data.birthdate}\nCivilité: ${extractedInfo.data.civility}\n\nVoulez-vous utiliser ces informations ?`,
-                    [
-                        {
-                            text: "Oui",
-                            onPress: () => {
-                                setFirstName(extractedInfo.data.firstName);
-                                setLastName(extractedInfo.data.lastName);
-                                setBirthdate(extractedInfo.data.birthdate);
-                                setCivility(extractedInfo.data.civility);
-                                setCameraActive(false);
-                            }
-                        },
-                        {
-                            text: "Non",
-                            style: "cancel",
-                            onPress: () => setCameraActive(false)
-                        }
-                    ]
-                );
-            } else {
-                Alert.alert(
-                    "Attention",
-                    "Aucune information n'a pu être extraite de l'image. Veuillez réessayer avec une photo plus nette ou remplir les champs manuellement.",
-                    [{ text: "OK" }]
-                );
-            }
-        } catch (error) {
-            console.error("Erreur lors de la prise de photo :", error);
-            Alert.alert(
-                "Erreur",
-                "Impossible de traiter l'image. Veuillez réessayer."
-            );
-        } finally {
-            setIsLoading(false); // Désactiver le chargement
+        if (!response.ok) {
+          throw new Error('Server response was not ok');
         }
+
+        const extractedInfo = await response.json();
+
+        if (extractedInfo.data) {
+          Alert.alert(
+            "Informations trouvées",
+            `Nom: ${extractedInfo.data.lastName}\nPrénom: ${extractedInfo.data.firstName}\nDate de naissance: ${extractedInfo.data.birthdate}\nCivilité: ${extractedInfo.data.civility}\n\nVoulez-vous utiliser ces informations ?`,
+            [
+              {
+                text: "Oui",
+                onPress: () => {
+                  setFirstName(extractedInfo.data.firstName);
+                  setLastName(extractedInfo.data.lastName);
+                  setBirthdate(extractedInfo.data.birthdate);
+                  setCivility(extractedInfo.data.civility);
+                  setCameraActive(false);
+                },
+              },
+              {
+                text: "Non",
+                style: "cancel",
+                onPress: () => setCameraActive(false),
+              },
+            ]
+          );
+        } else {
+          Alert.alert(
+            "Attention",
+            "Aucune information n'a pu être extraite de l'image. Veuillez réessayer avec une photo plus nette ou remplir les champs manuellement.",
+            [{ text: "OK" }]
+          );
+        }
+      } catch (error) {
+        console.error("Erreur lors de la prise de photo :", error);
+        Alert.alert("Erreur", "Impossible de traiter l'image. Veuillez réessayer.");
+      } finally {
+        setIsLoading(false); // Désactiver le chargement
+      }
     }
-};
+  };
 
   // Fonction pour valider l'étape actuelle
   const validateStep = (step) => {
@@ -330,11 +277,13 @@ export default function Register() {
         return true;
       case 6:
         if (hasAccompagnateur) {
-          return accompagnateurInfo.firstName && 
-                 accompagnateurInfo.lastName && 
-                 accompagnateurInfo.age && 
-                 accompagnateurInfo.birthdate && 
-                 accompagnateurInfo.civility;
+          return (
+            accompagnateurInfo.firstName &&
+            accompagnateurInfo.lastName &&
+            accompagnateurInfo.age &&
+            accompagnateurInfo.birthdate &&
+            accompagnateurInfo.civility
+          );
         }
         return true;
       default:
@@ -364,17 +313,17 @@ export default function Register() {
       Alert.alert('Erreur', 'Les mots de passe ne correspondent pas.');
       return;
     }
-  
+
     if (password.length < 8) {
       Alert.alert('Erreur', 'Le mot de passe doit contenir au moins 8 caractères.');
       return;
     }
-  
+
     if (!firstName || !lastName || !age || !email || !password || !birthdate || !civility || !tel) {
       Alert.alert('Erreur', 'Tous les champs sont obligatoires !');
       return;
     }
-  
+
     if (hasAccompagnateur) {
       const { firstName, lastName, age, birthdate, civility } = accompagnateurInfo;
       if (!firstName || !lastName || !age || !birthdate || !civility) {
@@ -382,26 +331,28 @@ export default function Register() {
         return;
       }
     }
-  
+
     try {
       const salt = bcrypt.genSaltSync(10);
       const hashedPassword = bcrypt.hashSync(password, salt);
-      
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, hashedPassword);
       const user = userCredential.user;
-  
-      const accompagnateurData = hasAccompagnateur ? {
-        firstName: accompagnateurInfo.firstName,
-        lastName: accompagnateurInfo.lastName,
-        age: parseInt(accompagnateurInfo.age),
-        birthdate: formatISOBirthdate(accompagnateurInfo.birthdate),
-        civility: accompagnateurInfo.civility
-      } : null;
-  
+
+      const accompagnateurData = hasAccompagnateur
+        ? {
+            firstName: accompagnateurInfo.firstName,
+            lastName: accompagnateurInfo.lastName,
+            age: parseInt(accompagnateurInfo.age),
+            birthdate: formatISOBirthdate(accompagnateurInfo.birthdate),
+            civility: accompagnateurInfo.civility,
+          }
+        : null;
+
       const userDocRef = doc(db, 'users', user.uid);
       await setDoc(userDocRef, {
-        firstName: firstName, // Prénom
-        lastName: lastName,   // Nom de famille
+        firstName: firstName,
+        lastName: lastName,
         Age: parseInt(age),
         Email: email,
         Birthdate: birthdate,
@@ -419,12 +370,12 @@ export default function Register() {
         Accompagnateur: accompagnateurData,
       });
 
-      try{
+      try {
         const response = await fetch(`http://${ipaddress}/api/user`, {
-          method: "POST",
+          method: 'POST',
           headers: {
-            Accept: "application/json",
-            'Content-Type': "application/json",
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             firstname: firstName,
@@ -432,25 +383,22 @@ export default function Register() {
             birthdate: formatISOBirthdate(birthdate),
             email,
             tel,
-            password,
+            password: hashedPassword,
             civility,
             note,
             handicap: 1,
             googleUUID: user.uid,
-          })
+          }),
         });
-        console.log('Status: ',response.status)
+        console.log('Status: ', response.status);
         if (!response.ok) {
           console.error(`Failed with status ${response.status}: ${response.statusText}: ${response.body}`);
-        }
-        else{
+        } else {
           console.log(`Data sent successfully to API:`);
         }
-      }
-      catch (error){
+      } catch (error) {
         console.error(`Error sending data to API:`, error.message);
-    }
-      
+      }
 
       console.log('Utilisateur enregistré avec succès et ajouté à Firestore !');
       alert('Inscription réussie !');
@@ -491,13 +439,13 @@ export default function Register() {
                         </View>
                       ) : (
                         <>
-                          <TouchableOpacity 
+                          <TouchableOpacity
                             style={styles.captureButton}
                             onPress={takePicture}
                           >
                             <Text style={styles.captureButtonText}>Prendre la photo</Text>
                           </TouchableOpacity>
-                          <TouchableOpacity 
+                          <TouchableOpacity
                             style={styles.cancelButton}
                             onPress={() => {
                               setCameraActive(false);
@@ -514,7 +462,7 @@ export default function Register() {
                 {!hasPermission && (
                   <View style={styles.errorContainer}>
                     <Text style={styles.errorText}>Permission de caméra non accordée</Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.retryButton}
                       onPress={handleScanPress}
                     >
@@ -656,14 +604,14 @@ export default function Register() {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.eyeIcon}
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <Ionicons 
-                  name={showPassword ? "eye-off" : "eye"} 
-                  size={24} 
-                  color="#888" 
+                <Ionicons
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#888"
                 />
               </TouchableOpacity>
             </View>
@@ -677,14 +625,14 @@ export default function Register() {
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.eyeIcon}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                <Ionicons 
-                  name={showConfirmPassword ? "eye-off" : "eye"} 
-                  size={24} 
-                  color="#888" 
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#888"
                 />
               </TouchableOpacity>
             </View>
@@ -698,13 +646,13 @@ export default function Register() {
             <View style={styles.accompagnateurChoice}>
               <Text style={styles.questionText}>Avez-vous un accompagnateur ?</Text>
               <View style={styles.choiceButtons}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.choiceButton, hasAccompagnateur && styles.choiceButtonActive]}
                   onPress={() => setHasAccompagnateur(true)}
                 >
                   <Text style={styles.choiceButtonText}>Oui</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.choiceButton, !hasAccompagnateur && styles.choiceButtonActive]}
                   onPress={() => setHasAccompagnateur(false)}
                 >
@@ -720,21 +668,27 @@ export default function Register() {
                   placeholder="Prénom de l'accompagnateur"
                   placeholderTextColor="#888"
                   value={accompagnateurInfo.firstName}
-                  onChangeText={(text) => setAccompagnateurInfo({...accompagnateurInfo, firstName: text})}
+                  onChangeText={(text) =>
+                    setAccompagnateurInfo({ ...accompagnateurInfo, firstName: text })
+                  }
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="Nom de l'accompagnateur"
                   placeholderTextColor="#888"
                   value={accompagnateurInfo.lastName}
-                  onChangeText={(text) => setAccompagnateurInfo({...accompagnateurInfo, lastName: text})}
+                  onChangeText={(text) =>
+                    setAccompagnateurInfo({ ...accompagnateurInfo, lastName: text })
+                  }
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="Âge"
                   placeholderTextColor="#888"
                   value={accompagnateurInfo.age}
-                  onChangeText={(text) => setAccompagnateurInfo({...accompagnateurInfo, age: text})}
+                  onChangeText={(text) =>
+                    setAccompagnateurInfo({ ...accompagnateurInfo, age: text })
+                  }
                   keyboardType="numeric"
                 />
                 <TextInput
@@ -744,7 +698,7 @@ export default function Register() {
                   value={accompagnateurInfo.birthdate}
                   onChangeText={(text) => {
                     const formatted = formatBirthdate(text);
-                    setAccompagnateurInfo({...accompagnateurInfo, birthdate: formatted});
+                    setAccompagnateurInfo({ ...accompagnateurInfo, birthdate: formatted });
                   }}
                   keyboardType="numeric"
                 />
@@ -753,7 +707,7 @@ export default function Register() {
                   onPress={() => setIsAccompagnateurPickerVisible(true)}
                 >
                   <Text style={{ color: accompagnateurInfo.civility ? 'white' : '#888' }}>
-                    {accompagnateurInfo.civility || 'Civilité de l\'accompagnateur'}
+                    {accompagnateurInfo.civility || "Civilité de l'accompagnateur"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -790,15 +744,15 @@ export default function Register() {
             </TouchableOpacity>
           )}
           {currentStep < 6 ? (
-            <TouchableOpacity 
-              style={[styles.navButton, currentStep === 1 && styles.navButtonFullWidth]} 
+            <TouchableOpacity
+              style={[styles.navButton, currentStep === 1 && styles.navButtonFullWidth]}
               onPress={nextStep}
             >
               <Text style={styles.navButtonText}>Suivant</Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity 
-              style={[styles.registerButton, currentStep === 1 && styles.navButtonFullWidth]} 
+            <TouchableOpacity
+              style={[styles.registerButton, currentStep === 1 && styles.navButtonFullWidth]}
               onPress={handleRegister}
             >
               <Text style={styles.registerButtonText}>S'inscrire</Text>
@@ -845,7 +799,7 @@ export default function Register() {
               <Picker
                 selectedValue={accompagnateurInfo.civility}
                 onValueChange={(itemValue) => {
-                  setAccompagnateurInfo({...accompagnateurInfo, civility: itemValue});
+                  setAccompagnateurInfo({ ...accompagnateurInfo, civility: itemValue });
                   setIsAccompagnateurPickerVisible(false);
                 }}
                 style={{ color: 'white' }}
@@ -979,10 +933,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 16,
   },
-  // Styles pour la caméra
   cameraContainer: {
     width: '100%',
-    aspectRatio: 3/4,
+    aspectRatio: 3 / 4,
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 16,
@@ -1078,7 +1031,6 @@ const styles = StyleSheet.create({
     minWidth: 130,
     alignItems: 'center',
   },
-  // Styles pour l'accompagnateur
   accompagnateurChoice: {
     width: '100%',
     marginBottom: 24,
@@ -1112,7 +1064,6 @@ const styles = StyleSheet.create({
   accompagnateurForm: {
     width: '100%',
   },
-  // Styles pour la barre de progression
   progressBarContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1134,7 +1085,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#12B3A8',
     height: 6,
   },
-  // Nouveaux styles pour le loading
   loadingContainer: {
     position: 'absolute',
     top: 0,

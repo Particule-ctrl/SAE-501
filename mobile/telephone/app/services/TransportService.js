@@ -3,8 +3,8 @@ import { API_CONFIG } from '../../constants/API_CONFIG';
 class TransportService {
     // Configuration des modes de transport
     static TRANSPORT_MODES = {
-        bus: {
-            id: 'bus',
+        RATP: {  // Changé de 'bus' à 'RATP'
+            id: 'RATP',
             name: 'Bus',
             icon: 'bus-outline',
             color: '#9C27B0',
@@ -13,8 +13,8 @@ class TransportService {
                 dashArray: null
             }
         },
-        car: {
-            id: 'car',
+        TAXI: {  // Changé de 'car' à 'TAXI'
+            id: 'TAXI',
             name: 'Voiture',
             icon: 'car-outline',
             color: '#2196F3',
@@ -23,18 +23,8 @@ class TransportService {
                 dashArray: null
             }
         },
-        taxi: {
-            id: 'taxi',
-            name: 'Taxi',
-            icon: 'car-outline',
-            color: '#FFC107',
-            lineStyle: {
-                weight: 4,
-                dashArray: null
-            }
-        },
-        train: {
-            id: 'train',
+        SNCF: {  // Changé de 'train' à 'SNCF'
+            id: 'SNCF',
             name: 'Train',
             icon: 'train-outline',
             color: '#4CAF50',
@@ -43,8 +33,8 @@ class TransportService {
                 dashArray: null
             }
         },
-        plane: {
-            id: 'plane',
+        AF: {  // Changé de 'plane' à 'AF'
+            id: 'AF',
             name: 'Avion',
             icon: 'airplane-outline',
             color: '#FF9800',
@@ -158,23 +148,31 @@ class TransportService {
     }
 
     // Obtenir un itinéraire routier
-    static async getDetailedRoadRoute(from, to, mode = 'bus') {
+    static async getDetailedRoadRoute(from, to, mode = 'RATP') {
         try {
+            // Vérifier si le mode existe dans TRANSPORT_MODES
+            if (!this.TRANSPORT_MODES[mode]) {
+                console.error(`Mode de transport inconnu: ${mode}`);
+                return null;
+            }
+    
             const modeConfig = this.TRANSPORT_MODES[mode];
             console.log(`Calcul itinéraire ${mode} entre:`, from.name, 'et', to.name);
-
+    
             const response = await fetch(
                 `https://api.mapbox.com/directions/v5/mapbox/driving/` +
                 `${from.coords[0]},${from.coords[1]};${to.coords[0]},${to.coords[1]}?` +
                 `geometries=geojson&overview=full&steps=true&access_token=${API_CONFIG.mapbox}`
             );
-
+    
             if (!response.ok) throw new Error(`Erreur itinéraire ${mode}`);
             
             const data = await response.json();
             if (!data.routes?.length) throw new Error('Aucun itinéraire trouvé');
             
-            const durationMultiplier = mode === 'bus' ? 1.5 : 0.9;
+            // Ajuster le multiplicateur selon le mode de transport
+            const durationMultiplier = mode === 'RATP' ? 1.5 : 
+                                     mode === 'TAXI' ? 0.9 : 1.0;
             
             return {
                 mode,
@@ -199,14 +197,14 @@ class TransportService {
         try {
             console.log('Calcul itinéraire ferroviaire entre:', fromStation.name, 'et', toStation.name);
             
-            const modeConfig = this.TRANSPORT_MODES.train;
+            const modeConfig = this.TRANSPORT_MODES.SNCF;  // Changé de train à SNCF
             const distance = this.calculateDistance(fromStation.coords, toStation.coords);
-            const avgSpeed = 160; // km/h
+            const avgSpeed = 160;
             const estimatedDuration = (distance / 1000 / avgSpeed * 60) + 30;
             
             return {
-                mode: 'train',
-                type: 'train',
+                mode: 'SNCF',  // Changé de train à SNCF
+                type: 'SNCF',  // Changé de train à SNCF
                 icon: modeConfig.icon,
                 color: modeConfig.color,
                 lineStyle: modeConfig.lineStyle,
@@ -228,12 +226,12 @@ class TransportService {
     // Obtenir un itinéraire aérien
     static getFlightRoute(fromAirport, toAirport) {
         try {
-            const modeConfig = this.TRANSPORT_MODES.plane;
+            const modeConfig = this.TRANSPORT_MODES.AF;  // Changé de plane à AF
             const distance = this.calculateDistance(fromAirport.coords, toAirport.coords);
             
             return {
-                mode: 'plane',
-                type: 'plane',
+                mode: 'AF',  // Changé de plane à AF
+                type: 'AF',  // Changé de plane à AF
                 icon: modeConfig.icon,
                 color: modeConfig.color,
                 lineStyle: modeConfig.lineStyle,
@@ -265,7 +263,7 @@ class TransportService {
             const arrivalAirport = await this.findNearestAirport(arrivalStation.coords, 100000);
 
             // Options de transport terrestre
-            const groundOptions = ['bus', 'car'];
+            const groundOptions = ['RATP', 'TAXI'];
 
             for (const groundMode of groundOptions) {
                 // Transport terrestre initial
@@ -303,7 +301,7 @@ class TransportService {
                 if (toStation && trainToAirport && flight && trainFromAirport && toFinal) {
                     routes.push({
                         id: `multimodal-${groundMode}-${Date.now()}`,
-                        type: `${groundMode}-train-avion-train-${groundMode}`,
+                        type: `${groundMode}-SNCF-AF-SNCF-${groundMode}`,
                         segments: [
                             toStation,
                             trainToAirport,
@@ -340,11 +338,10 @@ class TransportService {
     // Calcul du prix
     static calculatePrice(route) {
         const prices = {
-            bus: { base: 2, perKm: 0.10 },
-            car: { base: 5, perKm: 0.20 },
-            taxi: { base: 5, perKm: 0.25 },
-            train: { base: 10, perKm: 0.20 },
-            plane: { base: 50, perKm: 0.30 }
+            RATP: { base: 2, perKm: 0.10 },    // bus -> RATP
+            TAXI: { base: 5, perKm: 0.20 },     // car -> TAXI
+            SNCF: { base: 10, perKm: 0.20 },    // train -> SNCF
+            AF: { base: 50, perKm: 0.30 }       // plane -> AF
         };
 
         return route.segments.reduce((total, segment) => {
@@ -356,11 +353,10 @@ class TransportService {
     // Calcul des émissions CO2
     static calculateCO2(route) {
         const co2Factors = {
-            bus: 0.1,
-            car: 0.15,
-            taxi: 0.2,
-            train: 0.02,
-            plane: 0.25
+            RATP: 0.1,    // bus -> RATP
+            TAXI: 0.15,   // car -> TAXI
+            SNCF: 0.02,   // train -> SNCF
+            AF: 0.25      // plane -> AF
         };
 
         return route.segments.reduce((total, segment) => {
