@@ -28,8 +28,8 @@ services:
       ME_CONFIG_BASICAUTH: "false"
   app:
     image: lamarquenoe/api-sae:latest
-    # build:
-    #   context: ./
+    build:
+      context: ./
     environment:
       DB_SCHEMA: postgres
       DB_USER: postgres
