@@ -1,32 +1,46 @@
-import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import CurrentTrajet from '../../components/trajet/TrajetEnCours';
 import { useRoute } from '@react-navigation/native';
 
 export default function Trajet() {
     const route = useRoute();
-    const [param, setParam] = useState(null);
-    const verifieParam = () => param !== null;
+    const [param, setParam] = useState([]);
+    const [loading, setLoading] = useState(true);  // Nouvelle variable d'état pour le chargement
+
+    const verifieParam = () => {
+        return param !== null && param.length === 2; // Vérifie si les 2 paramètres sont présents
+    };
 
     useEffect(() => {
-    try {
-        if (route.params && route.params["idDossier"]) {
-            setParam(route.params["idDossier"]);
+        try {
+            if (route.params && route.params["idDossier"] && route.params["numDossier"]) {
+                setParam([route.params["idDossier"], route.params["numDossier"]]);
+                console.log("Paramètres reçus :", param);
+                setLoading(false);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        console.error("Erreur lors de l'accès à idDossier :", error);
+    }, [route.params]);
+
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.notFound}>
+                <Text style={styles.textNotFound}>Chargement...</Text>
+            </SafeAreaView>
+        );
     }
-}, [route.params]);
 
-
-     
     return (
         verifieParam() ? (
             <SafeAreaView style={styles.container}>
-                <CurrentTrajet id={param} />
+                <CurrentTrajet idDossier={route.params["idDossier"]} idTrajet={route.params["numDossier"]} />
             </SafeAreaView>
         ) : (
-            <SafeAreaView style={styles.notFound}> 
+            <SafeAreaView style={styles.notFound}>
                 <View>
                     <Text style={styles.textNotFound}>Aucun trajet en cours</Text>
                 </View>
@@ -37,8 +51,8 @@ export default function Trajet() {
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: "#192031", 
+        flex: 1,
+        backgroundColor: "#192031",
     },
     notFound: {
         flex: 1,
@@ -52,4 +66,4 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
-  });
+});

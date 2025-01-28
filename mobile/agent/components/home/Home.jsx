@@ -1,182 +1,141 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, SafeAreaView, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-
-
-const DATA = [
-    {
-        "id-dossier": 1234,
-        "idPMR": 1234,
-        "enregistre": 0,
-        "Assistance": 1,
-        "sousTrajets": [
-            {
-                "BD": "SNCF",
-                "numDossier": 1234,
-                "departure": "Paris Est",
-                "arrival": "CDG",
-                "departureTime": "2024-12-22 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "AF",
-                "numDossier": 5555,
-                "departure": "LAX",
-                "arrival": "CDG",
-                "departureTime": "2024-12-40 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "RATP",
-                "numDossier": 8901,
-                "departure": "Chatelet",
-                "arrival": "Saint Lazare",
-                "departureTime": "2024-12-40 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            }
-        ],
-        "bagage": [1234, 4321]
-    },
-        {
-        "id-dossier": 127834,
-        "idPMR": 1234,
-        "enregistre": 0,
-        "Assistance": 1,
-        "sousTrajets": [
-            {
-                "BD": "SNCF",
-                "numDossier": 1234,
-                "departure": "Paris Est",
-                "arrival": "CDG",
-                "departureTime": "2025-12-27 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "AF",
-                "numDossier": 5555,
-                "departure": "LAX",
-                "arrival": "CDG",
-                "departureTime": "2024-12-40 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "RATP",
-                "numDossier": 8901,
-                "departure": "Chatelet",
-                "arrival": "Saint Lazare",
-                "departureTime": "2024-12-40 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            }
-        ],
-        "bagage": [1234, 4321]
-    },
-        {
-        "id-dossier": 143434,
-        "idPMR": 1234,
-        "enregistre": 0,
-        "Assistance": 1,
-        "sousTrajets": [
-            {
-                "BD": "SNCF",
-                "numDossier": 1234,
-                "departure": "Paris Est",
-                "arrival": "CDG",
-                "departureTime": "2024-12-40 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "AF",
-                "numDossier": 5555,
-                "departure": "LAX",
-                "arrival": "CDG",
-                "departureTime": "2024-12-40 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            },
-            {
-                "BD": "RATP",
-                "numDossier": 8901,
-                "departure": "Chatelet",
-                "arrival": "Saint Lazare",
-                "departureTime": "2024-12-40 03:25:44",
-                "arrivalTime": "2024-12-24 04:25:44"
-            }
-        ],
-        "bagage": [1234, 4321]
-    },
-    
-];
+import { getAuth } from 'firebase/auth';
 
 export default function Header() {
-    const [trajets, setTrajets] = useState([]);
-    const router = useRouter();
+    const [trajets, setTrajets] = useState();
+    const [loading, setLoading] = useState(true);
 
-    const exctratTime = (time) => {
-        return time.split(' ')[1];
+    const router = useRouter();
+    const auth = getAuth();
+
+    const ipaddress = '172.20.10.11';
+
+
+    const extractTime = (dateTime) => {
+        const timeMatch = dateTime.match(/T(\d{2}:\d{2}):/);
+        if (timeMatch) {
+            return timeMatch[1];
+        }
+        return 'Heure inconnue';
     };
 
-    const exctratDate = (time) => {
-        let date = time.split(' ')[0];
-        let [year, month, day] = date.split('-');
-        return `${day}/${month}/${year}`;
+    const extractDate = (dateTime) => {
+        if (!dateTime) return 'Date inconnue';
+
+        const regex = /(\d{4})-(\d{2})-(\d{2})/;
+        const match = dateTime.match(regex);
+
+        if (match) {
+            const [, year, month, day] = match;
+            return `${day}/${month}/${year}`;
+        }
+
+        return 'Date invalide';
     };
 
     const handleRefuser = (idDossier) => {
-        setTrajets((prevTrajets) => prevTrajets.filter(trajet => trajet['id-dossier'] !== idDossier));
+        setTrajets((prevTrajets) => prevTrajets.filter((trajet) => trajet['id-dossier'] !== idDossier));
     };
+
+    const handleValider = (idDossier, numDossier) => {
+        setTrajets((prevTrajets) => prevTrajets.filter((trajet) => trajet['id-dossier'] !== idDossier));
+        router.push({
+            pathname: './Trajet',
+            params: { idDossier, numDossier },
+        });
+    };
+
+    const getTrajets = async () => {
+        try {
+            console.log(`http://${ipaddress}/api/agent/getTrajetsFromUuid/${auth.currentUser.uid}`);
+            const response = await fetch(`http://${ipaddress}/api/agent/getTrajetsFromUuid/${auth.currentUser.uid}`);
+            const data = await response.json();
+            setTrajets(data);
+            setLoading(false);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des trajets :', error);
+            setLoading(false);
+        }
+    };
+
+    const retrievePassenger = async (idPMR) => {
+        try {
+
+            const response = await fetch(`http://${ipaddress}/api/user/${idPMR}`);
+            console.log(response.url);
+            const data = await response.json();
+            return data.firstname + ' ' + data.lastname;
+        } catch (error) {
+            console.error('Erreur lors de la récupération du passager :', error);
+        }
+    };
+
     useEffect(() => {
-        setTrajets(DATA); 
+        getTrajets();
     }, []);
-
-    const handleValider = (idDossier) => {
-    router.push({
-        // pathname: './Trajet',
-        pathname: './Trafic', 
-        params: { idDossier }, 
-    });
-};
-
-    
 
     return (
         <SafeAreaView style={styles.container}>
-            <FlatList 
-                style={{ marginTop: 10 }}
-                data={trajets}
-                keyExtractor={(item) => item['id-dossier'].toString()}
-                renderItem={({ item }) => (
-                    <TouchableOpacity activeOpacity={0.9} onPress={() => {}}>
-                        <View style={[styles.item]}>
-                            <View style={styles.top}>
-                                <Text style={styles.header}>Jean Dupont</Text>
-                                <Text style={styles.header}>{exctratDate(item.sousTrajets[0].departureTime)}</Text>
+            {loading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#12B3A8" />
+                    <Text style={styles.loadingText}>Chargement des trajets...</Text>
+                </View>
+            ) : (
+                <FlatList
+                    style={{ marginTop: 10 }}
+                    data={trajets}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity activeOpacity={0.9}>
+                            <View style={styles.item}>
+                                <View style={styles.top}>
+                                    <Text style={styles.header}>{retrievePassenger(item.idPMR)}</Text>
+                                    <Text style={styles.header}>{extractDate(item.departureTime)}</Text>
+                                    <Text style={styles.middleText}>{extractTime(item.departureTime)}</Text>
+                                </View>
+                                <View style={styles.middle}>
+                                    <Text style={styles.middleText}>{item.departure}</Text>
+                                    <Text style={styles.middleText}>{(item.arrival)}</Text>
+                                </View>
+                                <View style={styles.bottom}>
+                                    <TouchableOpacity
+                                        style={styles.buttonRouge}
+                                        onPress={() => handleRefuser(item.idDossier)}
+                                    >
+                                        <Text style={styles.bouttonText}>Refuser</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.buttonVert}
+                                        onPress={() => handleValider(item.idDossier, item.numDossier)}
+                                    >
+                                        <Text style={styles.bouttonText}>Accepter</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                            <View style={styles.middle}>
-                                <Text style={styles.middleText}>Gare du nord</Text>
-                                <Text style={styles.middleText}>17:50:54</Text>
-                            </View>
-                            <View style={styles.bottom}>
-                                <TouchableOpacity
-                                    style={styles.buttonRouge}
-                                    onPress={() => handleRefuser(item['id-dossier'])}
-                                >
-                                    <Text style={styles.bouttonText}>Refuser</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.buttonVert}
-                                onPress={() => handleValider(item['id-dossier'])}>
-                                    <Text style={styles.bouttonText}>Accepter</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                )}
-            />
+                        </TouchableOpacity>
+                    )}
+                />
+            )}
         </SafeAreaView>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'efefef',
+        backgroundColor: '#192031',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        color: '#12B3A8',
+        fontSize: 18,
+        marginTop: 10,
     },
     item: {
         backgroundColor: '#2D3956',
@@ -195,7 +154,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         color: 'white',
-
     },
     middle: {
         flexDirection: 'row',
@@ -224,9 +182,5 @@ const styles = StyleSheet.create({
     middleText: {
         fontSize: 16,
         color: 'white',
-
-    }
-
+    },
 });
-
-

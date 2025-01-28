@@ -1,6 +1,6 @@
 import React from 'react'
 import { TouchableOpacity } from 'react-native';
-import {View, Text, StyleSheet} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
@@ -9,15 +9,13 @@ import Entypo from '@expo/vector-icons/Entypo';
 
 export default function TabBar({ state, descriptors, navigation }) {
 
-    const icones = {
-        Home : (props) => <AntDesign name="home" size={26} color= {secondColor} {...props} />,
-        Maps : (props) => <Feather name="map" size={26}  color= {secondColor} {...props} />,
-        Settings : (props) => <AntDesign name="setting" size={26} color= {secondColor} {...props} />,
-        Trafic : (props) => <Entypo name="traffic-cone" size={26} color= {secondColor} {...props} />,
-        // Trajet: (props) => <Entypo name="traffic-cone" size={26} color= {secondColor} {...props} />,
-    }
-    const primaryColor = "#12B3A8";
-    const secondColor = "#737373";
+  const icones = {
+    Home: (props) => <AntDesign name="home" size={26} color={secondColor} {...props} />,
+    Settings: (props) => <AntDesign name="setting" size={26} color={secondColor} {...props} />,
+    Trajet: (props) => <Entypo name="ticket" size={26} color={secondColor} {...props} />
+  }
+  const primaryColor = "#12B3A8";
+  const secondColor = "#737373";
   return (
     <View style={styles.tabbar}>
       {state.routes.map((route, index) => {
@@ -26,9 +24,9 @@ export default function TabBar({ state, descriptors, navigation }) {
           options.tabBarLabel !== undefined
             ? options.tabBarLabel
             : options.title !== undefined
-            ? options.title
-            : route.name;
-        if(['_sitemap', '+not-found', "index"].includes(route.name)) return null;
+              ? options.title
+              : route.name;
+        if (['_sitemap', '+not-found', "index"].includes(route.name)) return null;
 
         const isFocused = state.index === index;
 
@@ -55,8 +53,8 @@ export default function TabBar({ state, descriptors, navigation }) {
         return (
           <TouchableOpacity
 
-          key={route.name}
-          style={styles.tabbarItems}
+            key={route.name}
+            style={styles.tabbarItems}
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
@@ -64,8 +62,8 @@ export default function TabBar({ state, descriptors, navigation }) {
             onPress={onPress}
             onLongPress={onLongPress}
           >
-            
-             {Icon ? Icon({ color: isFocused ? primaryColor : secondColor }) : null}
+
+            {Icon ? Icon({ color: isFocused ? primaryColor : secondColor }) : null}
 
             <Text style={{ color: isFocused ? primaryColor : secondColor }}>
               {label}
@@ -73,29 +71,29 @@ export default function TabBar({ state, descriptors, navigation }) {
           </TouchableOpacity>
         );
       })}
-    </View>  )
+    </View>)
 }
- const styles = StyleSheet.create({
-    tabbar : {
-        position: 'absolute',
-        bottom: 25,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        backgroundColor: "white",
-        marginHorizontal: 20,
-        paddingVertical:15,
-        borderRadius: 25,
-        borderCurve: "continuous",
-        shadowColor: "black",
-        shadowOffset:{width: 0, height: 10},
-        shadowRadius: 10,
-        shadowOpacity : 0.1,
-    },
-    tabbarItems: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 4,
-    }
- })
+const styles = StyleSheet.create({
+  tabbar: {
+    position: 'absolute',
+    bottom: 25,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "white",
+    marginHorizontal: 20,
+    paddingVertical: 15,
+    borderRadius: 25,
+    borderCurve: "continuous",
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 10,
+    shadowOpacity: 0.1,
+  },
+  tabbarItems: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4,
+  }
+})
