@@ -27,9 +27,9 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017/
       ME_CONFIG_BASICAUTH: "false"
   app:
-    #image: lamarquenoe/api-sae:latest
-    build:
-      context: ./
+    image: lamarquenoe/api-sae:latest
+    # build:
+    #   context: ./
     environment:
       DB_SCHEMA: postgres
       DB_USER: postgres
