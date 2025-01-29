@@ -1,6 +1,5 @@
 import { Tabs } from "expo-router";
-import TabBar from "../../components/TabBar";
-
+import TabBar from "../../components/trajet/TabBar";
 export default function TabLayout() {
   return (
     <>

@@ -10,7 +10,7 @@ export default function Header() {
     const router = useRouter();
     const auth = getAuth();
 
-    const ipaddress = '172.20.10.11';
+    const ipaddress = '172.20.10.2';
 
 
     const extractTime = (dateTime) => {

@@ -1,7 +1,7 @@
 import { Alert } from "react-native";
 
 
-const ipaddress = '172.20.10.11';
+const ipaddress = '172.20.10.2';
 
 
 export const getTrajet = async (idDossier, idTrajet) => {
