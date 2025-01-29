@@ -1,8 +1,10 @@
+const no_sql_db = require('../nosql-database');
+
 const API_MAPPING = {
-    AF: 'http://api-af:3000/reservations',  // Updated to Docker service name and correct port
-    SNCF: 'http://api-sncf:3000/reservations',
-    RATP: 'http://api-ratp:3000/reservations',
-    TAXI: 'http://api-taxi:3000/reservations'
+    AF: 'http://api-af:3000',  // Updated to Docker service name and correct port
+    SNCF: 'http://api-sncf:3000',
+    RATP: 'http://api-ratp:3000',
+    TAXI: 'http://api-taxi:3000'
 };
 
 
@@ -19,7 +21,10 @@ const transformData = (incomingData) => {
             numDossier: st.numDossier,
             statusValue: 0
         })),
-        bagage: incomingData.bagage
+        bagage: incomingData.bagage,
+        specialAssistance: incomingData.specialAssistance,
+        security: incomingData.security,
+        additionalInfo: incomingData.additionalInfo
     };
 };
 
@@ -40,7 +45,7 @@ const sendDataToAPIs = async (incomingData) => {
 
             try {
                 console.log('Data to send: ',dataToSend)
-                const response = await fetch(apiUrl, {
+                const response = await fetch(`${apiUrl}/reservations`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -63,6 +68,21 @@ const sendDataToAPIs = async (incomingData) => {
     }
 };
 
+const getTrajetFromAPIs = async(incomingData) => {
+    const apiUrl = API_MAPPING[incomingData.BD];
+    const response = await fetch(`${apiUrl}/reservations/${incomingData.numDossier}`);
+    const responseData = await response.json();
+    return {
+        BD: incomingData.BD,
+        numDossier: incomingData.numDossier,
+        statusValue: incomingData.statusValue,
+        departure: responseData.departure,
+        arrival: responseData.arrival,
+        departureTime: responseData.departureTime,
+        arrivalTime: responseData.arrivalTime
+    };
+}
+
 const getDataFromAPIs = async (incomingData) => {
     try {
         const sousTrajets = incomingData.sousTrajets || [];
@@ -71,8 +91,10 @@ const getDataFromAPIs = async (incomingData) => {
             idPMR: incomingData.idPMR,
             googleId: incomingData.googleId,
             enregistre: incomingData.enregistre,
-            Assistance: incomingData.Assistance,
             bagage: incomingData.bagage,
+            specialAssistance: incomingData.specialAssistance,
+            security: incomingData.security,
+            additionalInfo: incomingData.additionalInfo,
             sousTrajets: []
         }; // Clone l'objet pour éviter de modifier directement l'entrée
 
@@ -86,7 +108,7 @@ const getDataFromAPIs = async (incomingData) => {
             }
 
             try {
-                const response = await fetch(`${apiUrl}/${trajet.numDossier}`);
+                const response = await fetch(`${apiUrl}/reservations/${trajet.numDossier}`);
                 if (!response.ok) {
                     console.warn(`Failed to fetch data for numDossier ${trajet.numDossier}: ${response.status}`);
                     continue;
@@ -121,9 +143,88 @@ const getDataFromAPIs = async (incomingData) => {
     }
 };
 
+const getTrajetsForPlace = async (incomingData) => {
+    try {
+      // Fetch the agent details
+      const agentResponse = await fetch(`${API_MAPPING[incomingData.entreprise]}/agent/?email=${incomingData.email}`);
+      if (!agentResponse.ok) {
+        throw new Error(`Failed to fetch agent: ${agentResponse.statusText}`);
+      }
+      const agentData = await agentResponse.json();
+      console.log("Agent Data:", agentData);
+  
+      // Fetch the voyage details using the agent and incoming data
+      const voyageResponse = await fetch(`${API_MAPPING[incomingData.entreprise]}/reservations/fromLieu/${agentData.lieu}`);
+      if (!voyageResponse.ok) {
+        throw new Error(`Failed to fetch voyage: ${voyageResponse.statusText}`);
+      }
+      const voyageData = await voyageResponse.json();
+      console.log("Voyage Data:", voyageData);
+
+      const results = [];
+        for (const sousTrajet of voyageData) {
+            const numDossier = sousTrajet.numDossier;
+
+            try {
+                // Appeler getIdDossierAndIdPMR pour chaque sous-trajet
+                const { idDossier, idPMR } = await getIdDossierAndIdPMR(incomingData.entreprise, numDossier);
+                results.push({
+                    BD: incomingData.entreprise,
+                    numDossier,
+                    idDossier: idDossier,
+                    idPMR: idPMR,
+                    departure: sousTrajet.departure,
+                    arrival: sousTrajet.arrival,
+                    departureTime: sousTrajet.departureTime,
+                    arrivalTime : sousTrajet.arrivalTime
+                });
+            } catch (error) {
+                console.error(`Erreur pour BD: ${incomingData.entreprise}, numDossier: ${numDossier} - ${error.message}`);
+            }
+            }
+      console.log("New voyage data:",results);
+  
+      // Return both agent and voyage data as a result
+      return results ;
+    } catch (error) {
+      console.error("Error in getTrajetsForPlace:", error.message);
+      throw error;
+    }
+  };
+  
+  const getIdDossierAndIdPMR = async (BD, numDossier) => {
+    try {
+        // Rechercher dans la collection pour trouver l'entrée correspondante
+        const result = await no_sql_db.DataModel.findOne({
+            sousTrajets: {
+                $elemMatch: { BD: BD, numDossier: numDossier }
+            }
+        }, {
+            idDossier: 1, // Récupérer uniquement les champs nécessaires
+            idPMR: 1
+        });
+
+        if (!result) {
+            throw new Error("Aucune correspondance trouvée avec les critères spécifiés.");
+        }
+
+        return {
+            idDossier: result.idDossier,
+            idPMR: result.idPMR
+        };
+    } catch (error) {
+        console.error("Erreur lors de la récupération de l'idDossier et de l'idPMR:", error.message);
+        throw error;
+    }
+};
+
+
 functions = {
     transformData: transformData,
     sendDataToAPIs: sendDataToAPIs,
-    getDataFromAPIs: getDataFromAPIs
+    getDataFromAPIs: getDataFromAPIs,
+    getTrajetFromAPIs: getTrajetFromAPIs,
+    getTrajetsForPlace: getTrajetsForPlace,
+    API_MAPPING: API_MAPPING
 }
 module.exports = functions

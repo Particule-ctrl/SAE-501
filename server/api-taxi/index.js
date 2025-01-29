@@ -1,5 +1,5 @@
 const express = require('express');
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes, Op } = require('sequelize');
 const app = express();
 const port = 3000;
 
@@ -130,6 +130,62 @@ app.post('/reservations/delete', async (req, res) => {
 
     await item.destroy();
     res.json({ success: true, deletedItem: item });
+});
+
+
+app.get('/agent', async (req, res) =>{
+    try{
+        const agentEmail = req.query.email.toLowerCase();
+        const agent = await Agent.findOne(
+            {
+                where: { email: agentEmail }
+              }
+        );
+
+        if (!agent) {
+            return res.status(404).json({ error: 'Item not found' });
+        }
+
+        res.json(agent);
+    }
+    catch (err){
+        console.error('Error in GET /agent', err.message);
+        res.status(500).json({ error: err.message });
+    }
+})
+app.get('/reservations/fromLieu/:lieu', async (req, res) => {
+    try {
+      const lieu = req.params.lieu;
+  
+      const reservations = await Reservations.findAll({
+        where: {
+          [Op.or]: [
+            { departure: lieu },
+            { arrival: lieu }
+          ]
+        }
+      });
+  
+      return res.status(200).json(reservations);
+    } catch (err) {
+      console.error('Error in GET /reservations/fromLieu/:lieu:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  });
+  
+
+app.post('/agent', (req, res) => {
+    Agent.create({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password,
+        lieu: req.body.lieu,
+        tel: req.body.tel
+    })
+    .then(agent => res.status(201).send(agent))
+    .catch( err => {
+      res.status(500).send(JSON.stringify(err));
+    });
 });
 
 // Lancer le serveur

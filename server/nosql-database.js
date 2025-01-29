@@ -14,8 +14,7 @@ const setupModels = () => {
         idDossier: Number,
         idPMR: Number,
         googleId: String,
-        enregistre: Number,
-        Assistance: Number,
+        enregistre: Boolean,
         sousTrajets: [
             {
                 BD: String,
@@ -23,7 +22,44 @@ const setupModels = () => {
                 statusValue: Number,
             }
         ],
-        bagage: [Number]
+        bagage: {
+            bagagesList: [Number],
+            specialBagage: String
+        },
+        specialAssistance:{
+            wheelchair: Boolean,
+            visualAssistance: Boolean,
+            hearingAssistance: Boolean,
+            otherAssistance: String
+        },
+        security: {
+            validDocuments: Boolean,
+            documentsExpiry: String,
+            dangerousItems: [String],
+            liquidVolume: String,
+            medicalEquipment: String,
+            securityQuestions: {
+                packedOwn: Boolean,
+                leftUnattended: Boolean,
+                acceptedItems: Boolean,
+                receivedItems: Boolean,
+                dangerousGoods: Boolean,
+            },
+            declarations: {
+                weaponsFirearms: Boolean,
+                explosives: Boolean,
+                flammableMaterials: Boolean,
+                radioactiveMaterials: Boolean,
+                toxicSubstances: Boolean,
+                compressedGases: Boolean,
+                illegalDrugs: Boolean,
+            },
+        },
+        additionalInfo: {
+            emergencyContact: String,
+            medicalInfo: String,
+            dietaryRestrictions: String,
+        }
     });
 
     const DataModel = mongoose.model('Data', DataSchema);
