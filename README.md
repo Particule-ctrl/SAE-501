@@ -9,7 +9,6 @@ Projet de développement d'une solution informatique facilitant les déplacement
   - Accompagnants
   - Agents d'assistance
 - Backend :
-  - Services REST
   - Bases de données SQL/NoSQL
 
 ## Règles de Contribution
