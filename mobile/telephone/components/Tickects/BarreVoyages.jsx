@@ -1,20 +1,11 @@
-import { ProgressBar, Colors } from 'react-native-paper';
+import { ProgressBar } from 'react-native-paper';
 import { View, StyleSheet } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-export default function BarreVoyage({ points, ordre }) {
-    const icones = {
-        Train: (props) => <FontAwesome name="train" size={18} {...props} />,
-        Taxi: (props) => <FontAwesome name="taxi" size={18} {...props} />,
-        Plane: (props) => <FontAwesome name="plane" size={18} {...props} />,
-        Bus: (props) => <FontAwesome name="bus" size={18} {...props} />,
-    };
-
+export default function BarreVoyage({ points, ordre, statut }) {
     const princesse = () => {
-        return ordre.map((transport, index) => (
+        return ordre.map((progress, index) => (
             <View key={index} style={styles.progressItem}>
-                {icones[transport] && icones[transport]}
-                <ProgressBar progress={undefined}  style={styles.progressBar} />
+                <ProgressBar progress={progress / 2} style={styles.progressBar} color={"#23b44d"} />
             </View>
         ));
     };
@@ -24,16 +15,17 @@ export default function BarreVoyage({ points, ordre }) {
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'row',
+        flexDirection: 'row', // Aligne les barres horizontalement
         marginTop: 10,
+        width: '100%', // Prend toute la largeur du parent
     },
     progressItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 10,
+        flex: 1, // Chaque élément occupe un espace proportionnel
+        marginHorizontal: 5, // Espacement horizontal entre les barres
     },
     progressBar: {
-        width: 100,
-        height: 5,
+        height: 7,
+        borderRadius: 4,
+        backgroundColor: "#ccc"
     },
 });

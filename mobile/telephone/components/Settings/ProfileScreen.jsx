@@ -7,9 +7,8 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { PhotoContext } from '../Photos/PhotoContext2';
+import { PhotoContext } from '../Photos/PhotoContext2';
 import EditProfile from './EditProfile';
-// import PhotoButton from '../Photos/PhotoButton'; 
 
 const ProfileScreen = () => {
   const [profile, setProfile] = useState(null);
@@ -21,7 +20,7 @@ const ProfileScreen = () => {
   const [id, setId] = useState(null);
   const { photo, setPhoto } = React.useContext(PhotoContext);
 
-  const ipaddress = '172.20.10.7'; // Remplacez par votre adresse IP
+  const ipaddress = '172.20.10.7';
 
   const fetchUserProfile = async () => {
     try {
@@ -87,7 +86,6 @@ const ProfileScreen = () => {
           onPress: async () => {
             try {
               const userId = auth.currentUser?.uid;
-
               const response = await fetch(`http://${ipaddress}/api/user/byGoogleID/${userId}`);
               if (!response.ok) throw new Error('Erreur lors de la suppression des données utilisateur.');
               
@@ -103,7 +101,6 @@ const ProfileScreen = () => {
               router.replace('/');
             } catch (error) {
               console.error('Erreur lors de la suppression du profil :', error.message);
-
               if (error.code === 'auth/requires-recent-login') {
                 Alert.alert(
                   'Reconnexion requise',
@@ -131,10 +128,8 @@ const ProfileScreen = () => {
           onPress: async () => {
             try {
               await signOut(auth);
-              console.log('Utilisateur déconnecté avec succès !');
               router.replace('/');
             } catch (error) {
-              console.error('Erreur lors de la déconnexion :', error.message);
               Alert.alert('Erreur', 'Impossible de se déconnecter.');
             }
           },
@@ -302,8 +297,19 @@ const ProfileScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profil Utilisateur</Text>
-      
+      <View style={styles.avatarContainer}>
+        <Image 
+          source={photo?.uri ? { uri: photo.uri } : require("./../../assets/Profile/profil.jpeg")}
+          style={styles.avatar}
+        />
+        <TouchableOpacity 
+          style={styles.editPhotoButton} 
+          onPress={handlePhotoPress}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Feather name="edit-2" size={16} color="#192031" />
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.mainContent}>
         {isEditing ? (
@@ -331,7 +337,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#192031',
+    backgroundColor: '#42547e',  // couleur du fonnd 
     padding: 20,
     paddingTop: 50,
   },
@@ -366,7 +372,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   mainContent: {
-    width: '100%',
+    width: 370,
     alignItems: 'center',
   },
   profileContainer: {

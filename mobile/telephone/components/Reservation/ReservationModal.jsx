@@ -123,14 +123,17 @@ const ReservationModal = ({ visible, onClose, onConfirm, route }) => {
   
       const reservationData = {
         idDossier,
-        idPMR: userFound.id, // Utilisation de l'ID du PMR trouvé
+        idPMR: userFound.id,
         googleId: currentUser?.uid || '',
         enregistre: true,
         sousTrajets: route.segments.map((segment, index) => ({
           BD: segment.mode.toUpperCase(),
           numDossier: idDossier + index,
           statusValue: 0,
-          heure: generateRandomTime()
+          departureTime: "2024-12-24T04:25:44",
+          arrivalTime: "2024-12-24T01:25:44",
+          departure: segment.from.name, // Ajout du point de départ
+          arrival: segment.to.name // Ajout du point d'arrivée
         })),
         bagage: {
           bagagesList: formData.baggage.hasBaggage ? Array(formData.baggage.count).fill(1) : [],

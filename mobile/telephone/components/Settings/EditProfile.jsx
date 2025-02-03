@@ -1,114 +1,134 @@
 import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
 
-const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => (
-  <View style={styles.container}>
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>Prénom</Text>
-      <TextInput
-        style={styles.input}
-        value={editedProfile.firstname}
-        onChangeText={(text) => onChange({ ...editedProfile, firstname: text })}
-        placeholder="Entrez votre prénom"
-      />
-    </View>
+const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
+  return (
+    <View style={styles.profileContainer}>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Prénom</Text>
+        <TextInput
+          style={styles.input}
+          value={editedProfile.firstname}
+          onChangeText={(text) => onChange({ ...editedProfile, firstname: text })}
+          placeholder="Entrez votre prénom"
+          placeholderTextColor="#888"
+        />
+      </View>
 
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>Nom</Text>
-      <TextInput
-        style={styles.input}
-        value={editedProfile.lastname}
-        onChangeText={(text) => onChange({ ...editedProfile, lastname: text })}
-        placeholder="Entrez votre nom"
-      />
-    </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Nom</Text>
+        <TextInput
+          style={styles.input}
+          value={editedProfile.lastname}
+          onChangeText={(text) => onChange({ ...editedProfile, lastname: text })}
+          placeholder="Entrez votre nom"
+          placeholderTextColor="#888"
+        />
+      </View>
 
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={styles.input}
-        value={editedProfile.email}
-        onChangeText={(text) => onChange({ ...editedProfile, email: text })}
-        placeholder="Entrez votre email"
-        keyboardType="email-address"
-      />
-    </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          value={editedProfile.email}
+          onChangeText={(text) => onChange({ ...editedProfile, email: text })}
+          placeholder="Entrez votre email"
+          placeholderTextColor="#888"
+          keyboardType="email-address"
+        />
+      </View>
 
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>Téléphone</Text>
-      <TextInput
-        style={styles.input}
-        value={editedProfile.tel}
-        onChangeText={(text) => onChange({ ...editedProfile, tel: text })}
-        placeholder="Entrez votre téléphone"
-        keyboardType="phone-pad"
-      />
-    </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Téléphone</Text>
+        <TextInput
+          style={styles.input}
+          value={editedProfile.tel}
+          onChangeText={(text) => onChange({ ...editedProfile, tel: text })}
+          placeholder="Entrez votre téléphone"
+          placeholderTextColor="#888"
+          keyboardType="phone-pad"
+        />
+      </View>
 
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>Mot de passe</Text>
-      <TextInput
-        style={styles.input}
-        value={editedProfile.password}
-        onChangeText={(text) => onChange({ ...editedProfile, password: text })}
-        placeholder="Entrez un nouveau mot de passe"
-        secureTextEntry
-      />
-    </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Mot de passe</Text>
+        <TextInput
+          style={styles.input}
+          value={editedProfile.password}
+          onChangeText={(text) => onChange({ ...editedProfile, password: text })}
+          placeholder="Entrez un nouveau mot de passe"
+          placeholderTextColor="#888"
+          secureTextEntry
+        />
+      </View>
 
-    <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={onSave}>
-      <Text style={styles.buttonText}>Sauvegarder</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onCancel}>
-      <Text style={styles.buttonText}>Annuler</Text>
-    </TouchableOpacity>
-  </View>
-);
+      <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={onSave}>
+        <Text style={styles.buttonText}>Sauvegarder</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onCancel}>
+        <Text style={styles.buttonText}>Annuler</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  container: {
+  profileContainer: {
     width: '100%',
     alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#1E1E2D',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
   },
   inputContainer: {
-    width: '90%', // Largeur maximale de 90%
-    minWidth: '75%', // Largeur minimale de 75%
-    marginBottom: 7,
+    width: '100%',
+    marginBottom: 15,
   },
   label: {
     fontSize: 14,
-    color: '#888',
-    marginBottom: 8,
+    color: '#A0A0A0',
+    marginBottom: 5,
     fontWeight: '600',
   },
   input: {
-    minWidth: '90%',
-    height: 40,
-    backgroundColor: '#2C3A4A', // Fond sombre pour les champs
-    borderRadius: 12,
+    width: '100%',
+    height: 50,
+    backgroundColor: '#2C3A4A',
+    borderRadius: 15,
     paddingHorizontal: 16,
-    marginBottom: 16,
     color: 'white',
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#3A3A4A',
   },
   button: {
-    borderRadius: 8,
-    padding: 10,
+    borderRadius: 15,
+    padding: 15,
     marginVertical: 10,
     alignItems: 'center',
-    width: '90%', // Largeur maximale de 90%
-    minWidth: '65%', // Largeur minimale de 75%
+    width: '90%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
   },
   saveButton: {
     backgroundColor: '#4CAF50',
   },
   cancelButton: {
-    backgroundColor: '#999',
+    backgroundColor: 'gray',
   },
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
-    textAlign: 'center',
+    fontSize: 16,
   },
 });
 
