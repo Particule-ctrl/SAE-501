@@ -12,6 +12,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Checkbox } from 'react-native-paper';
@@ -21,8 +22,25 @@ import { auth, db } from './firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
 import { CameraView as ExpoCamera, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImageManipulator from 'expo-image-manipulator';
-import TextRecognition from '@react-native-ml-kit/text-recognition';
+import bcrypt from 'react-native-bcrypt';
+
+// Composant de barre de progression
+const ProgressBar = ({ steps, currentStep }) => {
+  return (
+    <View style={styles.progressBarContainer}>
+      {steps.map((step, index) => (
+        <View
+          key={index}
+          style={[
+            styles.progressStep,
+            index < currentStep && styles.completedStep,
+            index === currentStep - 1 && styles.activeStep,
+          ]}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function Register() {
   // États pour les champs du formulaire
@@ -38,7 +56,7 @@ export default function Register() {
   const [civility, setCivility] = useState('');
   const [tel, setTel] = useState('');
   const [note, setNote] = useState('');
-
+  const [isLoading, setIsLoading] = useState(false);
 
   // address ip 
   const ipaddress = '192.168.1.29';
@@ -66,7 +84,7 @@ export default function Register() {
     lastName: '',
     age: '',
     birthdate: '',
-    civility: ''
+    civility: '',
   });
 
   // État pour gérer l'étape actuelle
@@ -78,7 +96,6 @@ export default function Register() {
 
   const navigation = useNavigation();
 
-
   // Masquer l'en-tête de la navigation
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -88,12 +105,10 @@ export default function Register() {
 
   useEffect(() => {
     (async () => {
-      const { status } = await useCameraPermissions();
+      const { status } = await requestPermission();
       setHasPermission(status === 'granted');
     })();
   }, []);
-
- 
 
   // Fonction pour formater la date de naissance
   const formatBirthdate = (text) => {
@@ -119,120 +134,104 @@ export default function Register() {
 
   // Fonction pour gérer l'activation de la caméra
   const handleScanPress = async () => {
-    try {
-      if (!permission?.granted) {
-        const { status } = await requestPermission();
-        if (status === 'granted') {
-          setHasPermission(true);
-          setCameraActive(true);
-        } else {
-          Alert.alert(
-            "Permission refusée",
-            "L'accès à la caméra est nécessaire pour scanner votre carte d'identité.",
-            [
-              { text: "Réessayer", onPress: handleScanPress },
-              { text: "Annuler", style: "cancel" }
-            ]
-          );
-        }
-      } else {
-        setHasPermission(true);
-        setCameraActive(true);
-      }
-    } catch (error) {
-      console.error("Erreur lors de la demande de permission:", error);
-      Alert.alert("Erreur", "Impossible d'accéder à la caméra. Veuillez vérifier vos paramètres.");
-    }
-  };
-
-  // Fonction pour extraire les informations du texte
-  const extractInfoFromText = (text) => {
-    const lines = text.split('\n').map(line => line.trim());
-    let result = {
-      firstName: '',
-      lastName: '',
-      birthdate: '',
-      civility: '',
-      found: false
-    };
-  
-    let foundNames = [];
-    
-    lines.forEach((line) => {
-      console.log("Analysing line:", line); // Pour le débogage
-  
-      // Recherche de la date de naissance (format JJ/MM/AAAA ou JJ MM AAAA)
-      const dateMatch = line.match(/(\d{2}[/.]\d{2}[/.]\d{4}|\d{2}\s+\d{2}\s+\d{4})/);
-      if (dateMatch) {
-        result.birthdate = dateMatch[1].replace(/\s+/g, '/');
-        result.found = true;
-        console.log("Found birthdate:", result.birthdate);
-      }
-  
-      // Recherche des noms (en majuscules)
-      if (/^[A-ZÀ-Ÿ\s-]{2,}$/.test(line) && 
-          !line.includes('CARTE') && 
-          !line.includes('IDENTITE')) {
-        foundNames.push(line.trim());
-        console.log("Found name:", line.trim());
-      }
-  
-      // Recherche du genre (M/F)
-      if (/^[MF]$/.test(line.trim())) {
-        result.civility = line.trim() === 'M' ? 'Mr' : 'Mme';
-        result.found = true;
-        console.log("Found civility:", result.civility);
-      }
-    });
-  
-    // Attribution des noms trouvés
-    if (foundNames.length >= 2) {
-      result.lastName = foundNames[0];
-      result.firstName = foundNames[1];
-      result.found = true;
-    }
-  
-    return result;
+    Alert.alert(
+      "Conditions Générales d'Utilisation",
+      "En utilisant la fonction de scan de carte d'identité, vous acceptez que C&FM traite vos données personnelles conformément à nos CGU.",
+      [
+        {
+          text: "En savoir plus",
+          onPress: () => router.push("/cgu"),
+          style: "default",
+        },
+        {
+          text: "Refuser",
+          style: "cancel",
+        },
+        {
+          text: "Accepter",
+          onPress: async () => {
+            try {
+              if (!permission?.granted) {
+                const { status } = await requestPermission();
+                if (status === 'granted') {
+                  setHasPermission(true);
+                  setCameraActive(true);
+                } else {
+                  Alert.alert(
+                    "Permission refusée",
+                    "L'accès à la caméra est nécessaire pour scanner votre carte d'identité.",
+                    [
+                      { text: "Réessayer", onPress: handleScanPress },
+                      { text: "Annuler", style: "cancel" },
+                    ]
+                  );
+                }
+              } else {
+                setHasPermission(true);
+                setCameraActive(true);
+              }
+            } catch (error) {
+              console.error("Erreur lors de la demande de permission:", error);
+              Alert.alert("Erreur", "Impossible d'accéder à la caméra. Veuillez vérifier vos paramètres.");
+            }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   // Fonction pour prendre la photo
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
-        // Prendre la photo
+        setIsLoading(true); // Activer le chargement
         const photo = await cameraRef.current.takePictureAsync({
           quality: 1,
         });
-  
-        console.log("Photo prise, début de la reconnaissance...");
-  
-        // Reconnaissance du texte
-        const result = await TextRecognition.recognize(photo.uri);
-        console.log("Texte reconnu :", result.text);
-  
-        // Extraire les informations
-        const extractedInfo = extractInfoFromText(result.text);
-        
-        if (extractedInfo.found) {
+
+        const formData = new FormData();
+        formData.append('image', {
+          uri: photo.uri,
+          type: 'image/jpeg',
+          name: 'id_card.jpg',
+        });
+
+        const response = await fetch(`http://${ipaddress}:80/api/textrecognition/analyze`, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'multipart/form-data',
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Server response was not ok');
+        }
+
+        const extractedInfo = await response.json();
+
+        if (extractedInfo.data) {
           Alert.alert(
             "Informations trouvées",
-            `Nom: ${extractedInfo.lastName}\nPrénom: ${extractedInfo.firstName}\nDate de naissance: ${extractedInfo.birthdate}\nCivilité: ${extractedInfo.civility}\n\nVoulez-vous utiliser ces informations ?`,
+            `Nom: ${extractedInfo.data.lastName}\nPrénom: ${extractedInfo.data.firstName}\nDate de naissance: ${extractedInfo.data.birthdate}\nCivilité: ${extractedInfo.data.civility}\n\nVoulez-vous utiliser ces informations ?`,
             [
               {
                 text: "Oui",
                 onPress: () => {
-                  setFirstName(extractedInfo.firstName);
-                  setLastName(extractedInfo.lastName);
-                  setBirthdate(extractedInfo.birthdate);
-                  setCivility(extractedInfo.civility);
+                  setFirstName(extractedInfo.data.firstName);
+                  setLastName(extractedInfo.data.lastName);
+                  setBirthdate(extractedInfo.data.birthdate);
+                  setCivility(extractedInfo.data.civility);
                   setCameraActive(false);
-                }
+                },
               },
               {
                 text: "Non",
                 style: "cancel",
-                onPress: () => setCameraActive(false)
-              }
+                onPress: () => setCameraActive(false),
+              },
             ]
           );
         } else {
@@ -242,13 +241,11 @@ export default function Register() {
             [{ text: "OK" }]
           );
         }
-  
       } catch (error) {
         console.error("Erreur lors de la prise de photo :", error);
-        Alert.alert(
-          "Erreur",
-          "Impossible de traiter l'image. Veuillez réessayer."
-        );
+        Alert.alert("Erreur", "Impossible de traiter l'image. Veuillez réessayer.");
+      } finally {
+        setIsLoading(false); // Désactiver le chargement
       }
     }
   };
@@ -265,14 +262,28 @@ export default function Register() {
       case 4:
         return true; // Note est optionnelle
       case 5:
-        return password && confirmPassword && password === confirmPassword && password.length >= 8;
+        if (!password || !confirmPassword) {
+          Alert.alert('Erreur', 'Veuillez remplir les deux champs de mot de passe');
+          return false;
+        }
+        if (password !== confirmPassword) {
+          Alert.alert('Erreur', 'Les mots de passe ne correspondent pas');
+          return false;
+        }
+        if (password.length < 8) {
+          Alert.alert('Erreur', 'Le mot de passe doit faire au moins 8 caractères');
+          return false;
+        }
+        return true;
       case 6:
         if (hasAccompagnateur) {
-          return accompagnateurInfo.firstName && 
-                 accompagnateurInfo.lastName && 
-                 accompagnateurInfo.age && 
-                 accompagnateurInfo.birthdate && 
-                 accompagnateurInfo.civility;
+          return (
+            accompagnateurInfo.firstName &&
+            accompagnateurInfo.lastName &&
+            accompagnateurInfo.age &&
+            accompagnateurInfo.birthdate &&
+            accompagnateurInfo.civility
+          );
         }
         return true;
       default:
@@ -322,7 +333,10 @@ export default function Register() {
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const salt = bcrypt.genSaltSync(10);
+      const hashedPassword = bcrypt.hashSync(password, salt);
+
+      const userCredential = await createUserWithEmailAndPassword(auth, email, hashedPassword);
       const user = userCredential.user;
 
       const accompagnateurData = hasAccompagnateur ? {
@@ -335,8 +349,8 @@ export default function Register() {
 
       const userDocRef = doc(db, 'users', user.uid);
       await setDoc(userDocRef, {
-        firstName: firstName, // Prénom
-        lastName: lastName,   // Nom de famille
+        firstName: firstName,
+        lastName: lastName,
         Age: parseInt(age),
         Email: email,
         Birthdate: birthdate,
@@ -419,28 +433,37 @@ export default function Register() {
                       Positionnez votre carte d'identité dans le cadre
                     </Text>
                     <View style={styles.buttonContainer}>
-                      <TouchableOpacity 
-                        style={styles.captureButton}
-                        onPress={takePicture}
-                      >
-                        <Text style={styles.captureButtonText}>Prendre la photo</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity 
-                        style={styles.cancelButton}
-                        onPress={() => {
-                          setCameraActive(false);
-                          setHasPermission(false);
-                        }}
-                      >
-                        <Text style={styles.cancelButtonText}>Annuler</Text>
-                      </TouchableOpacity>
+                      {isLoading ? (
+                        <View style={styles.loadingContainer}>
+                          <ActivityIndicator size="large" color="#12B3A8" />
+                          <Text style={styles.loadingText}>Traitement en cours...</Text>
+                        </View>
+                      ) : (
+                        <>
+                          <TouchableOpacity
+                            style={styles.captureButton}
+                            onPress={takePicture}
+                          >
+                            <Text style={styles.captureButtonText}>Prendre la photo</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.cancelButton}
+                            onPress={() => {
+                              setCameraActive(false);
+                              setHasPermission(false);
+                            }}
+                          >
+                            <Text style={styles.cancelButtonText}>Annuler</Text>
+                          </TouchableOpacity>
+                        </>
+                      )}
                     </View>
                   </View>
                 )}
                 {!hasPermission && (
                   <View style={styles.errorContainer}>
                     <Text style={styles.errorText}>Permission de caméra non accordée</Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.retryButton}
                       onPress={handleScanPress}
                     >
@@ -582,14 +605,14 @@ export default function Register() {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.eyeIcon}
                 onPress={() => setShowPassword(!showPassword)}
               >
-                <Ionicons 
-                  name={showPassword ? "eye-off" : "eye"} 
-                  size={24} 
-                  color="#888" 
+                <Ionicons
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#888"
                 />
               </TouchableOpacity>
             </View>
@@ -603,14 +626,14 @@ export default function Register() {
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.eyeIcon}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                <Ionicons 
-                  name={showConfirmPassword ? "eye-off" : "eye"} 
-                  size={24} 
-                  color="#888" 
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#888"
                 />
               </TouchableOpacity>
             </View>
@@ -624,13 +647,13 @@ export default function Register() {
             <View style={styles.accompagnateurChoice}>
               <Text style={styles.questionText}>Avez-vous un accompagnateur ?</Text>
               <View style={styles.choiceButtons}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.choiceButton, hasAccompagnateur && styles.choiceButtonActive]}
                   onPress={() => setHasAccompagnateur(true)}
                 >
                   <Text style={styles.choiceButtonText}>Oui</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.choiceButton, !hasAccompagnateur && styles.choiceButtonActive]}
                   onPress={() => setHasAccompagnateur(false)}
                 >
@@ -646,21 +669,27 @@ export default function Register() {
                   placeholder="Prénom de l'accompagnateur"
                   placeholderTextColor="#888"
                   value={accompagnateurInfo.firstName}
-                  onChangeText={(text) => setAccompagnateurInfo({...accompagnateurInfo, firstName: text})}
+                  onChangeText={(text) =>
+                    setAccompagnateurInfo({ ...accompagnateurInfo, firstName: text })
+                  }
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="Nom de l'accompagnateur"
                   placeholderTextColor="#888"
                   value={accompagnateurInfo.lastName}
-                  onChangeText={(text) => setAccompagnateurInfo({...accompagnateurInfo, lastName: text})}
+                  onChangeText={(text) =>
+                    setAccompagnateurInfo({ ...accompagnateurInfo, lastName: text })
+                  }
                 />
                 <TextInput
                   style={styles.input}
                   placeholder="Âge"
                   placeholderTextColor="#888"
                   value={accompagnateurInfo.age}
-                  onChangeText={(text) => setAccompagnateurInfo({...accompagnateurInfo, age: text})}
+                  onChangeText={(text) =>
+                    setAccompagnateurInfo({ ...accompagnateurInfo, age: text })
+                  }
                   keyboardType="numeric"
                 />
                 <TextInput
@@ -670,7 +699,7 @@ export default function Register() {
                   value={accompagnateurInfo.birthdate}
                   onChangeText={(text) => {
                     const formatted = formatBirthdate(text);
-                    setAccompagnateurInfo({...accompagnateurInfo, birthdate: formatted});
+                    setAccompagnateurInfo({ ...accompagnateurInfo, birthdate: formatted });
                   }}
                   keyboardType="numeric"
                 />
@@ -679,7 +708,7 @@ export default function Register() {
                   onPress={() => setIsAccompagnateurPickerVisible(true)}
                 >
                   <Text style={{ color: accompagnateurInfo.civility ? 'white' : '#888' }}>
-                    {accompagnateurInfo.civility || 'Civilité de l\'accompagnateur'}
+                    {accompagnateurInfo.civility || "Civilité de l'accompagnateur"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -690,6 +719,8 @@ export default function Register() {
         return null;
     }
   };
+
+  const steps = [1, 2, 3, 4, 5, 6];
 
   return (
     <KeyboardAvoidingView
@@ -703,6 +734,8 @@ export default function Register() {
         />
         <Text style={styles.text}>Créer un compte</Text>
 
+        <ProgressBar steps={steps} currentStep={currentStep} />
+
         {renderStep()}
 
         <View style={styles.navigationButtons}>
@@ -712,15 +745,15 @@ export default function Register() {
             </TouchableOpacity>
           )}
           {currentStep < 6 ? (
-            <TouchableOpacity 
-              style={[styles.navButton, currentStep === 1 && styles.navButtonFullWidth]} 
+            <TouchableOpacity
+              style={[styles.navButton, currentStep === 1 && styles.navButtonFullWidth]}
               onPress={nextStep}
             >
               <Text style={styles.navButtonText}>Suivant</Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity 
-              style={[styles.registerButton, currentStep === 1 && styles.navButtonFullWidth]} 
+            <TouchableOpacity
+              style={[styles.registerButton, currentStep === 1 && styles.navButtonFullWidth]}
               onPress={handleRegister}
             >
               <Text style={styles.registerButtonText}>S'inscrire</Text>
@@ -729,7 +762,6 @@ export default function Register() {
         </View>
       </ScrollView>
 
-      {/* Modal pour le Picker de civilité */}
       <Modal
         transparent={true}
         visible={isPickerVisible}
@@ -756,7 +788,6 @@ export default function Register() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Modal pour le Picker de civilité de l'accompagnateur */}
       <Modal
         transparent={true}
         visible={isAccompagnateurPickerVisible}
@@ -769,7 +800,7 @@ export default function Register() {
               <Picker
                 selectedValue={accompagnateurInfo.civility}
                 onValueChange={(itemValue) => {
-                  setAccompagnateurInfo({...accompagnateurInfo, civility: itemValue});
+                  setAccompagnateurInfo({ ...accompagnateurInfo, civility: itemValue });
                   setIsAccompagnateurPickerVisible(false);
                 }}
                 style={{ color: 'white' }}
@@ -785,7 +816,6 @@ export default function Register() {
     </KeyboardAvoidingView>
   );
 }
-
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -904,10 +934,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 16,
   },
-  // Styles pour la caméra
   cameraContainer: {
     width: '100%',
-    aspectRatio: 3/4,
+    aspectRatio: 3 / 4,
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 16,
@@ -1003,7 +1032,6 @@ const styles = StyleSheet.create({
     minWidth: 130,
     alignItems: 'center',
   },
-  // Styles pour l'accompagnateur
   accompagnateurChoice: {
     width: '100%',
     marginBottom: 24,
@@ -1036,5 +1064,43 @@ const styles = StyleSheet.create({
   },
   accompagnateurForm: {
     width: '100%',
+  },
+  progressBarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '90%',
+    marginBottom: 24,
+  },
+  progressStep: {
+    flex: 1,
+    height: 4,
+    backgroundColor: '#2C3A4A',
+    marginHorizontal: 2,
+    borderRadius: 2,
+  },
+  completedStep: {
+    backgroundColor: '#12B3A8',
+  },
+  activeStep: {
+    backgroundColor: '#12B3A8',
+    height: 6,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: 'center',
   },
 });

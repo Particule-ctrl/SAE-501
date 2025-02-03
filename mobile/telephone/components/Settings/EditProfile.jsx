@@ -1,52 +1,17 @@
 import React from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Text, Alert } from 'react-native';
-import { getAuth, updateEmail, updatePassword } from 'firebase/auth';
-import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
 
 const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
-  const auth = getAuth();
-  const firestore = getFirestore();
-
-  const handleSave = async () => {
-    try {
-      const user = auth.currentUser;
-
-      // Mettre à jour l'e-mail dans Firebase Authentication
-      if (editedProfile.email !== user.email) {
-        await updateEmail(user, editedProfile.email);
-      }
-
-      // Mettre à jour le mot de passe dans Firebase Authentication (si un nouveau mot de passe est fourni)
-      if (editedProfile.password) {
-        await updatePassword(user, editedProfile.password);
-      }
-
-      // Mettre à jour les informations supplémentaires dans Firestore
-      const userDocRef = doc(firestore, 'users', user.uid);
-      await updateDoc(userDocRef, {
-        firstName: editedProfile.firstName,
-        lastName: editedProfile.lastName,
-        email: editedProfile.email,
-        tel: editedProfile.tel,
-      });
-
-      Alert.alert('Succès', 'Profil mis à jour avec succès.');
-      onSave(); // Appeler la fonction onSave pour fermer le mode édition ou rafraîchir les données
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du profil :', error);
-      Alert.alert('Erreur', 'Impossible de mettre à jour le profil.');
-    }
-  };
-
   return (
-    <View style={styles.container}>
+    <View style={styles.profileContainer}>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Prénom</Text>
         <TextInput
           style={styles.input}
-          value={editedProfile.firstName}
-          onChangeText={(text) => onChange({ ...editedProfile, firstName: text })}
+          value={editedProfile.firstname}
+          onChangeText={(text) => onChange({ ...editedProfile, firstname: text })}
           placeholder="Entrez votre prénom"
+          placeholderTextColor="#888"
         />
       </View>
 
@@ -54,9 +19,10 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
         <Text style={styles.label}>Nom</Text>
         <TextInput
           style={styles.input}
-          value={editedProfile.lastName}
-          onChangeText={(text) => onChange({ ...editedProfile, lastName: text })}
+          value={editedProfile.lastname}
+          onChangeText={(text) => onChange({ ...editedProfile, lastname: text })}
           placeholder="Entrez votre nom"
+          placeholderTextColor="#888"
         />
       </View>
 
@@ -67,6 +33,7 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
           value={editedProfile.email}
           onChangeText={(text) => onChange({ ...editedProfile, email: text })}
           placeholder="Entrez votre email"
+          placeholderTextColor="#888"
           keyboardType="email-address"
         />
       </View>
@@ -78,6 +45,7 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
           value={editedProfile.tel}
           onChangeText={(text) => onChange({ ...editedProfile, tel: text })}
           placeholder="Entrez votre téléphone"
+          placeholderTextColor="#888"
           keyboardType="phone-pad"
         />
       </View>
@@ -89,13 +57,15 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
           value={editedProfile.password}
           onChangeText={(text) => onChange({ ...editedProfile, password: text })}
           placeholder="Entrez un nouveau mot de passe"
+          placeholderTextColor="#888"
           secureTextEntry
         />
       </View>
 
-      <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={handleSave}>
+      <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={onSave}>
         <Text style={styles.buttonText}>Sauvegarder</Text>
       </TouchableOpacity>
+
       <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onCancel}>
         <Text style={styles.buttonText}>Annuler</Text>
       </TouchableOpacity>
@@ -104,49 +74,61 @@ const EditProfile = ({ editedProfile, onChange, onSave, onCancel }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  profileContainer: {
     width: '100%',
     alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#1E1E2D',
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
   },
   inputContainer: {
-    width: '90%', // Largeur maximale de 90%
-    minWidth: '75%', // Largeur minimale de 75%
-    marginBottom: 7,
+    width: '100%',
+    marginBottom: 15,
   },
   label: {
     fontSize: 14,
-    color: '#888',
-    marginBottom: 8,
+    color: '#A0A0A0',
+    marginBottom: 5,
     fontWeight: '600',
   },
   input: {
-    minWidth: '90%',
-    height: 40,
-    backgroundColor: '#2C3A4A', // Fond sombre pour les champs
-    borderRadius: 12,
+    width: '100%',
+    height: 50,
+    backgroundColor: '#2C3A4A',
+    borderRadius: 15,
     paddingHorizontal: 16,
-    marginBottom: 16,
     color: 'white',
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#3A3A4A',
   },
   button: {
-    borderRadius: 8,
-    padding: 10,
+    borderRadius: 15,
+    padding: 15,
     marginVertical: 10,
     alignItems: 'center',
-    width: '90%', // Largeur maximale de 90%
-    minWidth: '65%', // Largeur minimale de 75%
+    width: '90%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
   },
   saveButton: {
     backgroundColor: '#4CAF50',
   },
   cancelButton: {
-    backgroundColor: '#999',
+    backgroundColor: 'gray',
   },
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
-    textAlign: 'center',
+    fontSize: 16,
   },
 });
 

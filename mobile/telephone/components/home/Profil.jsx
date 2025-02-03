@@ -4,9 +4,12 @@ import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from "expo-status-bar";
 import { db } from '../../app/authentication/firebaseConfig';
 import Tickets from '../Tickects/Tickets';
+import Photo from '../Photos/Photo';
 
 import { doc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+
+import OnGoingHeader from '../Tickects/OnGoingHeader';
 
 export default function Profil() {
 
@@ -63,10 +66,7 @@ export default function Profil() {
         <View style={styles.container2}>
           <View style={styles.leftContainer}>
             <View style={styles.logoWrapper}>
-              <Image
-                source={require("./../../assets/Profile/profil.jpeg")}
-                style={styles.logo}
-              />
+              <Photo/>
             </View>
             <View style={styles.ConText}>
               <Text style={styles.Text1}>Bienvenue,</Text>
@@ -74,10 +74,17 @@ export default function Profil() {
                 <Text style={styles.Text2}> {user.firstName} 👋</Text>
               )}
             </View>
+            <View  style={styles.OnGoing} >
+                <OnGoingHeader/>
+            </View>
+            
              
           </View>
+
+
+          
           <View style={styles.rightContainer}>
-          <Text style={styles.Text3}>
+              <Text style={styles.Text3}>
                 Mes trajets
               </Text>
           </View>
@@ -152,13 +159,6 @@ const styles = StyleSheet.create({
     marginTop: 52,
     left: 10,
   },
-  logo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2, // Largeur de la bordure
-    borderColor: "white", // Couleur de la bordure
-  },
 
   ConText: {
     marginTop: 42,
@@ -196,4 +196,16 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     fontSize:20
   },
+  OnGoing: {
+    top: 150,
+    width: 330,
+    height: 130,
+    left: -95,
+    borderRadius: 7,
+    display: "flex", 
+    textAlign: "center", 
+    justifyContent: "center", // Centre verticalement les enfants
+    alignItems: "center", // Centre horizontalement les enfants
+  }
+
 });

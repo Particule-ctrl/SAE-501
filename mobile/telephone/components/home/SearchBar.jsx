@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, FlatList, Dimensions } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, FlatList, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -7,10 +7,8 @@ import axios from 'axios';
 
 const { height } = Dimensions.get('window');
 
-
-
-export default function SearchBar() {
-  const [departure, setDeparture] = useState('');
+const Home = () => {
+    const [departure, setDeparture] = useState('');
     const [arrival, setArrival] = useState('');
     const [departureSuggestions, setDepartureSuggestions] = useState([]);
     const [arrivalSuggestions, setArrivalSuggestions] = useState([]);
@@ -27,7 +25,7 @@ export default function SearchBar() {
     const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1Ijoia2xlcGVyIiwiYSI6ImNtMjNpdTBjbjA3bmQyanF3cTB3ZDR2bTkifQ.zGnlUoaFGuyhrWSJtEsXYA';
 
     const fetchSuggestions = async (query, setSuggestions) => {
-        if (query.length < 3) {
+        if (query.length < 2) {
             setSuggestions([]);
             return;
         }
@@ -39,18 +37,27 @@ export default function SearchBar() {
                     params: {
                         access_token: MAPBOX_ACCESS_TOKEN,
                         country: 'FR',
-                        types: 'address,poi',
-                        language: 'fr'
+                        types: 'place,address,poi',
+                        language: 'fr',
+                        limit: 8
                     },
                 }
             );
 
             if (response.data.features) {
-                const suggestions = response.data.features.map(feature => ({
-                    id: feature.id,
-                    name: feature.place_name,
-                    coords: feature.center,
-                }));
+                const suggestions = response.data.features.map(feature => {
+                    let displayName = feature.place_name;
+                    if (feature.place_type[0] === 'place') {
+                        displayName = `${feature.text}, ${feature.context?.[0]?.text || 'France'}`;
+                    }
+
+                    return {
+                        id: feature.id,
+                        name: displayName,
+                        coords: feature.center,
+                        type: feature.place_type[0]
+                    };
+                });
                 setSuggestions(suggestions);
             }
         } catch (error) {
@@ -94,13 +101,8 @@ export default function SearchBar() {
     return (
         <View style={styles.container}>
             <View style={styles.innerContainer}>
-
-            
-                {/* <Header/> */}
-
                 <View style={styles.formContainer}>
                     {/* Sélecteur de type de trajet */}
-                    <View style={styles.forme}>
                     <View style={styles.tripTypeContainer}>
                         <TouchableOpacity 
                             style={[
@@ -142,7 +144,7 @@ export default function SearchBar() {
                                     setDeparture(text);
                                     fetchSuggestions(text, setDepartureSuggestions);
                                 }}
-                                placeholder="Saisissez une adresse de départ"
+                                placeholder="Ville ou adresse de départ"
                                 placeholderTextColor="#8E8E93"
                             />
                         </View>
@@ -158,7 +160,22 @@ export default function SearchBar() {
                                         style={styles.suggestionItem}
                                         onPress={() => handleSelectSuggestion(item, true)}
                                     >
-                                        <Text style={styles.suggestionText}>{item.name}</Text>
+                                        <View style={styles.suggestionContent}>
+                                            <Ionicons 
+                                                name={item.type === 'place' ? 'location-outline' : 
+                                                      item.type === 'address' ? 'home-outline' : 'business-outline'} 
+                                                size={16} 
+                                                color="#8E8E93" 
+                                                style={styles.suggestionIcon}
+                                            />
+                                            <View>
+                                                <Text style={styles.suggestionText}>{item.name}</Text>
+                                                <Text style={styles.suggestionType}>
+                                                    {item.type === 'place' ? 'Ville' : 
+                                                     item.type === 'address' ? 'Adresse' : 'Point d\'intérêt'}
+                                                </Text>
+                                            </View>
+                                        </View>
                                     </TouchableOpacity>
                                 )}
                             />
@@ -179,7 +196,7 @@ export default function SearchBar() {
                                     setArrival(text);
                                     fetchSuggestions(text, setArrivalSuggestions);
                                 }}
-                                placeholder="Saisissez une adresse d'arrivée"
+                                placeholder="Ville ou adresse d'arrivée"
                                 placeholderTextColor="#8E8E93"
                             />
                         </View>
@@ -195,7 +212,22 @@ export default function SearchBar() {
                                         style={styles.suggestionItem}
                                         onPress={() => handleSelectSuggestion(item, false)}
                                     >
-                                        <Text style={styles.suggestionText}>{item.name}</Text>
+                                        <View style={styles.suggestionContent}>
+                                            <Ionicons 
+                                                name={item.type === 'place' ? 'location-outline' : 
+                                                      item.type === 'address' ? 'home-outline' : 'business-outline'} 
+                                                size={16} 
+                                                color="#8E8E93" 
+                                                style={styles.suggestionIcon}
+                                            />
+                                            <View>
+                                                <Text style={styles.suggestionText}>{item.name}</Text>
+                                                <Text style={styles.suggestionType}>
+                                                    {item.type === 'place' ? 'Ville' : 
+                                                     item.type === 'address' ? 'Adresse' : 'Point d\'intérêt'}
+                                                </Text>
+                                            </View>
+                                        </View>
                                     </TouchableOpacity>
                                 )}
                             />
@@ -233,9 +265,7 @@ export default function SearchBar() {
                     >
                         <Text style={styles.searchButtonText}>Rechercher</Text>
                     </TouchableOpacity>
-                  </View>
                 </View>
-
             </View>
 
             {/* Date Picker Modal */}
@@ -256,8 +286,8 @@ export default function SearchBar() {
                                 }
                             }}
                             locale="fr-FR"
+                            minimumDate={new Date()}
                             style={styles.datePicker}
-                            textColor="white"
                         />
                         <TouchableOpacity 
                             style={styles.modalButton}
@@ -486,3 +516,6 @@ const styles = StyleSheet.create({
     },
 });
 
+
+
+export default Home;
