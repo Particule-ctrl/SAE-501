@@ -21,22 +21,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Extract metadata (labels) for Docker (api-sae)
+      - name: Extract metadata for Docker (api-sae)
         id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v4
         with:
           images: lamarquenoe/api-sae
           tags: |
             type=raw,value=latest
 
       - name: Build and push Docker image (api-sae)
-        id: push
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./server/Dockerfile
@@ -44,74 +43,70 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Extract metadata (labels) for Docker (api-taxi)
+      - name: Extract metadata for Docker (api-taxi)
         id: meta2
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v4
         with:
           images: lamarquenoe/api-taxi
           tags: |
             type=raw,value=latest
 
       - name: Build and push Docker image (api-taxi)
-        id: push2
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./server/api-taxi/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta2.outputs.tags }}
+          labels: ${{ steps.meta2.outputs.labels }}
 
-      - name: Extract metadata (labels) for Docker (api-af)
+      - name: Extract metadata for Docker (api-af)
         id: meta3
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v4
         with:
           images: lamarquenoe/api-af
           tags: |
             type=raw,value=latest
 
       - name: Build and push Docker image (api-af)
-        id: push3
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./server/api-af/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta3.outputs.tags }}
+          labels: ${{ steps.meta3.outputs.labels }}
 
-      - name: Extract metadata (labels) for Docker (api-sncf)
+      - name: Extract metadata for Docker (api-sncf)
         id: meta4
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v4
         with:
           images: lamarquenoe/api-sncf
           tags: |
             type=raw,value=latest
 
       - name: Build and push Docker image (api-sncf)
-        id: push4
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./server/api-sncf/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta4.outputs.tags }}
+          labels: ${{ steps.meta4.outputs.labels }}
 
-      - name: Extract metadata (labels) for Docker (api-ratp)
+      - name: Extract metadata for Docker (api-ratp)
         id: meta5
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v4
         with:
           images: lamarquenoe/api-ratp
           tags: |
             type=raw,value=latest
 
       - name: Build and push Docker image (api-ratp)
-        id: push5
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./server/api-ratp/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta5.outputs.tags }}
+          labels: ${{ steps.meta5.outputs.labels }}
