@@ -54,8 +54,8 @@ jobs:
       - name: Build and push Docker image (api-taxi)
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./server/api-taxi/Dockerfile
+          context: ./server/api-taxi
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta2.outputs.tags }}
           labels: ${{ steps.meta2.outputs.labels }}
@@ -71,8 +71,8 @@ jobs:
       - name: Build and push Docker image (api-af)
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./server/api-af/Dockerfile
+          context: ./server/api-af
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta3.outputs.tags }}
           labels: ${{ steps.meta3.outputs.labels }}
@@ -88,8 +88,8 @@ jobs:
       - name: Build and push Docker image (api-sncf)
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./server/api-sncf/Dockerfile
+          context: ./server/api-sncf
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta4.outputs.tags }}
           labels: ${{ steps.meta4.outputs.labels }}
@@ -105,8 +105,8 @@ jobs:
       - name: Build and push Docker image (api-ratp)
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./server/api-ratp/Dockerfile
+          context: ./server/api-ratp
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta5.outputs.tags }}
           labels: ${{ steps.meta5.outputs.labels }}
