@@ -3,7 +3,7 @@ RUN mkdir -p /opt/app
 WORKDIR /opt/app
 
 RUN apk update && apk add bash && apk add --no-cache coreutils
-COPY wait-for-it.sh /usr/local/bin/wait-for-it
+COPY ./wait-for-it.sh /usr/local/bin/wait-for-it
 RUN chmod +x /usr/local/bin/wait-for-it
 
 COPY package.json package-lock.json ./
