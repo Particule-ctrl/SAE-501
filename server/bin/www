@@ -8,6 +8,7 @@
 var app = require('../app');
 var debug = require('debug')('src:server');
 var http = require('http')
+const { initProducer, startConsumer } = require('../kafka');
 
 /**
  * Get port from environment and store in Express.
@@ -21,6 +22,18 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+
+initProducer()
+  .then((producer) => {
+    console.log('Kafka producer initialized');
+  })
+  .catch((err) => {
+    console.error('Failed to initialize Kafka producer', err);
+   // Exit the application if producer initialization fails
+  });
+
+
 
 /**
  * Listen on provided port, on all network interfaces.
