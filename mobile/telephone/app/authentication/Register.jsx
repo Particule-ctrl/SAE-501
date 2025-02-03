@@ -58,8 +58,8 @@ export default function Register() {
   const [note, setNote] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Adresse IP de l'API
-  const ipaddress = '172.20.10.7';
+  // address ip 
+  const ipaddress = '192.168.1.29';
 
   // États pour la caméra
   const [cameraActive, setCameraActive] = useState(false);
@@ -123,14 +123,14 @@ export default function Register() {
   };
 
   const formatISOBirthdate = (text) => {
-    let birthdateArray = text.split('/');
+    let birthdateArray = birthdate.split('/');
     const jour = birthdateArray[0].padStart(2, '0');
     const mois = birthdateArray[1].padStart(2, '0');
     const annee = birthdateArray[2];
 
     // Retourne la date au format AAAA-MM-JJ
     return `${annee}-${mois}-${jour}`;
-  };
+  }
 
   // Fonction pour gérer l'activation de la caméra
   const handleScanPress = async () => {
@@ -339,15 +339,13 @@ export default function Register() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, hashedPassword);
       const user = userCredential.user;
 
-      const accompagnateurData = hasAccompagnateur
-        ? {
-            firstName: accompagnateurInfo.firstName,
-            lastName: accompagnateurInfo.lastName,
-            age: parseInt(accompagnateurInfo.age),
-            birthdate: formatISOBirthdate(accompagnateurInfo.birthdate),
-            civility: accompagnateurInfo.civility,
-          }
-        : null;
+      const accompagnateurData = hasAccompagnateur ? {
+        firstName: accompagnateurInfo.firstName,
+        lastName: accompagnateurInfo.lastName,
+        age: parseInt(accompagnateurInfo.age),
+        birthdate: formatISOBirthdate(accompagnateurInfo.birthdate),
+        civility: accompagnateurInfo.civility
+      } : null;
 
       const userDocRef = doc(db, 'users', user.uid);
       await setDoc(userDocRef, {
@@ -370,12 +368,12 @@ export default function Register() {
         Accompagnateur: accompagnateurData,
       });
 
-      try {
+      try{
         const response = await fetch(`http://${ipaddress}/api/user`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
+            Accept: "application/json",
+            'Content-Type': "application/json",
           },
           body: JSON.stringify({
             firstname: firstName,
@@ -383,22 +381,25 @@ export default function Register() {
             birthdate: formatISOBirthdate(birthdate),
             email,
             tel,
-            password: hashedPassword,
+            password,
             civility,
             note,
             handicap: 1,
             googleUUID: user.uid,
-          }),
+          })
         });
-        console.log('Status: ', response.status);
+        console.log('Status: ',response.status)
         if (!response.ok) {
           console.error(`Failed with status ${response.status}: ${response.statusText}: ${response.body}`);
-        } else {
+        }
+        else{
           console.log(`Data sent successfully to API:`);
         }
-      } catch (error) {
-        console.error(`Error sending data to API:`, error.message);
       }
+      catch (error){
+        console.error(`Error sending data to API:`, error.message);
+    }
+      
 
       console.log('Utilisateur enregistré avec succès et ajouté à Firestore !');
       alert('Inscription réussie !');

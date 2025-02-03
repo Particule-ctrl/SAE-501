@@ -1,0 +1,112 @@
+name: Publish Docker image
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - 'main'
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Extract metadata for Docker (api-sae)
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: lamarquenoe/api-sae
+          tags: |
+            type=raw,value=latest
+
+      - name: Build and push Docker image (api-sae)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./server/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Extract metadata for Docker (api-taxi)
+        id: meta2
+        uses: docker/metadata-action@v4
+        with:
+          images: lamarquenoe/api-taxi
+          tags: |
+            type=raw,value=latest
+
+      - name: Build and push Docker image (api-taxi)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./server/api-taxi/Dockerfile
+          push: true
+          tags: ${{ steps.meta2.outputs.tags }}
+          labels: ${{ steps.meta2.outputs.labels }}
+
+      - name: Extract metadata for Docker (api-af)
+        id: meta3
+        uses: docker/metadata-action@v4
+        with:
+          images: lamarquenoe/api-af
+          tags: |
+            type=raw,value=latest
+
+      - name: Build and push Docker image (api-af)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./server/api-af/Dockerfile
+          push: true
+          tags: ${{ steps.meta3.outputs.tags }}
+          labels: ${{ steps.meta3.outputs.labels }}
+
+      - name: Extract metadata for Docker (api-sncf)
+        id: meta4
+        uses: docker/metadata-action@v4
+        with:
+          images: lamarquenoe/api-sncf
+          tags: |
+            type=raw,value=latest
+
+      - name: Build and push Docker image (api-sncf)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./server/api-sncf/Dockerfile
+          push: true
+          tags: ${{ steps.meta4.outputs.tags }}
+          labels: ${{ steps.meta4.outputs.labels }}
+
+      - name: Extract metadata for Docker (api-ratp)
+        id: meta5
+        uses: docker/metadata-action@v4
+        with:
+          images: lamarquenoe/api-ratp
+          tags: |
+            type=raw,value=latest
+
+      - name: Build and push Docker image (api-ratp)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./server/api-ratp/Dockerfile
+          push: true
+          tags: ${{ steps.meta5.outputs.tags }}
+          labels: ${{ steps.meta5.outputs.labels }}

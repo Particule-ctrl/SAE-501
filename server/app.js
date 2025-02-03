@@ -9,6 +9,7 @@ var userRouter = require('./routes/user');
 var agentRouter = require('./routes/agent');
 var handicapRouter = require('./routes/handicap');
 var reservationRouter = require('./routes/reservation');
+var notificationRouter = require('./routes/notification');;
 var textRecognitionRouter = require('./routes/textrecognition'); // Nouvelle ligne
 
 
@@ -42,6 +43,7 @@ app.use('/api/user/', userRouter);
 app.use('/api/agent/', agentRouter);
 app.use('/api/handicap/', handicapRouter);
 app.use('/api/reservation/', reservationRouter);
+app.use('/api/notification/', notificationRouter);
 app.use('/api/textrecognition/', textRecognitionRouter); // Nouvelle ligne
 
 app.get('/list-routes', (req, res) => {

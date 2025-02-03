@@ -1,3 +1,5 @@
+const no_sql_db = require('../nosql-database');
+
 const API_MAPPING = {
     AF: 'http://api-af:3000',  // Updated to Docker service name and correct port
     SNCF: 'http://api-sncf:3000',
@@ -149,7 +151,6 @@ const getTrajetsForPlace = async (incomingData) => {
         throw new Error(`Failed to fetch agent: ${agentResponse.statusText}`);
       }
       const agentData = await agentResponse.json();
-      console.log("A")
       console.log("Agent Data:", agentData);
   
       // Fetch the voyage details using the agent and incoming data
@@ -159,15 +160,64 @@ const getTrajetsForPlace = async (incomingData) => {
       }
       const voyageData = await voyageResponse.json();
       console.log("Voyage Data:", voyageData);
+
+      const results = [];
+        for (const sousTrajet of voyageData) {
+            const numDossier = sousTrajet.numDossier;
+
+            try {
+                // Appeler getIdDossierAndIdPMR pour chaque sous-trajet
+                const { idDossier, idPMR } = await getIdDossierAndIdPMR(incomingData.entreprise, numDossier);
+                results.push({
+                    BD: incomingData.entreprise,
+                    numDossier,
+                    idDossier: idDossier,
+                    idPMR: idPMR,
+                    departure: sousTrajet.departure,
+                    arrival: sousTrajet.arrival,
+                    departureTime: sousTrajet.departureTime,
+                    arrivalTime : sousTrajet.arrivalTime
+                });
+            } catch (error) {
+                console.error(`Erreur pour BD: ${incomingData.entreprise}, numDossier: ${numDossier} - ${error.message}`);
+            }
+            }
+      console.log("New voyage data:",results);
   
       // Return both agent and voyage data as a result
-      return voyageData ;
+      return results ;
     } catch (error) {
       console.error("Error in getTrajetsForPlace:", error.message);
       throw error;
     }
   };
   
+  const getIdDossierAndIdPMR = async (BD, numDossier) => {
+    try {
+        // Rechercher dans la collection pour trouver l'entrée correspondante
+        const result = await no_sql_db.DataModel.findOne({
+            sousTrajets: {
+                $elemMatch: { BD: BD, numDossier: numDossier }
+            }
+        }, {
+            idDossier: 1, // Récupérer uniquement les champs nécessaires
+            idPMR: 1
+        });
+
+        if (!result) {
+            throw new Error("Aucune correspondance trouvée avec les critères spécifiés.");
+        }
+
+        return {
+            idDossier: result.idDossier,
+            idPMR: result.idPMR
+        };
+    } catch (error) {
+        console.error("Erreur lors de la récupération de l'idDossier et de l'idPMR:", error.message);
+        throw error;
+    }
+};
+
 
 functions = {
     transformData: transformData,

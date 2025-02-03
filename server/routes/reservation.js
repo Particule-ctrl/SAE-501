@@ -127,7 +127,6 @@ router.get('/setOngoing/:dossier/:trajet', function(req,res){
 });
 
 module.exports = router;
-
 /**
  * @swagger
  * tags:
@@ -153,12 +152,106 @@ module.exports = router;
  *           description: Status of the sousTrajet (0 = pending, 1 = ongoing, 2 = done)
  *         departure:
  *           type: string
+ *           description: Departure location
  *         arrival:
  *           type: string
+ *           description: Arrival location
  *         departureTime:
- *           type: date
+ *           type: string
+ *           format: date-time
+ *           description: Departure time
  *         arrivalTime:
- *           type: date
+ *           type: string
+ *           format: date-time
+ *           description: Arrival time
+ *     Bagage:
+ *       type: object
+ *       properties:
+ *         bagagesList:
+ *           type: array
+ *           items:
+ *             type: integer
+ *           description: List of baggage IDs
+ *         specialBagage:
+ *           type: string
+ *           description: Special baggage type (e.g., oversized baggage)
+ *     SpecialAssistance:
+ *       type: object
+ *       properties:
+ *         wheelchair:
+ *           type: boolean
+ *           description: Whether wheelchair assistance is required
+ *         visualAssistance:
+ *           type: boolean
+ *           description: Whether visual assistance is required
+ *         hearingAssistance:
+ *           type: boolean
+ *           description: Whether hearing assistance is required
+ *         otherAssistance:
+ *           type: string
+ *           description: Other types of assistance required
+ *     Security:
+ *       type: object
+ *       properties:
+ *         validDocuments:
+ *           type: boolean
+ *           description: Whether the documents are valid
+ *         documentsExpiry:
+ *           type: string
+ *           description: Expiry date of documents
+ *         dangerousItems:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: List of dangerous items
+ *         liquidVolume:
+ *           type: string
+ *           description: Volume of liquid items
+ *         medicalEquipment:
+ *           type: string
+ *           description: Medical equipment carried
+ *         securityQuestions:
+ *           type: object
+ *           properties:
+ *             packedOwn:
+ *               type: boolean
+ *               description: Whether the passenger packed their own luggage
+ *             leftUnattended:
+ *               type: boolean
+ *               description: Whether luggage was left unattended
+ *             acceptedItems:
+ *               type: boolean
+ *               description: Whether all accepted items were included
+ *             receivedItems:
+ *               type: boolean
+ *               description: Whether received items match the original list
+ *             dangerousGoods:
+ *               type: boolean
+ *               description: Whether dangerous goods are declared
+ *         declarations:
+ *           type: object
+ *           properties:
+ *             weaponsFirearms:
+ *               type: boolean
+ *               description: Whether weapons or firearms are declared
+ *             explosives:
+ *               type: boolean
+ *               description: Whether explosives are declared
+ *             flammableMaterials:
+ *               type: boolean
+ *               description: Whether flammable materials are declared
+ *             radioactiveMaterials:
+ *               type: boolean
+ *               description: Whether radioactive materials are declared
+ *             toxicSubstances:
+ *               type: boolean
+ *               description: Whether toxic substances are declared
+ *             compressedGases:
+ *               type: boolean
+ *               description: Whether compressed gases are declared
+ *             illegalDrugs:
+ *               type: boolean
+ *               description: Whether illegal drugs are declared
  *     Reservation:
  *       type: object
  *       properties:
@@ -172,7 +265,7 @@ module.exports = router;
  *           type: string
  *           description: Google UUID associated with the reservation
  *         enregistre:
- *           type: integer
+ *           type: boolean
  *           description: Registration status
  *         Assistance:
  *           type: integer
@@ -182,10 +275,23 @@ module.exports = router;
  *           items:
  *             $ref: '#/components/schemas/SousTrajet'
  *         bagage:
- *           type: array
- *           items:
- *             type: integer
- *           description: List of baggage IDs
+ *           $ref: '#/components/schemas/Bagage'
+ *         specialAssistance:
+ *           $ref: '#/components/schemas/SpecialAssistance'
+ *         security:
+ *           $ref: '#/components/schemas/Security'
+ *         additionalInfo:
+ *           type: object
+ *           properties:
+ *             emergencyContact:
+ *               type: string
+ *               description: Emergency contact information
+ *             medicalInfo:
+ *               type: string
+ *               description: Medical information for the passenger
+ *             dietaryRestrictions:
+ *               type: string
+ *               description: Dietary restrictions for the passenger
  */
 
 /**
