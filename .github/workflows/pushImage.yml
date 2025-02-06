@@ -55,7 +55,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./server/api-taxi
-          file: Dockerfile
+          file: ./server/api-taxi/Dockerfile
           push: true
           tags: ${{ steps.meta2.outputs.tags }}
           labels: ${{ steps.meta2.outputs.labels }}
@@ -72,7 +72,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./server/api-af
-          file: Dockerfile
+          file: ./server/api-af/Dockerfile
           push: true
           tags: ${{ steps.meta3.outputs.tags }}
           labels: ${{ steps.meta3.outputs.labels }}
@@ -89,7 +89,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./server/api-sncf
-          file: Dockerfile
+          file: ./server/api-sncf/Dockerfile
           push: true
           tags: ${{ steps.meta4.outputs.tags }}
           labels: ${{ steps.meta4.outputs.labels }}
@@ -106,7 +106,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./server/api-ratp
-          file: Dockerfile
+          file: ./server/api-ratp/Dockerfile
           push: true
           tags: ${{ steps.meta5.outputs.tags }}
           labels: ${{ steps.meta5.outputs.labels }}
