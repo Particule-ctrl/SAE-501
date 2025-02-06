@@ -10,6 +10,19 @@ app.use(express.json());
 const sequelize = new Sequelize(process.env.DATABASE_NAME, process.env.DATABASE_USER, process.env.DATABASE_PASSWORD, {
     host: process.env.DATABASE_HOST,
     dialect: 'mysql',
+    retry: {
+        max: 10, // Number of retry attempts
+        match: [
+          /ECONNREFUSED/, // Retry on connection refused
+          /ETIMEDOUT/,
+        ],
+    },
+    pool: {
+        max: 10, // Nombre maximum de connexions dans le pool
+        min: 0,  // Nombre minimum de connexions dans le pool
+        acquire: 30000, // Durée maximale pour tenter d'obtenir une connexion (ms)
+        idle: 10000 // Durée maximale pendant laquelle une connexion peut rester inactive avant d'être libérée (ms)
+    }
 });
 
 // Définition du modèle Item
