@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, FlatList, View, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, FlatList, View, TouchableOpacity, Alert } from 'react-native';
 import BarreTrajet from './BarreTrajet';
 import BarreVoyage from './BarreVoyages';
 import QRCodeTrajet from './QRCodeTrajet';
+import QRCodeBagage from './QRCodeBagage';
 
 const DATA = [
     {
@@ -239,6 +240,15 @@ export default function Tickets() {
         return dataQR;
     }
 
+    const qrBagage = (id) => {
+        const bagage = DATA.find(item => item["id-dossier"] === id).bagage;
+        if (bagage.length === 0) {
+            Alert.alert('Pas de bagage enregistré');
+        } else {
+            Alert.alert('Code bagage', `Votre code bagage est: ${bagage.join(' ')}`);
+        }
+    };
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -287,9 +297,15 @@ export default function Tickets() {
                                                         <QRCodeTrajet id={qrData(idTrajet, isSousTrajet)} />
                                                     </View>
                                                 )}
+
                                             </View>
                                         </TouchableOpacity>
                                     ))}
+                                    <View>
+                                        <TouchableOpacity style={styles.buttonBagage} onPress={() => qrBagage(item["id-dossier"])}>
+                                            <Text style={styles.buttonText}>Imprimer code bagage</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             )}
                         </View>
@@ -388,5 +404,10 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         alignItems: 'center',
         marginTop: 10,
+    },
+    buttonBagage: {
+        padding: 10,
+        backgroundColor: '#007BFF',
+        borderRadius: 5,
     },
 });
