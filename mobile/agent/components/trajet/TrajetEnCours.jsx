@@ -59,12 +59,14 @@ export default function CurrentTrajet({ idDossier, idTrajet }) {
 
     const onScan = (result) => {
         if (result) {
-            console.log("QR Code detected:", result.data);
-            console.log("Trajet status:", trajet.statusValue);
-            console.log("id Dossier:", idDossier);
-            console.log("id Trajet:", idTrajet);
-            changeTrajetStatue(idDossier, idTrajet, trajet.statusValue);
-            setCameraActive(false);
+            data = JSON.parse(result.data);
+            console.log(data);
+            if (data.idDossier === idDossier && data.trajet === idTrajet) {
+                changeTrajetStatue(idDossier, idTrajet, trajet.statusValue);
+                setCameraActive(false);
+            } else {
+                Alert.alert("Erreur", "Code invalide !");
+            }
         }
     };
 
