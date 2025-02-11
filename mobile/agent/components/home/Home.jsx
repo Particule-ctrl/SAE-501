@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
+import { API_CONFIG } from '../../constants/API_CONFIG';
 
 export default function Header() {
     const [trajets, setTrajets] = useState();
@@ -10,7 +11,7 @@ export default function Header() {
     const router = useRouter();
     const auth = getAuth();
 
-    const ipaddress = '172.20.10.2';
+    // const ipaddress = '172.20.10.11';
 
 
     const extractTime = (dateTime) => {
@@ -49,8 +50,8 @@ export default function Header() {
 
     const getTrajets = async () => {
         try {
-            console.log(`http://${ipaddress}/api/agent/getTrajetsFromUuid/${auth.currentUser.uid}`);
-            const response = await fetch(`http://${ipaddress}/api/agent/getTrajetsFromUuid/${auth.currentUser.uid}`);
+            console.log(`http://${API_CONFIG.ipaddress}/api/agent/getTrajetsFromUuid/${auth.currentUser.uid}`);
+            const response = await fetch(`http://${API_CONFIG.ipaddress}/api/agent/getTrajetsFromUuid/${auth.currentUser.uid}`);
             const data = await response.json();
             setTrajets(data);
             setLoading(false);
@@ -63,7 +64,7 @@ export default function Header() {
     const retrievePassenger = async (idPMR) => {
         try {
 
-            const response = await fetch(`http://${ipaddress}/api/user/${idPMR}`);
+            const response = await fetch(`http://${API_CONFIG.ipaddress}/api/user/${idPMR}`);
             console.log(response.url);
             const data = await response.json();
             return data.firstname + ' ' + data.lastname;

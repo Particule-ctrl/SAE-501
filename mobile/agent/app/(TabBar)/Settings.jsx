@@ -69,7 +69,7 @@ export default function Setting() {
       <Text style={styles.title}>Paramètres</Text>
       <View style={styles.infoContainer}>
         <Text style={styles.label}>Email:</Text>
-        <Text style={styles.infoText}>{userData.Email}</Text>
+        <Text style={styles.infoText}>{userData.email}</Text>
         <Text style={styles.label}>Entreprise:</Text>
         <Text style={styles.infoText}>{userData.entreprise}</Text>
       </View>

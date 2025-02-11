@@ -1,14 +1,15 @@
 import { Alert } from "react-native";
+import { API_CONFIG } from "../../constants/API_CONFIG";
 
 
-const ipaddress = '172.20.10.2';
+// const ipaddress = '172.20.10.11';
 
 
 export const getTrajet = async (idDossier, idTrajet) => {
 
 
     try {
-        const response = await fetch(`http://${ipaddress}/api/reservation/${idDossier}/${idTrajet}`);
+        const response = await fetch(`http://${API_CONFIG.ipaddress}/api/reservation/${idDossier}/${idTrajet}`);
         console.log(response.url);
         const data = await response.json();
         if (response.ok) {
