@@ -14,10 +14,13 @@
     "express-list-endpoints": "^7.1.1",
     "mongodb": "^6.9.0",
     "mongoose": "^8.7.1",
+    "multer": "^1.4.5-lts.1",
     "pg": "8.13.0",
+    "kafkajs": "^2.2.4",
     "sequelize": "6.37.4",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "tesseract.js": "^6.0.0"
   },
   "devDependencies": {
     "jest": "^29.7.0"

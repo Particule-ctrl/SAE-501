@@ -57,9 +57,9 @@ export default function Login() {
           <Text style={styles.buttonText}>Se connecter</Text>
         </TouchableOpacity>
 
-        {/* <Link href="./Register">
+        <Link href="./Register">
           <Text style={styles.linkText}>Pas encore inscrit ? Inscrivez-vous</Text>
-        </Link> */}
+        </Link>
       </View>
     </ScrollView>
   );
