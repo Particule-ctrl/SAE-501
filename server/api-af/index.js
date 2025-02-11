@@ -79,7 +79,7 @@ const Agent = sequelize.define('Agent',{
         await sequelize.authenticate();
         console.log('Connection to MySQL has been established successfully.');
 
-        await sequelize.sync({ force: true }); // Réinitialise la base à chaque lancement
+        await sequelize.sync({ alter: true });
         console.log('Database synced.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
