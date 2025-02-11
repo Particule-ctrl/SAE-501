@@ -4,6 +4,7 @@ import BarreTrajet from './BarreTrajet';
 import BarreVoyage from './BarreVoyages';
 import QRCodeTrajet from './QRCodeTrajet';
 import { getAuth } from 'firebase/auth';
+import { API_CONFIG } from '../../constants/API_CONFIG';
 
 export default function Tickets() {
     const [idTrajet, setID] = useState(null);
@@ -12,12 +13,12 @@ export default function Tickets() {
     const [isLoading, setIsLoading] = useState(true); // Nouvel état pour le chargement
     const googleID = getAuth().currentUser?.uid;
 
-    const ipaddress = '172.20.10.2';
+    // const ipaddress = '172.20.10.11';
 
     // Fonction pour récupérer les trajets
     const retrieveTrajet = async () => {
         try {
-            const response = await fetch(`http://${ipaddress}/api/reservation/bygoogleid/${googleID}`);
+            const response = await fetch(`http://${API_CONFIG.ipaddress}/api/reservation/bygoogleid/${googleID}`);
             const data = await response.json();
             console.log(data);
             setData(data); // Mettre à jour l'état data avec les données récupérées

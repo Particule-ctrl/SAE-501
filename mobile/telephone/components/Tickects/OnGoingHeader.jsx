@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { getAuth } from 'firebase/auth';
+import { API_CONFIG } from '../../constants/API_CONFIG';
 
 export default function OnGoingHeader() {
     const [data, setData] = useState([]); // État pour stocker les données récupérées
     const [isLoading, setIsLoading] = useState(true); // État pour gérer le chargement
     const googleID = getAuth().currentUser?.uid;
 
-    const ipaddress = '172.20.10.2';
+    // const ipaddress = '172.20.10.11';
 
     // Fonction pour récupérer les données
     const retrieveTrajet = async () => {
         try {
-            const response = await fetch(`http://${ipaddress}/api/reservation/bygoogleid/${googleID}`);
+            const response = await fetch(`http://${API_CONFIG.ipaddress}/api/reservation/bygoogleid/${googleID}`);
             const data = await response.json();
             console.log("Données récupérées :", data);
             setData(data); // Met à jour l'état avec les données récupérées

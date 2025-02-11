@@ -23,6 +23,7 @@ import { CameraView as ExpoCamera, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImageManipulator from 'expo-image-manipulator';
 import TextRecognition from '@react-native-ml-kit/text-recognition';
+import { API_CONFIG } from '../../constants/API_CONFIG';
 
 export default function Register() {
   // États pour les champs du formulaire
@@ -41,7 +42,7 @@ export default function Register() {
 
 
   // address ip 
-  const ipaddress = '172.20.10.2';
+  // const ipaddress = '172.20.10.11';
 
   // États pour la caméra
   const [cameraActive, setCameraActive] = useState(false);
@@ -355,7 +356,7 @@ export default function Register() {
       });
 
       try{
-        const response = await fetch(`http://${ipaddress}/api/user`, {
+        const response = await fetch(`http://${API_CONFIG.ipaddress}/api/user`, {
           method: "POST",
           headers: {
             Accept: "application/json",
