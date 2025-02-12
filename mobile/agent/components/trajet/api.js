@@ -27,7 +27,7 @@ export const getTrajet = async (idDossier, idTrajet) => {
 
 export const getStuff = async (idDossier) => {
      try {
-        const response = await fetch(`http://${ipaddress}/api/reservation/${idDossier}`);
+        const response = await fetch(`http://${API_CONFIG.ipaddress}/api/reservation/${idDossier}`);
         console.log(response.url);
         const data = await response.json();
         if (response.ok) {
@@ -46,7 +46,7 @@ export const getStuff = async (idDossier) => {
 
 export const retrievePassenger = async (idPMR) => {
     try {
-        const response = await fetch(`http://${ipaddress}/api/user/${idPMR}`);
+        const response = await fetch(`http://${API_CONFIG.ipaddress}/api/user/${idPMR}`);
         const data = await response.json();
         console.log(data);
         return data; 
@@ -65,9 +65,9 @@ export const changeTrajetStatue = async (idDossier, idTrajet, status) => {
         let endpoint;
        
         if (status === 0) {
-            endpoint = `http://${ipaddress}/api/reservation/setOngoing/${idDossier}/${idTrajet}`;
+            endpoint = `http://${API_CONFIG.ipaddress}/api/reservation/setOngoing/${idDossier}/${idTrajet}`;
         } else if (status === 1) {
-            endpoint = `http://${ipaddress}/api/reservation/setDone/${idDossier}/${idTrajet}`;
+            endpoint = `http://${API_CONFIG.ipaddress}/api/reservation/setDone/${idDossier}/${idTrajet}`;
         } else {
             Alert.alert("Erreur", "Le trajet est déjà terminé");
             return;

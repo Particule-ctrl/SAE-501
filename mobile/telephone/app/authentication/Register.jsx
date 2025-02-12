@@ -22,25 +22,9 @@ import { auth, db } from './firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
 import { CameraView as ExpoCamera, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import bcrypt from 'react-native-bcrypt';
-
-// Composant de barre de progression
-const ProgressBar = ({ steps, currentStep }) => {
-  return (
-    <View style={styles.progressBarContainer}>
-      {steps.map((step, index) => (
-        <View
-          key={index}
-          style={[
-            styles.progressStep,
-            index < currentStep && styles.completedStep,
-            index === currentStep - 1 && styles.activeStep,
-          ]}
-        />
-      ))}
-    </View>
-  );
-};
+import * as ImageManipulator from 'expo-image-manipulator';
+import TextRecognition from '@react-native-ml-kit/text-recognition';
+import { API_CONFIG } from '../../constants/API_CONFIG';
 
 export default function Register() {
   // États pour les champs du formulaire
@@ -59,7 +43,7 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
 
   // address ip 
-  const ipaddress = '192.168.1.29';
+  // const ipaddress = '172.20.10.11';
 
   // États pour la caméra
   const [cameraActive, setCameraActive] = useState(false);
@@ -369,7 +353,7 @@ export default function Register() {
       });
 
       try{
-        const response = await fetch(`http://${ipaddress}/api/user`, {
+        const response = await fetch(`http://${API_CONFIG.ipaddress}/api/user`, {
           method: "POST",
           headers: {
             Accept: "application/json",

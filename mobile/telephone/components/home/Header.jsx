@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from "expo-status-bar";
 import { db } from '../../app/authentication/firebaseConfig';
 import SearchBar from './SearchBar';
+import Photo from '../Photos/Photo';
 
 import { doc, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
@@ -63,10 +64,7 @@ export default function Header() {
         <View style={styles.container2}>
           <View style={styles.leftContainer}>
             <View style={styles.logoWrapper}>
-              <Image
-                source={require("./../../assets/Profile/profil.jpeg")}
-                style={styles.logo}
-              />
+              <Photo/>
             </View>
             <View style={styles.ConText}>
               <Text style={styles.Text1}>Bienvenue,</Text>
@@ -74,12 +72,23 @@ export default function Header() {
                 <Text style={styles.Text2}> {user.firstName} 👋</Text>
               )}
             </View>
+
+            
+
+
+            
             <View style={styles.ConText2}>
               <Text style={styles.Text3}>
                 Réservez votre titre de transport facilement et en toute sérénité
               </Text>
             </View>
           </View>
+
+          <View style={styles.rightContainer}>
+              <Text style={styles.Text3}>
+                Mon accueil
+              </Text>
+            </View>
           {/* <View style={styles.rightContainer}>
             {user && <Text style={styles.Text3}> {user.Name} </Text>}
           </View> */}
@@ -153,19 +162,12 @@ const styles = StyleSheet.create({
     marginTop: 52,
     left: 10,
   },
-  logo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2, // Largeur de la bordure
-    borderColor: "white", // Couleur de la bordure
-  },
   rightContainer: {
     width: "37%",
     height: 45,
-    backgroundColor: "grey",
     marginTop: 60,
     borderRadius: 25,
+    top: 10, 
   },
   ConText: {
     marginTop: 42,

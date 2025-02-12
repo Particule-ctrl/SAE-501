@@ -9,6 +9,7 @@ import * as MediaLibrary from 'expo-media-library';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PhotoContext } from '../Photos/PhotoContext2';
 import EditProfile from './EditProfile';
+import { API_CONFIG } from '../../constants/API_CONFIG';
 
 const ProfileScreen = () => {
   const [profile, setProfile] = useState(null);
@@ -20,9 +21,12 @@ const ProfileScreen = () => {
   const [id, setId] = useState(null);
   const { photo, setPhoto } = React.useContext(PhotoContext);
 
-  const ipaddress = '172.20.10.7';
+
+  // const ipaddress = '172.20.10.11';
 
   const fetchUserProfile = async () => {
+
+    // console.log(API_CONFIG.ipaddress)
     try {
       const userId = auth.currentUser?.uid;
       if (!userId) {
@@ -30,7 +34,7 @@ const ProfileScreen = () => {
         return;
       }
 
-      const response = await fetch(`http://${ipaddress}/api/user/byGoogleID/${userId}`);
+      const response = await fetch(`http://${API_CONFIG.ipaddress}/api/user/byGoogleID/${userId}`);
       if (response.ok) {
         const responseData = await response.json();
         setId(responseData.id);
@@ -59,7 +63,7 @@ const ProfileScreen = () => {
 
   const handleSaveProfile = async () => {
     try {
-      const response = await fetch(`http://${ipaddress}/api/user/${id}`, {
+      const response = await fetch(`http://${API_CONFIG.ipaddress}/api/user/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editedProfile),
@@ -86,11 +90,11 @@ const ProfileScreen = () => {
           onPress: async () => {
             try {
               const userId = auth.currentUser?.uid;
-              const response = await fetch(`http://${ipaddress}/api/user/byGoogleID/${userId}`);
+              const response = await fetch(`http://${API_CONFIG.ipaddress}/api/user/byGoogleID/${userId}`);
               if (!response.ok) throw new Error('Erreur lors de la suppression des données utilisateur.');
               
               const responseData = await response.json();
-              const deleteResponse = await fetch(`http://${ipaddress}/api/user/delete/${responseData.id}`, {
+              const deleteResponse = await fetch(`http://${API_CONFIG.ipaddress}/api/user/delete/${responseData.id}`, {
                 method: 'DELETE',
               });
 
@@ -321,6 +325,8 @@ const ProfileScreen = () => {
           />
         ) : (
           renderUserInfo()
+          
+
         )}
         <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleSignOut}>
           <Text style={[styles.buttonText, { color: '#FF5252', textDecorationLine: 'underline' }]}>
