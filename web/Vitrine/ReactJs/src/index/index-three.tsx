@@ -2,7 +2,6 @@ import React from 'react'
 import Navbar from '../components/navbar'
 
 import bg from '../assets/images/bg2.png'
-import hero from '../assets/images/phone/3-phone-full.png'
 
 import Screenshot from '../components/screenshot'
 import Faq from '../components/faq'
@@ -36,9 +35,7 @@ export default function IndexThree() {
         <section className="relative mt-8">
             <div className="container relative">
                 <div className="grid grid-cols-1 justify-center">
-                    <div className="relative z-2 duration-500 xl:-mt-[400px] lg:-mt-[320px] md:-mt-[350px] -mt-[140px] m-0">
-                        <img src={hero} className="lg:px-10" alt=""/>
-                    </div>
+
                 </div>
             </div>
         </section>

@@ -8,7 +8,6 @@ import Download from '../components/download'
 import Contact from '../components/contact'
 import Footer from '../components/footer'
 
-import hero from '../assets/images/phone/2-phone.png'
 
 export default function IndexFour() {
   return (
@@ -36,12 +35,7 @@ export default function IndexFour() {
                         </div>
                     </div>
 
-                    <div className="md:col-span-6">
-                        <div className="relative after:content-[''] after:absolute after:md:bottom-48 after:-bottom-20 lg:after:-start-10 md:after:-start-20 after:-start-24
-                        after:bg-red-500 after:shadow-2xl after:shadow-red-500/40 after:z-1 ltr:after:rotate-[130deg] rtl:after:-rotate-[130deg] after:w-[75rem] after:md:h-[45rem] after:h-[30rem] after:rounded-[30rem]">
-                            <img src={hero} className="lg:max-w-[600px] md:max-w-md relative z-2 mover" alt=""/>
-                        </div>
-                    </div>
+                
                 </div>
             </div>
         </section>

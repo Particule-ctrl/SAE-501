@@ -3,7 +3,6 @@ import Navbar from '../components/navbar'
 import { Link } from 'react-router-dom'
 
 import { FiArrowRight, FiMail } from 'react-icons/fi'
-import hero from '../assets/images/phone/3-phone-half.png'
 
 import { TypeAnimation } from 'react-type-animation';
 
@@ -51,9 +50,6 @@ export default function IndexTwo() {
                     </div>
 
                     <span className="text-slate-500 dark:text-white/60 font-medium">Looking for help? <Link to="" className="text-red-500">Get in touch with us</Link></span>
-                </div>
-                <div className="relative mt-4 lg:mx-16 z-3">
-                    <img src={hero} alt="" className="mover"/>
                 </div>
             </div>
         </div>

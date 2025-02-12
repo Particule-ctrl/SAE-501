@@ -10,9 +10,7 @@ import 'wowjs/css/libs/animate.css';
 import bg from '../assets/images/map.png'
 import app from '../assets/images/app.png'
 import play from '../assets/images/play.png'
-import hero from '../assets/images/phone/2-phone.png'
 import phone1 from '../assets/images/phone/1.png'
-import about2 from '../assets/images/phone/half-2.png'
 
 import { feature2, feature3 } from '../data/data';
 import { FiAperture, FiShield } from 'react-icons/fi';
@@ -72,7 +70,6 @@ export default function IndexSix() {
             <div className="container relative ">
                 <div className="grid grid-cols-1 justify-center">
                     <div className="relative z-2 duration-500 xl:-mt-[400px] lg:-mt-[320px] md:-mt-[350px] -mt-[140px] m-0">
-                        <img src={hero} className="mx-auto w-80 md:w-96 lg:w-[500px] relative z-2 wow animate__animated animate__bounceIn" data-wow-delay=".7s" alt=""/>
                         <div className="absolute overflow-hidden lg:size-[600px] md:size-[450px] sm:size-[400px] size-[320px] bg-gradient-to-tl to-red-500/20 via-red-500/70 from-red-500 bottom-0 translate-x-1/2 start-1/2 ltr:-translate-x-1/2 rtl:md:translate-x-0 rtl:translate-x-1/2 z-1 shadow-md shadow-red-500/10 rounded-full"></div>
                     </div>
                 </div>
@@ -136,9 +133,6 @@ export default function IndexSix() {
             <div className="container relative md:mt-24 mt-16">
                 <div className="grid md:grid-cols-12 grid-cols-1 items-center gap-6">
                     <div className="lg:col-span-5 md:col-span-6">
-                        <div className="pt-6 px-6 rounded-2xl bg-red-500/5 dark:bg-red-500/10 shadow shadow-red-500/20">
-                            <img src={about2} className="wow animate__animated animate__zoomIn" data-wow-delay=".7s" alt=""/>
-                        </div>
                     </div>
 
                     <div className="lg:col-span-7 md:col-span-6">
@@ -180,9 +174,7 @@ export default function IndexSix() {
             <div className="container relative md:mt-24 mt-16">
                 <div className="grid md:grid-cols-12 grid-cols-1 items-center gap-6">
                     <div className="lg:col-span-5 md:col-span-6 md:order-2 order-1">
-                        <div className="pt-6 px-6 rounded-2xl bg-red-500/5 dark:bg-red-500/10 shadow shadow-red-500/20">
-                            <img src={about2} className="wow animate__animated animate__zoomIn" data-wow-delay=".7s" alt=""/>
-                        </div>
+                
                     </div>
 
                     <div className="lg:col-span-7 md:col-span-6 md:order-1 order-2">

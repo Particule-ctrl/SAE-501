@@ -5,8 +5,6 @@ import phone3 from '../assets/images/phone/3.png'
 import phone4 from '../assets/images/phone/4.png'
 import phone5 from '../assets/images/phone/5.png'
 import phone6 from '../assets/images/phone/6.png'
-import phone7 from '../assets/images/phone/7.png'
-import phone8 from '../assets/images/phone/8.png'
 
 
 import { FiDatabase, FiEye, FiFeather, FiHeart, FiMaximize, FiMonitor, FiNavigation2, FiPieChart, FiSmartphone, FiUserCheck } from "react-icons/fi"
@@ -74,7 +72,7 @@ export const feature3 = [
 ]
 
 export const screenshotImg = [
-    phone1, phone2, phone3, phone4, phone5, phone6, phone7, phone8
+    phone1, phone2, phone3, phone4, phone6, phone5
 ]
 
 export const faq = [
