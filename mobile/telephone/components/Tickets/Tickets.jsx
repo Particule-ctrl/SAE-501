@@ -3,6 +3,7 @@ import { SafeAreaView, StyleSheet, Text, FlatList, View, TouchableOpacity, Alert
 import BarreTrajet from './BarreTrajet';
 import BarreVoyage from './BarreVoyages';
 import QRCodeTrajet from './QRCodeTrajet';
+import QRCode from 'react-native-qrcode-svg';
 import QRCodeBagage from './QRCodeBagage';
 
 const DATA = [
@@ -209,6 +210,7 @@ const DATA = [
 export default function Tickets() {
     const [idTrajet, setID] = useState(null);
     const [isSousTrajet, setQRCode] = useState(null);
+    const [bagage, setBagage] = useState(null);
 
 
     const bouton = (id) => {
@@ -242,11 +244,7 @@ export default function Tickets() {
 
     const qrBagage = (id) => {
         const bagage = DATA.find(item => item["id-dossier"] === id).bagage;
-        if (bagage.length === 0) {
-            Alert.alert('Pas de bagage enregistré');
-        } else {
-            Alert.alert('Code bagage', `Votre code bagage est: ${bagage.join(' ')}`);
-        }
+        setBagage(bagage);
     };
 
 
@@ -304,6 +302,9 @@ export default function Tickets() {
                                     <View>
                                         <TouchableOpacity style={styles.buttonBagage} onPress={() => qrBagage(item["id-dossier"])}>
                                             <Text style={styles.buttonText}>Imprimer code bagage</Text>
+                                            {bagage && (
+                                                <QRCodeBagage bagageListe={bagage} />
+                                            )}
                                         </TouchableOpacity>
                                     </View>
                                 </View>
