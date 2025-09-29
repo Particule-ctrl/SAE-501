@@ -1,5 +1,7 @@
 # SAE501 - Solution de Transport Multimodal pour PMR | CMF
 
+![](https://media.licdn.com/dms/image/v2/D4E2DAQEEBvKzuir6_Q/profile-treasury-image-shrink_800_800/profile-treasury-image-shrink_800_800/0/1738525931228?e=1759737600&v=beta&t=D9OCE6il85XLD-Iu_0i_oVm7-QwH6m-KVK-W-sBI3ek)
+
 ## Description
 Projet de développement d'une solution informatique facilitant les déplacements des personnes à mobilité réduite (PMR) dans les transports multimodaux. L'application permet la planification, réservation et assistance des voyages combinant différents modes de transport (train, avion, bus), avec un focus sur la protection des données personnelles et l'expérience utilisateur.
 
